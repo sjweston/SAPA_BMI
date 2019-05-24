@@ -1,0 +1,1102 @@
+Demographic code book for the data published in association with "Selected personality data from the SAPA-Project:  On the structure of phrased self-report items".
+
+by David M. Condon and William Revelle
+
+----------------------------------------------
+
+This code book describes a data object called 'sapaTempData696items08dec2013thru26jul2014', which can be found in a data file of the same name ('sapaTempData696items08dec2013thru26jul2014.rdata').  The data object contains 23,681 participants (by row) and 716 variables (by column).  Listed below are the demographic variables included in this data object; they represent the first 20 columns.  These variables have been coded as factors.  In R, it is possible to see the distribution of these variables with commands such as:
+table(sapaTempData696items08dec2013thru26jul2014$gender)
+
+It is also possible to convert these demographic variables to numeric data, and this may be useful for many types of analyses.  It should be noted however that (1) many of these variables are not ordered (e.g., gender, marital status, country); and (2) re-coding the country and state variables will be problematic as some of the options were not endorsed by any of the participants (i.e., it may no longer be possible to know by name which countries are represented if the data are transformed).  In R, the data can be converted to numeric values with commands such as:
+as.numeric(sapaTempData696items08dec2013thru26jul2014$relstatus)
+
+All of the remaining variables after the 20 listed here pertain to temperament survey questions.  The text of these variables can be viewed in a separate data object; see 'ItemInfo696' in the same data file ('sapaTempData696items08dec2013thru26jul2014.rdata').  The response options for all of those items were identical as follows:
+1:  Very Inaccurate
+2:  Moderately Inaccurate
+3:  Slightly Inaccurate
+4:  Slightly Accurate
+5:  Moderately Accurate
+6:  Very Accurate
+
+Finally, it should be noted that these data contain a considerable amount of missingness.  See the manuscript associated with these data for more information.
+
+----------------------------------------------
+
+RID ("RID")
+These numeric codes are generated randomly for each participant.
+
+Gender ("gender")
+1:  Male
+2:  Female
+
+Relationship Status ("relstatus")
+1:	Yes, in a committed relationship
+2:	Nope
+
+Age ("age")
+Self-reported age provided by participant.
+
+Marital Status ("marstatus")
+1:	Never married
+2:	Married
+3:	Divorced & Single
+4:	Divorced & Remarried
+5:	Widowed & Single
+6:	Widowed & Remarried
+7:	Domestic Partnership
+
+Height ("height")
+47:  less than 4ft (122cm)
+48:  4ft 0in (122cm)
+49:  4ft 1in (124cm)
+50:  4ft 2in (127cm)
+51:  4ft 3in (130cm)
+52:  4ft 4in (132cm)
+53:  4ft 5in (135cm)
+54:  4ft 6in (137cm)
+55:  4ft 7in (140cm)
+56:  4ft 8in (142cm)
+57:  4ft 9in (145cm)
+58:  4ft 10in (147cm)
+59:  4ft 11in (150cm)
+60:  5ft 0in (152cm)
+61:  5ft 1in (155cm)
+62:  5ft 2in (157cm)
+63:  5ft 3in (160cm)
+64:  5ft 4in (163cm)
+65:  5ft 5in (165cm)
+66:  5ft 6in (168cm)
+67:  5ft 7in (170cm)
+68:  5ft 8in (173cm)
+69:  5ft 9in (175cm)
+70:  5ft 10in (178cm)
+71:  5ft 11in (180cm)
+72:  6ft 0in (183cm)
+73:  6ft 1in (185cm)
+74:  6ft 2in (188cm)
+75:  6ft 3in (191cm)
+76:  6ft 4in (193cm)
+77:  6ft 5in (196cm)
+78:  6ft 6in (198cm)
+79:  6ft 7in (201cm)
+80:  6ft 8in (203cm)
+81:  6ft 9in (206cm)
+82:  6ft 10in (208cm)
+83:  6ft 11in (211cm)
+84:  7ft 0in (213cm)
+85:  more than 7ft (213cm)
+
+BMI ("BMI")
+Calculated formulaically based on height and weight.
+BMI = weight/(height^2)*703
+
+Weight ("weight")
+80:  below 80 lbs (below 36 kg)
+83:  80 - 85 lbs (36 - 39 kg)
+88:  85 - 90 lbs (39 - 41 kg)
+93:  90 - 95 lbs (41 - 43 kg)
+98:  95 - 100 lbs (43 - 45 kg)
+103:  100 - 105 lbs (45 - 48 kg)
+108:  105 - 110 lbs (48 - 50 kg)
+113:  110 - 115 lbs (50 - 52 kg)
+118:  115 - 120 lbs (52 - 54 kg)
+123:  120 - 125 lbs (54 - 57 kg)
+128:  125 - 130 lbs (57 - 59 kg)
+133:  130 - 135 lbs (59 - 61 kg)
+138:  135 - 140 lbs (61 - 64 kg)
+143:  140 - 145 lbs (64 - 66 kg)
+148:  145 - 150 lbs (66 - 68 kg)
+153:  150 - 155 lbs (68 - 70 kg)
+158:  155 - 160 lbs (70 - 73 kg)
+163:  160 - 165 lbs (73 - 75 kg)
+168:  165 - 170 lbs (75 - 77 kg)
+173:  170 - 175 lbs (77 - 79 kg)
+178:  175 - 180 lbs (79 - 82 kg)
+183:  180 - 185 lbs (82 - 84 kg)
+188:  185 - 190 lbs (84 - 86 kg)
+193:  190 - 195 lbs (86 - 88 kg)
+198:  195 - 200 lbs (88 - 91 kg)
+203:  200 - 205 lbs (91 - 93 kg)
+208:  205 - 210 lbs (93 - 95 kg)
+213:  210 - 215 lbs (95 - 98 kg)
+218:  215 - 220 lbs (98 - 100 kg)
+223:  220 - 225 lbs (100 - 102 kg)
+228:  225 - 230 lbs (102 - 104 kg)
+233:  230 - 235 lbs (104 - 107 kg)
+238:  235 - 240 lbs (107 - 109 kg)
+243:  240 - 245 lbs (109 - 111 kg)
+248:  245 - 250 lbs (111 - 113 kg)
+253:  250 - 255 lbs (113 - 116 kg)
+258:  255 - 260 lbs (116 - 118 kg)
+263:  260 - 265 lbs (118 - 120 kg)
+268:  265 - 270 lbs (120 - 122 kg)
+273:  270 - 275 lbs (122 - 125 kg)
+278:  275 - 280 lbs (125 - 127 kg)
+283:  280 - 285 lbs (127 - 129 kg)
+288:  285 - 290 lbs (129 - 132 kg)
+293:  290 - 295 lbs (132 - 134 kg)
+298:  295 - 300 lbs (134 - 136 kg)
+300:  above 300 lbs (above 136 kg)
+
+Exercise ("exer")
+1:  Very rarely or never
+2:  Less than once a month
+3:  Less than once a week
+4:  1 or 2 times a week
+5:  3 to 5 times a week
+6:  More than 5 times a week
+
+Smoking ("smoke")
+1:  Never in my life
+2:  Not in the last year
+3:  Less than once a month
+4:  Less than once a week
+5:  1 to 3 days a week
+6:  Most days
+7:  Everyday (5 or less times)
+8:  Up to 20 times a day
+9:  More than 20 times a day
+
+Country Codes ("country")
+Note that not all countries are represented.
+SAPA CODE, COUNTRY, ISO3 CODE
+USA:  United States of America
+AFG:  Afghanistan
+ALB:  Albania
+DZA:  Algeria
+AND:  Andorra
+AGO:  Angola
+AIA:  Anguilla
+ATA:  Antarctica
+ATG:  Antigua and Barbuda
+ARG:  Argentina
+ARM:  Armenia
+ABW:  Aruba
+AUS:  Australia
+AUT:  Austria
+AZE:  Azerbaijan
+BHS:  Bahamas
+BHR:  Bahrain
+BGD:  Bangladesh
+BRB:  Barbados
+BLR:  Belarus
+BEL:  Belgium
+BLZ:  Belize
+BEN:  Benin
+BMU:  Bermuda
+BTN:  Bhutan
+BOL:  Bolivia
+BIH:  Bosnia Herzogovinia
+BWA:  Botswana
+BRA:  Brazil
+IOT:  British Indian Ocean Territory
+VGB:  British Virgin Islands
+BRN:  Brunei
+BGR:  Bulgaria
+BFA:  Burkina Faso
+MMR:  Burma - Union of Myanmar
+BDI:  Burundi
+KHM:  Cambodia
+CMR:  Cameroon
+CAN:  Canada
+CPV:  Cape Verde
+CYM:  Cayman Islands
+CAF:  Central African Republic
+TCD:  Chad
+CHL:  Chile
+CHN:  China
+COL:  Colombia
+COM:  Comoros
+COD:  Congo (The Democratic Republic of the Congo)
+COK:  Cook Islands
+CRI:  Costa Rica
+HRV:  Croatia
+CUB:  Cuba
+CYP:  Cyprus
+CZE:  Czech Republic
+DNK:  Denmark
+DJI:  Djibouti
+DMA:  Dominica
+DOM:  Dominican Republic
+TLS:  East Timor
+ECU:  Ecuador
+EGY:  Egypt
+SLV:  El Salvador
+GNQ:  Equatorial Guinea
+ERI:  Eritrea
+EST:  Estonia
+ETH:  Ethiopia
+FRO:  Faroe Islands
+FLK:  Falkland Islands
+FSM:  Federated States of Micronesia
+FJI:  Fiji
+FIN:  Finland
+FRA:  France
+GUF:  French Guiana
+PYF:  French Polynesia
+GAB:  Gabon
+GMB:  Gambia
+GEO:  Georgia
+DEU:  Germany
+GHA:  Ghana
+GIB:  Gibraltar
+GRC:  Greece
+GRL:  Greenland
+GRD:  Grenada
+GLP:  Guadeloupe
+GUM:  Guam
+GTM:  Guatemala
+GNB:  Guinea-Bissau
+GIN:  Guinea
+GUY:  Guyana
+HTI:  Haiti
+HND:  Honduras
+HKG:  Hong Kong
+HUN:  Hungary
+ISL:  Iceland
+IND:  India
+IDN:  Indonesia
+IRN:  Iran
+IRQ:  Iraq
+IRL:  Ireland
+ISR:  Israel
+ITA:  Italy
+CIV:  Ivory Coast (Republic of Côte d'Ivoire)
+JAM:  Jamaica
+JPN:  Japan
+JTN:  Johnston Island
+JOR:  Jordan
+KAZ:  Kazakhstan
+KEN:  Kenya
+KIR:  Kiribati
+UNK:  Kosovo
+KWT:  Kuwait
+KGZ:  Kyrgyzstan
+LAO:  Lao Peoples Democratic Republic
+LVA:  Latvia
+LBN:  Lebanon
+LSO:  Lesotho
+LBR:  Liberia
+LBY:  Libya
+LIE:  Liechtenstein
+LTU:  Lithuania
+LUX:  Luxembourg
+MAC:  Macau (Macao)
+MKD:  Macedonia
+MDG:  Madagascar
+MWI:  Malawi
+MYS:  Malaysia
+MDV:  Maldives
+MLI:  Mali
+MLT:  Malta
+MHL:  Marshall Islands
+MTQ:  Martinique
+MRT:  Mauritania
+MUS:  Mauritius
+MEX:  Mexico
+MID:  Midway Islands
+MDA:  Moldova
+MCO:  Monaco
+MNG:  Mongolia
+MNE:  Montenegro
+MSR:  Montserrat
+MAR:  Morocco
+MOZ:  Mozambique
+NAM:  Namibia
+NRU:  Nauru
+NPL:  Nepal
+ANT:  Netherlands Antilles
+NLD:  Netherlands
+NCL:  New Caledonia
+NZL:  New Zealand
+NIC:  Nicaragua
+NER:  Niger
+NGA:  Nigeria
+NIU:  Niue
+NFK:  Norfolk Island
+PRK:  North Korea (Democratic People's Republic of Korea)
+MNP:  Northern Mariana Islands
+NOR:  Norway
+OMN:  Oman
+PAK:  Pakistan
+PLW:  Palau
+PSE:  Palestinian Territory
+PAN:  Panama
+PNG:  Papua New Guinea
+PRY:  Paraguay
+PER:  Peru
+PHL:  Philippines
+PCN:  Pitcairn Islands
+POL:  Poland
+PRT:  Portugal
+PRI:  Puerto Rico
+QAT:  Qatar
+REU:  Reunion
+ROU:  Romania
+RUS:  Russian Federation
+RWA:  Rwanda
+SHN:  Saint Helena
+KNA:  Saint Kitts and Nevis
+LCA:  Saint Lucia
+SPM:  Saint Pierre and Miquelon
+VCT:  Saint Vincent and the Grenadines
+WSM:  Samoa
+RSM:  San Marino
+STP:  Sao Tome and Principe
+SAU:  Saudi Arabia
+SEN:  Senegal
+SRB:  Serbia
+SYC:  Seychelles
+SLE:  Sierra Leone
+SGP:  Singapore
+SVK:  Slovakia
+SVN:  Slovenia
+SLB:  Solomon Islands
+SOM:  Somalia
+ZAF:  South Africa
+KOR:  South Korea (Republic of Korea)
+ESP:  Spain
+LKA:  Sri Lanka
+SDN:  Sudan
+SUR:  Suriname
+SWZ:  Swaziland
+SWE:  Sweden
+CHE:  Switzerland
+SYR:  Syria (Syrian Arab Republic)
+TWN:  Taiwan
+TJK:  Tajikistan
+TZA:  Tanzania
+THA:  Thailand
+TGO:  Togo
+TKL:  Tokelau
+TON:  Tonga
+TTO:  Trinidad and Tobago
+TUN:  Tunisia
+TUR:  Turkey
+TKM:  Turkmenistan
+TCA:  Turks and Caicos Islands
+TUV:  Tuvalu
+VIR:  U.S. Virgin Islands
+UGA:  Uganda
+UKR:  Ukraine
+ARE:  United Arab Emirates
+GBR:  United Kingdom
+URY:  Uruguay
+UZB:  Uzbekistan
+VUT:  Vanuatu
+VAT:  Vatican City
+VEN:  Venezuela
+VNM:  Vietnam
+WAK:  Wake Island
+WLF:  Wallis and Futuna Islands
+ESH:  Western Sahara
+YEM:  Yemen
+ZMB:  Zambia
+ZWE:  Zimbabwe
+COG:  Congo (The Republic of the Congo)
+
+State/Region Codes ("state")
+Note that not all states are represented and that only 33 of the countries have region/state choices available.
+Country, State/Region Code, State/Region name
+AL:  Alabama, USA
+AK:  Alaska, USA
+AZ:  Arizona, USA
+AR:  Arkansas, USA
+CA:  California, USA
+CO:  Colorado, USA
+CT:  Connecticut, USA
+DE:  Delaware, USA
+FL:  Florida, USA
+GA:  Georgia, USA
+HI:  Hawaii, USA
+ID:  Idaho, USA
+IL:  Illinois, USA
+IN:  Indiana, USA
+IA:  Iowa, USA
+KS:  Kansas, USA
+KY:  Kentucky, USA
+LA:  Louisiana, USA
+ME:  Maine, USA
+MD:  Maryland, USA
+MA:  Massachusetts, USA
+MI:  Michigan, USA
+MN:  Minnesota, USA
+MS:  Mississippi, USA
+MO:  Missouri, USA
+MT:  Montana, USA
+NE:  Nebraska, USA
+NV:  Nevada, USA
+NH:  New Hampshire, USA
+NJ:  New Jersey, USA
+NM:  New Mexico, USA
+NY:  New York, USA
+NC:  North Carolina, USA
+ND:  North Dakota, USA
+OH:  Ohio, USA
+OK:  Oklahoma, USA
+OR:  Oregon, USA
+PA:  Pennsylvania, USA
+RI:  Rhode Island, USA
+SC:  South Carolina, USA
+SD:  South Dakota, USA
+TN:  Tennessee, USA
+TX:  Texas, USA
+UT:  Utah, USA
+VT:  Vermont, USA
+VA:  Virginia, USA
+WA:  Washington, USA
+WV:  West Virginia, USA
+WI:  Wisconsin, USA
+WY:  Wyoming, USA
+DC:  District of Columbia, USA
+Australian Capital Territory, Australia
+New South Wales, Australia
+Northern Territory, Australia
+Queensland, Australia
+South Australia, Australia
+Tasmania, Australia
+Victoria, Australia
+Western Australia, Australia
+Barisal, Bangladesh
+Chittagong, Bangladesh
+Dhaka, Bangladesh
+Khulna, Bangladesh
+Rajshahi, Bangladesh
+Rangpur, Bangladesh
+Sylhet, Bangladesh
+Antwerp, Belgium
+East Flanders, Belgium
+Flemish Brabant, Belgium
+Hainaut, Belgium
+Liege, Belgium
+Limburg, Belgium
+Luxembourg, Belgium
+Namur, Belgium
+Walloon Brabant, Belgium
+West Flanders, Belgium
+Brunei, Borneo
+Kalimantan, Borneo
+Sabah, Borneo
+Sarawak, Borneo
+Acre, Brazil
+Alagoas, Brazil
+Amapa, Brazil
+Amazonas, Brazil
+Bahia, Brazil
+Ceara, Brazil
+Distrito Federal, Brazil
+Espirito Santo, Brazil
+Golas, Brazil
+Maranhao, Brazil
+Mato Grosso, Brazil
+Mato Grosso do Sul, Brazil
+Minas Gerais, Brazil
+Para, Brazil
+Paraiba, Brazil
+Parana, Brazil
+Pernambuco, Brazil
+Piaui, Brazil
+Rio de Janeiro, Brazil
+Rio Grande do Norte, Brazil
+Rio Grande do Sul, Brazil
+Rondonia, Brazil
+Roraima, Brazil
+Santa Catarina, Brazil
+Sao Paulo, Brazil
+Sergipe, Brazil
+Tocantins, Brazil
+Alberta, Canada
+British Columbia, Canada
+Manitoba, Canada
+New Brunswick, Canada
+Newfoundland and Labrador, Canada
+Northwest Territories, Canada
+Nova Scotia, Canada
+Nunavut, Canada
+Ontario, Canada
+Prince Edward Island, Canada
+Quebec, Canada
+Saskatchewan, Canada
+Yukon, Canada
+Anhui, China
+Fujian, China
+Gansu, China
+Guangdong, China
+Guizhou, China
+Hainan, China
+Hebei, China
+Heilongjiang, China
+Henan, China
+Hubei, China
+Hunan, China
+Jiangsu, China
+Jiangxi, China
+Jilin, China
+Liaoning, China
+Qinghai, China
+Shaanxi, China
+Shandong, China
+Shanxi, China
+Sichuan, China
+Yunnan, China
+Zhejiang, China
+Hovedstaden, Denmark
+Midtjyllan, Denmark
+Nordjylland, Denmark
+Sjaelland, Denmark
+Syddanmark, Denmark
+Aland Islands, Finland
+Central Finland, Finland
+Central Ostrobothnia, Finland
+Eastern Uusimaa, Finland
+Finland Proper, Finland
+Kainuu, Finland
+Kymenlaakso, Finland
+Lapland, Finland
+North Karelia, Finland
+Northern Ostrobothnia, Finland
+Northern Savonia, Finland
+Ostrobothnia, Finland
+Paijanne Tavastia, Finland
+Pirkanmaa, Finland
+Satakunta, Finland
+South Karelia, Finland
+Souther Ostrobothnia, Finland
+Southern Savonia, Finland
+Tavastia Proper, Finland
+Uusimaa, Finland
+Alsace, France
+Aquitaine, France
+Auvergne, France
+Basse-Normandie, France
+Bourgogne, France
+Bretagne, France
+Centre, France
+Champagne-Ardenne, France
+Corsica, France
+Franche-Comte, France
+Haute-Normandie, France
+Ile-de-France, France
+Languedoc-Roussillon, France
+Limousin, France
+Lorraine, France
+Midi-Pyrenees, France
+Nord-Pas-de-Calais, France
+Pays de la Loire, France
+Picardie, France
+Poitou-Charentes, France
+Provence-Alpes-Cote d\'Azur, France
+Rhone-Alpes, France
+Baden-Württemberg, Germany
+Bavaria, Germany
+Berlin, Germany
+Brandenburg, Germany
+Bremen, Germany
+Hamburg, Germany
+Hesse, Germany
+Lower Saxony, Germany
+Mecklenburg-Vorpommem, Germany
+North Rhine-Westphalia, Germany
+Rhineland-Palatinate, Germany
+Saarland, Germany
+Saxony, Germany
+Saxony-Anhalt, Germany
+Schleswig-Holstein, Germany
+Thuringia, Germany
+Hong Kong Island - Central and Western, HK
+Hong Kong Island - Eastern, HK
+Hong Kong Island - Southern, HK
+Hong Kong Island - Wan Chai, HK
+Kowloon - Kowloon City, HK
+Kowloon - Kwun Tong, HK
+Kowloon - Sham Shui Po, HK
+Kowloon - Wong Tai Sin, HK
+Kowloon - Yau Tsim Mong, HK
+New Territories - Islands, HK
+New Territories - Kwai Tsing, HK
+New Territories - North, HK
+New Territories - Sai Kung, HK
+New Territories - Sha Tin, HK
+New Territories - Tai Po, HK
+New Territories - Tsuen Wan, HK
+New Territories - Tuen Mun, HK
+New Territories - Yuen Long, HK
+Andaman and Nicobar Islands, India
+Andhra Pradesh, India
+Arunachal Pradesh, India
+Assam, India
+Bihar, India
+Chandigarh, India
+Chhattisgarh, India
+Dadra and Nagar Haveli, India
+Daman and Diu, India
+Goa, India
+Gujarat, India
+Haryana, India
+Himachal Pradesh, India
+Jammu and Kashmir, India
+Jharkhand, India
+Karnataka, India
+Kerala, India
+Lakshadweep, India
+Madhya Pradesh, India
+Maharashtra, India
+Manipur, India
+Meghalaya, India
+Mizoram, India
+Nagaland, India
+Orissa, India
+Puducherry, India
+Punjab, India
+Rajasthan, India
+Sikkim, India
+Tamil Nadu, India
+The Government of NCT of Delhi, India
+Tripura, India
+Uttar Pradesh, India
+Uttarakhand, India
+West Bengal, India
+Java, Indonesia
+Kalimantan, Indonesia
+Lesser Sunda Islands, Indonesia
+Maluku Islands, Indonesia
+Sulawesi, Indonesia
+Sumatra, Indonesia
+Western New Guinea, Indonesia
+Connacht, Ireland
+Leinster, Ireland
+Munster, Ireland
+Ulster, Ireland
+Abruzzo, Italy
+Aosta Valley, Italy
+Apulia, Italy
+Basilicata, Italy
+Calabria, Italy
+Campania, Italy
+Emilia-Romagna, Italy
+Friuli-Venezia Giulia, Italy
+Lazio, Italy
+Liguria, Italy
+Lombardy, Italy
+Marche, Italy
+Molise, Italy
+Piedmont, Italy
+Sardinia, Italy
+Sicily, Italy
+Trentino-Alto Adige, Italy
+Tuscany, Italy
+Umbria, Italy
+Veneto, Italy
+Federal Territory of Kuala Lumpur, Malaysia
+Johor, Malaysia
+Kedah, Malaysia
+Kelantan, Malaysia
+Malacca, Malaysia
+Negeri Sembilan, Malaysia
+Pahang, Malaysia
+Penang, Malaysia
+Perak, Malaysia
+Perlis, Malaysia
+Sabah, Malaysia
+Sarawak, Malaysia
+Selangor, Malaysia
+Terengganu, Malaysia
+Aguascalientes, Mexico
+Baja California, Mexico
+Baja California Sur, Mexico
+Campeche, Mexico
+Chiapas, Mexico
+Chihuahua, Mexico
+Ciudad de Mexico, Mexico
+Coahuila, Mexico
+Colima, Mexico
+Durango, Mexico
+Guanajuato, Mexico
+Guerrero, Mexico
+Hidalgo, Mexico
+Jalisco, Mexico
+Mexico, Mexico
+Michoacan, Mexico
+Morelos, Mexico
+Nayarit, Mexico
+Nuevo Leon, Mexico
+Oaxaca, Mexico
+Puebla, Mexico
+Queretaro, Mexico
+Quintana Roo, Mexico
+San Luis Potosi, Mexico
+Sinaloa, Mexico
+Sonora, Mexico
+Tabasco, Mexico
+Tamaulipas, Mexico
+Tiaxcala, Mexico
+Veracruz, Mexico
+Yucatan, Mexico
+Zacatecas, Mexico
+Drenthe, Netherlands
+Flevoland, Netherlands
+Friesland, Netherlands
+Gelderland, Netherlands
+Groningen, Netherlands
+Limburg, Netherlands
+North Brabant, Netherlands
+North Holland, Netherlands
+Overijssel, Netherlands
+South Holland, Netherlands
+Utrecht, Netherlands
+Zeeland, Netherlands
+Auckland, NZ
+Bay of Plenty, NZ
+Canterbury, NZ
+Gisborne, NZ
+Hawke\'s Bay, NZ
+Manawatu-Wanganui, NZ
+Marlborough, NZ
+Nelson, NZ
+Northland, NZ
+Otago, NZ
+Southland, NZ
+Taranaki, NZ
+Tasman, NZ
+Waikato, NZ
+Wellington, NZ
+West Coast, NZ
+Akershus, Norway
+Aust-Agder, Norway
+Buskerud, Norway
+Finnmark, Norway
+Hedmark, Norway
+Hordaland, Norway
+Jan Mayen, Norway
+More og Romsdal, Norway
+Nord-Trondelag, Norway
+Nordland, Norway
+Oppland, Norway
+Oslo, Norway
+Ostfold, Norway
+Rogaland, Norway
+Sogn og Fjordane, Norway
+Sor-Trondelag, Norway
+Svalbard, Norway
+Telemark, Norway
+Troms, Norway
+Vest-Agder, Norway
+Vestfold, Norway
+Azad Kashmir, Pakistan
+Balochistan, Pakistan
+Capital Territory, Pakistan
+Gilgit-Baltistan, Pakistan
+Khyber-Pakhtunkhwa, Pakistan
+Punjab, Pakistan
+Sindh, Pakistan
+Tribal Areas, Pakistan
+Autonomous Region in Muslim Mindanao, Philippines
+Bicol Region, Philippines
+Cagayan Valley, Philippines
+Calabarzon, Philippines
+Caraga, Philippines
+Central Luzon, Philippines
+Central Visayas, Philippines
+Cordillera Administrative Region, Philippines
+Davao Region, Philippines
+Eastern Visayas, Philippines
+Ilocos Region, Philippines
+Mimaropa, Philippines
+National Capital Region, Philippines
+Northern Mindanao, Philippines
+Soccsksargen, Philippines
+Western Visayas, Philippines
+Zamboanga Peninsula, Philippines
+Greater Poland, Poland
+Kuyavian-Pomeranian, Poland
+Lesser Poland, Poland
+Lodz, Poland
+Lower Silesian, Poland
+Lublin, Poland
+Lubusz, Poland
+Masovian, Poland
+Opole, Poland
+Podlaskie, Poland
+Pomeranian, Poland
+Silesian, Poland
+Subcarpathian, Poland
+Swietokrzyskie, Poland
+Warmian-Masurian, Poland
+West Pomeranian, Poland
+Bucuresti-Ilfov, Romania
+Centru, Romania
+Nord-Est, Romania
+Nord-Vest, Romania
+Sud-Est, Romania
+Sud-Muntenia, Romania
+Sud-Vest Oltenia, Romania
+Vest, Romania
+Adygea, Russia
+Altai, Russia
+Altai, Russia
+Amur, Russia
+Arkhangelsk, Russia
+Astrakhan, Russia
+Bashkortostan, Russia
+Belgorod, Russia
+Bryansk, Russia
+Buryat, Russia
+Chechen, Russia
+Chelyabinsk, Russia
+Chukotka, Russia
+Chuvash, Russia
+Dagestan, Russia
+Ingushetia, Russia
+Irkutsk, Russia
+Ivanovo, Russia
+Jewish Oblast, Russia
+Kabardino-Balkar, Russia
+Kaliningrad, Russia
+Kalmykia, Russia
+Kaluga, Russia
+Kamchatka, Russia
+Karachay-Cherkess, Russia
+Karelia, Russia
+Kemerovo, Russia
+Khabarovsk, Russia
+Khakassia, Russia
+Khanty-Mansi, Russia
+Kirov, Russia
+Komi, Russia
+Kostroma, Russia
+Krasnodar, Russia
+Krasnoyarsk, Russia
+Kurgan, Russia
+Kursk, Russia
+Leningrad, Russia
+Lipetsk, Russia
+Magadan, Russia
+Mari El, Russia
+Mordovia, Russia
+Moscow, Russia
+Moscow, Russia
+Murmansk, Russia
+Nenets, Russia
+Nizhny Novgorod, Russia
+North Ossetia-Alania, Russia
+Novgorod, Russia
+Novosibirsk, Russia
+Omsk, Russia
+Orenburg, Russia
+Oryol, Russia
+Penza, Russia
+Perm, Russia
+Primorsky, Russia
+Pskov, Russia
+Rostov, Russia
+Ryazan, Russia
+Saint Petersburg, Russia
+Sakha, Russia
+Sakhalin, Russia
+Samara, Russia
+Saratov, Russia
+Smolensk, Russia
+Stavropol, Russia
+Sverdlovsk, Russia
+Tambov, Russia
+Tatarstan, Russia
+Tomsk, Russia
+Tula, Russia
+Tuva, Russia
+Tver, Russia
+Tyumen, Russia
+Udmurt, Russia
+Ulyanovsk, Russia
+Vladimir, Russia
+Volgograd, Russia
+Vologda, Russia
+Voronezh, Russia
+Yamalo-Nenets, Russia
+Yaroslavl, Russia
+Zabaykalsky, Russia
+Eastern Cape, S Africa
+Free State, S Africa
+Gauteng, S Africa
+KwaZulu-Natal, S Africa
+Limpopo, S Africa
+Mpumalanga, S Africa
+North West, S Africa
+Northern Cape, S Africa
+Western Cape, S Africa
+Busan, S Korea
+Chungcheongbuk-do, S Korea
+Chungcheongnam-do, S Korea
+Daegu, S Korea
+Daejeon, S Korea
+Gangwon-do, S Korea
+Gwangju, S Korea
+Gyeonggi-do, S Korea
+Gyeongsangbuk-do, S Korea
+Gyeongsangnam-do, S Korea
+Incheon, S Korea
+Jeju-teukbyeoljachido, S Korea
+Jeollabuk-do, S Korea
+Jeollanam-do, S Korea
+Seoul, S Korea
+Ulsan, S Korea
+Alava, Spain
+Albacete, Spain
+Alicante, Spain
+Almeria, Spain
+Asturias, Spain
+Avila, Spain
+Badajoz, Spain
+Baleares, Spain
+Barcelona, Spain
+Vizcaya, Spain
+Burgos, Spain
+Caceres, Spain
+Cadiz, Spain
+Cantabria, Spain
+Castellon, Spain
+Ciudad Real, Spain
+Cordoba, Spain
+Cuenca, Spain
+Gerona, Spain
+Granada, Spain
+Guadalajara, Spain
+Guipuzcoa, Spain
+Huelva, Spain
+Huesca, Spain
+Jaen, Spain
+La Coruna, Spain
+La Rioja, Spain
+Leon, Spain
+Lerida, Spain
+Lugo, Spain
+Madrid, Spain
+Malaga, Spain
+Murcia, Spain
+Navarra, Spain
+Orense, Spain
+Palencia, Spain
+Las Palmas, Spain
+Pontevedra, Spain
+Salamanca, Spain
+Santa Cruz, Spain
+Segovia, Spain
+Sevilla, Spain
+Soria, Spain
+Tarragona, Spain
+Teruel, Spain
+Toledo, Spain
+Valencia, Spain
+Valladolid, Spain
+Zamora, Spain
+Zaragoza, Spain
+Blekinge, Sweden
+Dalarna, Sweden
+Gavleborg, Sweden
+Gotland, Sweden
+Halland, Sweden
+Jamtland, Sweden
+Jonkoping, Sweden
+Kalmar, Sweden
+Kronoberg, Sweden
+Norrbotten, Sweden
+Orebro, Sweden
+Ostergotland, Sweden
+Skane, Sweden
+Sodermanland, Sweden
+Stockholm, Sweden
+Uppsala, Sweden
+Varmland, Sweden
+Vasterbotten, Sweden
+Vasternorrland, Sweden
+Vastmanland, Sweden
+Vastra Gotaland, Sweden
+England, UK
+Northern Ireland, UK
+Scotland, UK
+Wales, UK
+Central Highlands, Vietnam
+Mekong River Delta, Vietnam
+North Central Coast, Vietnam
+Northeast, Vietnam
+Northwest, Vietnam
+Red River Delta, Vietnam
+South Central Coast, Vietnam
+Southeast, Vietnam
+
+Race/Ethnicity (USA only) ("ethnic")
+These codes are listed in numeric order, which is not the same as they are listed to participants (due to addition of more options over time).
+1:	Black/African-American
+2:	Chinese
+3:	Japanese
+4:	Korean
+5:	Filipino
+6:	Indian (Asian)
+7:	Other Asian
+8:	Other Hispanic/Latino
+9:	Mexican/Mexican-American
+10:	Puerto Rican
+11:	Native American
+12:	Other Pacific Islander
+13:	White
+14:	Other
+15:	Alaskan Native
+16:	Cuban
+17:	Native Hawaiian
+18:	Two or more ethnicities
+
+ZIP code ("zip")
+These are self-reported postal codes as entered by the participant.
+
+Level of education ("education")
+1:	Less than 12 years
+2:	High school graduate
+3:	Currently in college/university
+4:	Some college/university, but did not graduate
+5:	College/university degree
+6:	Currently in graduate or professional school
+7:	Graduate or professional school degree
+
+Job status ("jobstatus")
+Note that "prefer not to answer" has been converted to NA.
+1:	Currently a student
+2:	Not employed
+3:	Not employed, seeking work
+4:	Homemaker
+5:	Employed
+6:	Retired
+
+Parental occupation codes (same for both "p1occ" and "p2occ")
+1:	Prefer not to answer
+2:	Arts, Design, Entertainment, Sports, and Media
+3:	Building and Grounds Cleaning and Maintenance
+4:	Business and Financial Operations
+5:	Community and Social Services
+6:	Computers and Mathematics
+7:	Construction and Extraction
+8:	Education, Training and Library Services
+9:	Engineering and Architecture
+10:	Farming, Fishing, and Forestry
+11:	Food Preparation and Serving
+12:	Healthcare
+13:	Installation, Maintenance, and Repair
+14:	Law and Legal Services
+15:	Life Science, Physical Sciences and Social Sciences
+16:	Management
+17:	Manufacturing and Production
+18:	Military
+19:	Office and Administrative Support
+20:	Personal Care and Related Services
+21:	Protective Services
+22:	Sales and Related Services
+23:	Transportation and Material Moving
+
+Level of parental education (same for both "p1edu" and "p2edu")
+Note that these codes are the same as "education".
+1:	Less than 12 years
+2:	High school graduate
+3:	Currently in college/university
+4:	Some college/university, but did not graduate
+5:	College/university degree
+6:	Currently in graduate or professional school
+7:	Graduate or professional school degree
+
