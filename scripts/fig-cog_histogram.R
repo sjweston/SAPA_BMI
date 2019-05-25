@@ -18,11 +18,14 @@ male_reg$Gender = "Male"
 
 female_reg %>%
   full_join(male_reg) %>%
-  filter(model == "cov_mod") %>%
+  filter(model %in% c("cov_edu", "cov_inc")) %>%
+  mutate(model = factor(model, 
+                        labels = c("Controlling for\nParental Education", 
+                                   "Controlling for\nParental Income"))) %>%
   filter(term == "cog") %>%
   ggplot(aes(estimate, fill = Gender)) +
   geom_histogram(color = "white") +
-  facet_wrap(~Gender) +
+  facet_grid(model~Gender) +
   guides(fill = FALSE) +
   scale_x_continuous("Cognitive Ability Coefficient Estimate") +
   theme_minimal()

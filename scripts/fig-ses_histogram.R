@@ -18,11 +18,12 @@ male_reg$Gender = "Male"
 
 female_reg %>%
   full_join(male_reg) %>%
-  filter(model == "cov_mod") %>%
-  filter(term == "ses") %>%
+  filter(model %in% c("cov_edu", "cov_inc")) %>%
+  mutate(model = factor(model, labels = c("Parental Education", "Parental Income"))) %>%
+  filter(term %in% c("edu", "income")) %>%
   ggplot(aes(estimate, fill = Gender)) +
   geom_histogram(color = "white") +
-  facet_wrap(~Gender) +
+  facet_grid(model~Gender) +
   guides(fill = FALSE) +
   scale_x_continuous("Socioeconomic Status Coefficient Estimate") +
   theme_minimal()

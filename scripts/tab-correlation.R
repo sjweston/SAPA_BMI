@@ -17,7 +17,8 @@ load("data/cor_output.Rdata")
 # format names of predictors
 names = cor.data$pred
 names = gsub("cog", "Cognitive Ability", names)
-names = gsub("ses", "Socioeconomic Status", names)
+names = gsub("edu", "Parental Education", names)
+names = gsub("income", "Parental Income", names)
 names[grepl("spi", names)] = c(SPI_27_names, SPI_5_names)
 
 spi27_rows = which(grepl("27", cor.data$pred))

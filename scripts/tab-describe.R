@@ -17,12 +17,13 @@ load("data/descriptives.Rdata")
 des = data.frame(gender = c("male", "female"))
 des$df = descriptives
 
-levels = c("BMI", "SES", "Cognition", SPI_27_names, SPI_5_names)
+levels = c("BMI", "Parental Education", "Parental Income", "Cognitive Ability",
+           SPI_27_names, SPI_5_names)
 
 des %>%
   unnest() %>%
-  mutate(vars = rep(c("gender", "BMI", "SES", 
-                      "Cognition", SPI_27_names, SPI_5_names),2)) %>%
+  mutate(vars = rep(c("gender", "BMI", "Parental Education", "Parental Income", 
+                      "Cognitive Ability", SPI_27_names, SPI_5_names),2)) %>%
   dplyr::select(gender, vars, n, mean, sd, min, max) %>%
   rename(x1_n = n, 
          x2_mean = mean, 

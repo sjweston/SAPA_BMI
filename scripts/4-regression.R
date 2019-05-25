@@ -20,19 +20,20 @@ load("data/cleaned.Rdata")
 
 
 sapa_male_trait = sapa_male %>%
-  mutate(ses = scale(ses)) %>%
+  mutate(edu = scale(edu)) %>%
+  mutate(income = scale(income)) %>%
   mutate(cog = scale(cog)) %>%
   mutate(BMI = scale(BMI)) %>%
-  gather("trait_name", "trait_score", -ses, -cog, -BMI) %>%
+  gather("trait_name", "trait_score", -income, -edu, -cog, -BMI) %>%
   group_by(trait_name) %>%
   mutate(trait_score = scale(trait_score)) %>%
   nest()
 
 sapa_female_trait = sapa_female %>%
-  mutate(ses = scale(ses)) %>%
-  mutate(cog = scale(cog)) %>%
+  mutate(edu = scale(edu)) %>%
+  mutate(income = scale(income)) %>%
   mutate(BMI = scale(BMI)) %>%
-  gather("trait_name", "trait_score", -ses, -cog, -BMI) %>%
+  gather("trait_name", "trait_score", -income, -edu, -cog, -BMI) %>%
   group_by(trait_name) %>%
   mutate(trait_score = scale(trait_score)) %>%
   nest()
@@ -42,10 +43,12 @@ sapa_female_trait = sapa_female %>%
 # ------------------------------------
 
 male_reg = sapa_male_trait %>%
-  mutate(cov_mod = map(data, ~lm(BMI ~ trait_score + cog + ses, data = .))) %>%
-  mutate(ses_mod = map(data, ~lm(BMI ~ trait_score*ses + cog, data = .))) %>%
+  mutate(cov_edu = map(data, ~lm(BMI ~ trait_score + cog + edu, data = .))) %>%
+  mutate(ses_edu = map(data, ~lm(BMI ~ trait_score*edu + cog, data = .))) %>%
+  mutate(cov_inc = map(data, ~lm(BMI ~ trait_score + cog + income, data = .))) %>%
+  mutate(ses_inc = map(data, ~lm(BMI ~ trait_score*income + cog, data = .))) %>%
   dplyr::select(-data) %>%
-  gather("model", "output", cov_mod, ses_mod) %>%
+  gather("model", "output", cov_edu, ses_edu, cov_inc, ses_inc) %>%
   mutate(output = map(output, broom::tidy, conf.int = TRUE)) %>%
   unnest()
 
@@ -54,10 +57,12 @@ male_reg = sapa_male_trait %>%
 # ------------------------------------
 
 female_reg = sapa_female_trait %>%
-  mutate(cov_mod = map(data, ~lm(BMI ~ trait_score + cog + ses, data = .))) %>%
-  mutate(ses_mod = map(data, ~lm(BMI ~ trait_score*ses + cog, data = .))) %>%
+  mutate(cov_edu = map(data, ~lm(BMI ~ trait_score + cog + edu, data = .))) %>%
+  mutate(ses_edu = map(data, ~lm(BMI ~ trait_score*edu + cog, data = .))) %>%
+  mutate(cov_inc = map(data, ~lm(BMI ~ trait_score + cog + income, data = .))) %>%
+  mutate(ses_inc = map(data, ~lm(BMI ~ trait_score*income + cog, data = .))) %>%
   dplyr::select(-data) %>%
-  gather("model", "output", cov_mod, ses_mod) %>%
+  gather("model", "output", cov_edu, ses_edu, cov_inc, ses_inc) %>%
   mutate(output = map(output, broom::tidy, conf.int = TRUE)) %>%
   unnest()
 
