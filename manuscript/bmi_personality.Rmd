@@ -1,0 +1,156 @@
+---
+title             : "Body Mass in Adolescence: The Role of Personality, Intelligence, and Socioeconomic Status"
+shorttitle        : "BMI, Personality, and SES"
+
+author: 
+  - name          : "Sara J. Weston"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Department of Psychology, 1451 Onyx St, Eugene, OR 97403"
+    email         : "weston.sara@gmail.com"
+  - name          : "Magdalena Leszko"
+    affiliation   : "2"
+  - name          : "David Condon"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Oregon"
+  - id            : "2"
+    institution   : "University of Szczecin"
+
+authornote: |
+
+  Enter author note here.
+
+abstract: |
+  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+  
+  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
+  
+  One sentence clearly stating the **general problem** being addressed by  this particular study.
+  
+  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+  
+  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  
+  One or two sentences to put the results into a more **general context**.
+  
+  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "adolescents, Body Mass Index, obesity, personality traits, socioeconomic status"
+wordcount         : "X"
+
+bibliography      : ["bmi_personality.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+header-includes   :
+  - \usepackage[T1]{fontenc} 
+  - \usepackage{tabu}
+output            : papaja::apa6_pdf
+replace_ampersands: yes
+csl               : apa6.csl
+
+---
+\setlength{\parskip}{0pt}
+ \raggedbottom
+
+```{r setup, include = FALSE}
+library("papaja")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+Obesity among children and adolescents is an international public health crisis. In the last 40 years, the prevalence of obesity has grown from 1 in 20 American adolescents to nearly 1 in 5 [@ogden2014prevalence]. Currently, an estimated 16.9% of children and adolescents under the age of 19 were obese in 2010 [@ogden2012prevalence].
+
+Efforts to reduce the prevalence of overweight and obesity have now been a high priority public health issue in the U.S. for several years [@frieden2010reducing; @healthy2000healthy; @us2014healthy; @office2001surgeon] and several of the prominent social programs focused on this issue consider children and adolescents as populations that are ripe for intervention [@frieden2010reducing; @dietz2001preventing; @khan2009recommended]. Yet, there is little evidence that these efforts are working [@ogden2014prevalence].
+
+The Centers for Disease Control and Prevention defines childhood and adolescent obesity as having a BMI at or above the 95th percentile for children and teens of the same age and sex whereas overweight is defined as a BMI at or above the 85th percentile and below the 95th [@centers2015bmi]. Although there are some alternatives to the assessment of obesity in children and adolescents, BMI – as an estimate of body fat – is a widely accepted index to determine overweight status and obesity in children, adolescents, and adults [@dietz1999introduction]. BMI is calculated by dividing a person’s weight in kg by the square of their height in meters (the same formula can be used with pounds and inches, though the result must be multiplied by a conversion factor of 703).  The World Health Organization’s (WHO) defines overweight status, regardless of age and gender, as a BMI greater than or equal to 25 whereas a BMI greater than or equal to 30 qualifies as obese. The WHO furthers classifies overweight individuals (those with BMIs between 25 and 30) as "pre-obese" [@who2011].
+
+Adolescence is associated with considerable changes in body composition: all the main components of body composition (total body fat, lean body mass, bone mineral content) increase during this period [@siervogel2003puberty], which typically begins between the ages of XX and XX years for females and between XY and XY years for males. Numerous studies (and anecdotal evidence from billions of former adolescents) suggest that this period is often psychologically challenging. Adolescents are more likely to be dissatisfied with their body (to the point of endorsing a profound dislike of one's own body), experience fear of weight gain, and have appearance and body shape concerns, and these concerns predispose them to the development of eating disorders [@killen1994pursuit; @story1991demographic; @striegel1986toward].
+
+The trend of increasing obesity prevalence among adolescents, coupled with its adverse health outcomes, underscores the need for obesity prevention efforts, especially those targeting adolescents. Adolescence is a vulnerable period for weight gain and most of the complications that are commonly associated with adult obesity are tied to health behaviors formed in childhood and adolescence [@hampson2007mechanisms]. As such, a more informed understanding of relations among key constructs within this developmental period is crucial.
+
+Numerous changes in body mass levels during adolescence are already well-documented, including several pointing to important sex differences. For example, developmentally appropriate increases in BMI occur at different ages for each sex, necessitating the use of age- and sex-specific reference values [@bibiloni2013prevalence]. Adolescent males and females differ substantially on average in terms of body fat percentages, with females typically having more body fat than males at the same BMI [@daniels1997utility; @taylor1997gender]. Similarly, substantial differences have been reported between the eating habits of males and females, even when controlling for differences in knowledge of healthy eating practices and benefits [@djordjevic2013nutritional]. Given these and related findings, much of the research in this area (including the work reported here) is conducted on each of the sexes independently.
+
+The primary aim of this work is to identify and evaluate the wide range of individual differences contributing to elevated BMI across both sexes. There is some evidence that socioeconomic status [@neumarkeffect; @smiith2004], personality [@bogg2004conscientiousness], and cognitive ability [@liang2014neurocognitive] are each protective factors for obesity, however, the unique (independent) and combined variance of these attributes has rarely been considered. Before describing the methods used to evaluate the associations among these variables and body mass in large samples of both male and female adolescents, it is first necessary to summarize prior findings within and across each domain.
+
+## BMI and personality
+
+Research has shown that certain personality traits are associated with behaviors that contribute to obesity such as unhealthy eating habits and physical inactivity.  For example, individuals high on conscientiousness are likely to be more self-disciplined about their diet [see @bogg2004conscientiousness; @terracciano2009facets] and are more physically active [@rhodes2006personality] whereas individuals with lower levels of conscientiousness tend to engage in emotional and external eating, which is a tendency to overeat in response to food-related cues like the smell or taste of food, regardless of the individual’s physical need for food [@evers2011shaping; @heaven2001neuroticism].  Findings regarding neuroticism are inconclusive. Some researchers found that high levels of neuroticism are related to disinhibition and susceptibility to hunger [@provencher2008personality]. On the other hand, individuals who have higher scores on this trait tend to be underweight [@kakizaki2008personality; @terracciano2009facets] and more likely to suffer from eating disorders [@bogg2004conscientiousness]. Sutin and colleagues [-@sutin2015personality] suggested two possible explanations for this phenomenon: (1) there might be a curvilinear relationship between neuroticism and abnormal weight or (2) being overweight/underweight is associated with different aspects of neuroticism.  Higher scores on extraversion have also been found to contribute to obesity [e.g., @kakizaki2008personality; @sutin2011personality].  Similarly, individuals with higher scores on openness to experience were found to be less successful at managing their body weight and indicated a stronger drive toward overeating [@sullivan2007personality].  In addition, higher scores on openness were negatively related to cognitive dietary restraint [@van2006diet].  In summary, a growing body of research confirms that personality traits influence eating behavior and therefore moderate the association between personality and BMI. 
+
+## BMI and cognitive abilities
+
+Previous studies investigating the association between BMI and cognitive abilities found that individuals with lower levels of cognitive abilities have higher BMI [@cournot2006relation; @hirshman2004evidence; @li1995study]. Adolescents who are obese are more likely to suffer from deficits in multiple cognitive domains such as attention, memory, and executive function and as a result have worse school outcomes in comparison to non-obese peers [@elias2005obesity; @lawlor2006childhood; @mond2007associations; @sabia2008body]. This association remains significant even after controlling for important confounding factors, such as physical activity or maternal intelligence.  The mechanisms through which cognitive abilities may adversely affect BMI remain unclear. One hypothesis of the underlying mechanism is that lower levels of cognitive abilities may result in poor control over neurological centers associated with impulsivity which can lead to impaired control over food intake [@veldwijk2011body]. Alternatively, obesity may negatively influence cognitive function via physiological changes in brain tissue [@veldwijk2011body]. Therefore, there might be a bi-directional interaction between cognitive abilities and BMI. Because there is a hereditary component to both cognitive abilities and BMI, a number of genetic factors may be involved in explaining this association [@teasdale1992intelligence]. 
+
+
+## The relationship between SES and BMI
+
+The term "socioeconomic status" (SES) is an aggregate construct defined according to one’s level of resources or prestige in relation to others [@adler2008us; @krieger1997measuring; @lynch2000socioeconomic].  While the operationalization and measurement of socioeconomic status is notably inconsistent, there is general consensus that SES includes education, income, and occupational prestige [@shanahan2014conscientiousness].  Because children and adolescents are still in school and do not have income, researchers typically use measures of parental education, parental occupation, and/or household income as markers of childhood/adolescent SES [@shrewsbury2008socioeconomic]. 
+
+The relationship between SES and BMI has been widely investigated.  Several studies have found that obesity among children and adults in industrialized countries is negatively associated with income and education [e.g., @booth1999sociodemographic; @bove2006obesity; @molnar2004unsafe; @wang2007]; the opposite relationship has been found in some (but not all developing countries), including urban India or Ghana [@fokeena2012there]. The list of proposed mechanisms placing low-income children at increased risk for obesity relative to higher-income children includes the consumption of less whole meal and brown bread and less fresh fruits and vegetables, but more fatty milk, eggs, and meats [@steele1991eats; @smith1992public].  It has also been proposed that the inverse relationship between SES and BMI is driven by sedentary behavior as low SES children have been found to be less physically active and spend more time watching television and using the computer [@brown2015addressing; @drenowatz2010influence; @morgenstern2009relation].  Unfortunately, additional research has shown that SES is inversely related to sedentary behavior and to rates of overweight status in children over six years of age [@hanson2007socioeconomic; @inchley2005persistent; @lioret2007child] and adolescents [@lohman2006associations].  Still other research points to sedentary behavior as a mediator of BMI in children of low SES status [@o2006socio], among more prominent main effects.
+
+## SES and personality
+
+Personality traits have been widely linked to not only mental and physical health but also other criteria such as socioeconomic status. Considerable research suggests that individuals raised in low SES households have higher levels of neuroticism, lower openness to experience and maladaptive coping mechanisms, including external locus of control and lack of problem-focused coping [@bosma1999social; @korner2003influence].  These individuals are also more likely to engage in risky health behaviors and have higher levels of hostility [@barefoot1991hostility; @kubzansky1999socioeconomic] whereas children from families with higher SES are less impulsive on average [@delaney2012socioeconomic], significantly less likely to be risk-seeking [@deckers2015does], and more altruistic [@bauer2014parental; @deckers2015does].  
+
+It should be noted that associations between SES and personality are likely bidirectional. Certainly across the lifespan, there is strong evidence of the effects of personality on socioeconomic status in adulthood. Research shows children’s conscientiousness is a strong predictor of income and occupational status, even after controlling for IQ [@duckworth2012does]. Individuals high on conscientiousness tend to save more money and are more hardworking, dependable, persistent and goal-oriented [e.g., @barrick1991big]. In addition, they spend money more cautiously [e.g., @wilcox2011leave].  Some studies have also shown empirical support for the influence of agreeableness on SES.  Individuals high on agreeableness are more likely to choose professions that are paid less such as teaching, nursing or volunteer work [@larson2002meta; @lodi2007social].  Findings on other personality traits are inconsistent [@sutin2015personality].
+
+## SES and cognitive abilities
+
+A growing body of research has documented that socioeconomic status (SES) predicts a variety of children’s outcomes including physical and mental health, cognitive ability, and academic achievement [@adler2008us; @merikangas2010prevalence].  Interestingly, the differences in cognitive abilities between children from families with high and low SES can be observed as early as infancy and persists, on average, throughout adolescence [@lipina2005performance].  A number of studies have demonstrated that low-SES children performed worse in working memory or executive attention tasks in comparison to children from families with high SES [@blair2011salivary; @hughes2009tracking; @mezzacappa2004alerting].  Although cognitive ability has been shown to be highly heritable [e.g., @haworth2010heritability], SES also seems to have an important influence on children’s school performance that is potentially independent of cognitive ability [@conger2007interactionist].
+
+## SES as a moderator of the relationship between individual differences and BMI
+
+Given the known relationships between SES and both BMI and individual differences in temperament and congitive ability. it should be no surprise that the relationship between BMI and individual differences is unclear. Futher complicating the relationships are person-situation transactions, which may change the relationship between individual differences and behavior or outcomes. One example is the "strong-situation hypothesis" [@cooper2009strong], which posits that some situations demand specific responses, overpowering any potential impact of personality. Strong situtations limit personal expression or choice through constraint of resources or options. In the case of BMI, low SES may represent a strong situation in that individuals from poorer backgrounds have fewer dining options or leisure opportunites, and so food choices or activity levels reflect availability rather than preference.  In addition to overpowering individual differences, situations may carry different psychological meaning for different persons due to their temperament [@wagerman2009personality]. There is some evidence that socioeconomic status moderates personality expression. For example, phenotypic expression of personality is more closely assoicated with genetics among those with advantaged socioeconomic backgrounds [@tuvblad2006heritability], and adolescent impulsivity has stronger effects among the disadvantaged [@lynam2000interaction]. For some trait-behavior relationships, however, socioeconomic status has no effect [c.f., @ayer2011adolescent].
+
+## The present study
+
+In this study, we use a large sample of adolescents in the United States to examine the relationship between personality and cognitive ability to BMI above and beyond the influence of SES; moreover, we examine whether the relationship between individual differences and BMI changes across socioeconomic strata. The current study aims to clarify the relationship between personality traits, cognitive ability, SES, and BMI through the following methods: (1) examining both broad (Big-Five) and narrow traits to better determine the aspects of personality which relate to BMI, (2) utilizing a measure of SES that accounts for monetary resource and social status, and (3) using both percentile and categorial assessments of BMI to allow for both linear and non-linear relationships between psychosocial constructs and health.
+
+# Methods
+We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. 
+
+## Participants
+
+## Material
+
+## Procedure
+
+## Data analysis
+<!-- We used `r cite_r("bmi_personality.bib")` for all our analyses. -->
+
+
+# Results
+
+# Discussion
+
+
+\newpage
+
+# References
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
