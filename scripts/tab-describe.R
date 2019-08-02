@@ -7,7 +7,6 @@ lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 source("scripts/personality_scales.R")
-
 # ------------------------------------
 # Table. Descriptives                #
 # ------------------------------------

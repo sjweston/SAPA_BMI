@@ -12,9 +12,13 @@ load("data/cleaned.Rdata")
 # ------------------------------------
 # correlation matrix                 #
 # ------------------------------------
+R_male = sapa_male %>%
+  dplyr::select(-BMI_c) %>%
+  cor(use = "pairwise")
 
-R_male = cor(sapa_male, use = "pairwise")
-R_female = cor(sapa_female, use = "pairwise")
+R_female = sapa_female %>%
+  dplyr::select(-BMI_c) %>%
+  cor(use = "pairwise")
 
 # ------------------------------------
 # significance of correlation        #

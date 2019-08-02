@@ -3,11 +3,18 @@
 # ------------------------------------
 
 #load packages
-packages = c("tidyverse", "broom")
+packages = c("tidyverse", "broom", "sjPlot", "rsample")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 load("data/cleaned.Rdata")
+
+# ------------------------------------
+#     set up bootstraps              #
+# ------------------------------------
+
+# number of bootstrap samples
+boot.n = 10000
 
 # ------------------------------------
 # wrangle data for iteration         #
@@ -20,20 +27,21 @@ load("data/cleaned.Rdata")
 
 
 sapa_male_trait = sapa_male %>%
-  mutate(edu = scale(edu)) %>%
-  mutate(income = scale(income)) %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
+  mutate(ses = scale(ses)) %>%
   mutate(cog = scale(cog)) %>%
-  mutate(BMI = scale(BMI)) %>%
-  gather("trait_name", "trait_score", -income, -edu, -cog, -BMI) %>%
+  mutate(BMI_p = scale(BMI_p)) %>%
+  gather("trait_name", "trait_score", -ses, -BMI_p, -BMI, -BMI_c) %>%
   group_by(trait_name) %>%
   mutate(trait_score = scale(trait_score)) %>%
   nest()
 
 sapa_female_trait = sapa_female %>%
-  mutate(edu = scale(edu)) %>%
-  mutate(income = scale(income)) %>%
-  mutate(BMI = scale(BMI)) %>%
-  gather("trait_name", "trait_score", -income, -edu, -cog, -BMI) %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
+  mutate(ses = scale(ses)) %>%
+  mutate(cog = scale(cog)) %>%
+  mutate(BMI_p = scale(BMI_p)) %>%
+  gather("trait_name", "trait_score", -ses, -BMI_p, -BMI, -BMI_c) %>%
   group_by(trait_name) %>%
   mutate(trait_score = scale(trait_score)) %>%
   nest()
@@ -43,27 +51,97 @@ sapa_female_trait = sapa_female %>%
 # ------------------------------------
 
 male_reg = sapa_male_trait %>%
-  mutate(cov_edu = map(data, ~lm(BMI ~ trait_score + cog + edu, data = .))) %>%
-  mutate(ses_edu = map(data, ~lm(BMI ~ trait_score*edu + cog, data = .))) %>%
-  mutate(cov_inc = map(data, ~lm(BMI ~ trait_score + cog + income, data = .))) %>%
-  mutate(ses_inc = map(data, ~lm(BMI ~ trait_score*income + cog, data = .))) %>%
+  mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
+  mutate(int = map(data, ~lm(BMI_p ~ trait_score*ses, data = .))) 
+
+male_plot = male_reg %>%
+  mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
+  mutate(int = map(data, ~lm(BMI_p ~ trait_score*ses, data = .))) 
+
+
+male_reg = male_reg %>%
   dplyr::select(-data) %>%
-  gather("model", "output", cov_edu, ses_edu, cov_inc, ses_inc) %>%
-  mutate(output = map(output, broom::tidy, conf.int = TRUE)) %>%
+  gather("model", "output", cov, int) %>%
+  mutate(output = map(output, broom::tidy, conf.int = FALSE)) %>%
   unnest()
+
+
+# ----------------------------------------------
+# bootstrap confidence intervals (males)       #
+# ----------------------------------------------
+
+male_boot = sapa_male_trait %>%
+  mutate(samples = map(data, bootstraps, times = boot.n)) %>%
+  dplyr::select(-data) %>%
+  unnest(samples) %>%
+  mutate(boot_cov = map(splits, ~broom::tidy(lm(BMI_p ~ trait_score + ses, analysis(.))))) %>%
+  mutate(boot_int = map(splits, ~broom::tidy(lm(BMI_p ~ trait_score*ses, analysis(.))))) 
+
+male_boot = male_boot %>%
+  dplyr::select(-splits, -id) %>%
+  gather("model", "summary", -trait_name) %>%
+  unnest()
+
+male_boot = male_boot %>% 
+  group_by(trait_name, model, term) %>%
+  summarise(conf.low = quantile(estimate, probs = .025),
+            conf.high = quantile(estimate, probs = .975)) %>%
+  ungroup() %>%
+  mutate(model = gsub("boot_", "", model)) 
+
+male_reg = male_reg %>%
+  full_join(male_boot)
+
 
 # ------------------------------------
 # regression iteration (females)       #
 # ------------------------------------
 
 female_reg = sapa_female_trait %>%
-  mutate(cov_edu = map(data, ~lm(BMI ~ trait_score + cog + edu, data = .))) %>%
-  mutate(ses_edu = map(data, ~lm(BMI ~ trait_score*edu + cog, data = .))) %>%
-  mutate(cov_inc = map(data, ~lm(BMI ~ trait_score + cog + income, data = .))) %>%
-  mutate(ses_inc = map(data, ~lm(BMI ~ trait_score*income + cog, data = .))) %>%
+  mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
+  mutate(int = map(data, ~lm(BMI_p ~ trait_score*ses, data = .))) 
+
+female_plot = female_reg %>%
+  mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
+  mutate(int = map(data, ~lm(BMI_p ~ trait_score*ses, data = .))) 
+
+
+female_reg = female_reg %>%
   dplyr::select(-data) %>%
-  gather("model", "output", cov_edu, ses_edu, cov_inc, ses_inc) %>%
-  mutate(output = map(output, broom::tidy, conf.int = TRUE)) %>%
+  gather("model", "output", cov, int) %>%
+  mutate(output = map(output, broom::tidy, conf.int = FALSE)) %>%
   unnest()
 
+
+# ----------------------------------------------
+# bootstrap confidence intervals (females)       #
+# ----------------------------------------------
+
+female_boot = sapa_female_trait %>%
+  mutate(samples = map(data, bootstraps, times = boot.n)) %>%
+  dplyr::select(-data) %>%
+  unnest(samples) %>%
+  mutate(boot_cov = map(splits, ~broom::tidy(lm(BMI_p ~ trait_score + ses, analysis(.))))) %>%
+  mutate(boot_int = map(splits, ~broom::tidy(lm(BMI_p ~ trait_score*ses, analysis(.))))) 
+
+female_boot = female_boot %>%
+  dplyr::select(-splits, -id) %>%
+  gather("model", "summary", -trait_name) %>%
+  unnest()
+
+female_boot = female_boot %>% 
+  group_by(trait_name, model, term) %>%
+  summarise(conf.low = quantile(estimate, probs = .025),
+            conf.high = quantile(estimate, probs = .975)) %>%
+  ungroup() %>%
+  mutate(model = gsub("boot_", "", model)) 
+
+female_reg = female_reg %>%
+  full_join(female_boot)
+
+# --------------------------
+#     save outputs         #
+# --------------------------
+
 save(male_reg, female_reg, file = "data/regression_output.Rdata")
+save(male_plot, female_plot, file = "data/regression_plots.Rdata")

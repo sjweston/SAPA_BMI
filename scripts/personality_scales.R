@@ -1,64 +1,26 @@
-# scoring keys for SPI
+keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
 
-SPI_27_01 <- c("q_90", "q_253", "q_1763", "q_851", "q_1832")
-SPI_27_02 <- c("q_952", "q_1357", "-q_1585", "-q_1683", "-q_176")
-SPI_27_03 <- c("q_1904", "-q_312", "-q_684", "q_4243", "-q_1923")
-SPI_27_04 <- c("-q_578", "-q_811", "q_1371", "q_2765", "q_820")
-SPI_27_05 <- c("q_1367", "q_1664", "q_1662", "q_1781", "q_598")
-SPI_27_06 <- c("q_4249", "q_1989", "q_4252", "q_1505", "q_808")
-SPI_27_07 <- c("-q_4296", "q_1812", "q_2853", "-q_1896", "-q_501")
-SPI_27_08 <- c("-q_904", "q_1744", "q_1979", "-q_1452", "-q_1444")
-SPI_27_09 <- c("-q_1253", "q_240", "q_493", "q_422", "q_1834")
-SPI_27_10 <- c("q_128", "q_2745", "q_2754", "q_1392", "q_1058")
-SPI_27_11 <- c("q_35", "q_1424", "q_1173", "-q_4223", "q_4276")
-SPI_27_12 <- c("q_1416", "q_1296", "-q_565", "q_1555", "-q_1027")
-SPI_27_13 <- c("q_1201", "-q_1254", "-q_1483", "-q_169", "q_1290")
-SPI_27_14 <- c("q_369", "q_398", "q_1624", "q_1867", "-q_1609")
-SPI_27_15 <- c("q_254", "-q_901", "q_1045", "q_131", "-q_1242")
-SPI_27_16 <- c("q_1855", "q_4289", "q_377", "-q_871", "q_379")
-SPI_27_17 <- c("q_1243", "q_1244", "q_1248", "q_296", "-q_1685")
-SPI_27_18 <- c("q_219", "-q_1081", "q_1706", "-q_1635", "q_803")
-SPI_27_19 <- c("-q_607", "q_348", "-q_610", "q_1132", "-q_612")
-SPI_27_20 <- c("q_1389", "q_1738", "q_1880", "q_755", "q_1310")
-SPI_27_21 <- c("q_571", "q_1915", "q_1694", "q_530", "q_142")
-SPI_27_22 <- c("q_1462", "q_1590", "q_1461", "q_56", "q_736")
-SPI_27_23 <- c("q_1300", "q_2005", "q_747", "q_152", "q_1653")
-SPI_27_24 <- c("-q_566", "-q_689", "q_1542", "q_39", "q_1303")
-SPI_27_25 <- c("q_1329", "q_1281", "q_1052", "q_1024", "q_1280")
-SPI_27_26 <- c("q_1840", "q_797", "-q_979", "-q_793", "q_174")
-SPI_27_27 <- c("q_1824", "-q_660", "q_345", "-q_1825", "q_1328")
+keys = keys %>%
+  select(contains("SPI_135")) 
 
-SPI_27_names = c("Compassion", "Irritability", "Sociability", "Well-Being",
-                 "Sensation-Seeking", "Anxiety", "Honesty", "Industry", "Intellect",
-                 "Creativity", "Impulsivity", "Attention-Seeking", "Order", "Authoritarianism",
-                 "Charisma", "Trust", "Humor", "Emotional	Expressiveness", "Art	Appreciation",
-                 "Introspection", "Perfectionism", "Self-Control", "Conformity", "Adaptability",
-                 "Easy-Goingness", "Emotional	Stability", "Conservatism")
+#identify rows with all 0's
+row_remove = apply(keys, 1, function(row) all(row == 0))
+keys = keys[!(row_remove), ]
 
-SPI_27_list = list(SPI_27_01, SPI_27_02, SPI_27_03, SPI_27_04, SPI_27_05, 
-                SPI_27_06, SPI_27_07, SPI_27_08, SPI_27_09, SPI_27_10,
-                SPI_27_11, SPI_27_12, SPI_27_13, SPI_27_14, SPI_27_15, 
-                SPI_27_16, SPI_27_17, SPI_27_18, SPI_27_19, SPI_27_20,
-                SPI_27_21, SPI_27_22, SPI_27_23, SPI_27_24, SPI_27_25, 
-                SPI_27_26, SPI_27_27)
+#save as key matrix
+key.matrix = keys
 
-SPI_5_1 <- c("q_1904", "q_4243", "-q_312", "-q_565", "q_1416", "-q_1923", "-q_1027", 
-                 "-q_684", "q_254", "q_1296", "-q_901","q_1243", "q_803", "q_1244")
+# create vectors with names of scales
+keys = names(keys)
+names(keys) = keys
 
-SPI_5_2  <- c("q_979", "q_4252", "q_1989", "q_1505", "q_4249", "q_808", "q_793", 
-                  "-q_1840", "q_811", "-q_1585", "q_578","-q_176", "-q_797", "-q_1683")
+SPI_27_names = gsub("SPI_135_27_5_", "", keys)
+SPI_5_names = c("Agreeableness", "Conscientiousness", "Extraversion", "Neuroticism", "Openness")
+names(SPI_5_names) = names(SPI_27_names)[1:5]
+SPI_27_names = SPI_27_names[6:32]
+#names(SPI_27_names) = SPI_27_names
+SPI_27_names = gsub("([a-z])([A-Z])", "\\1 \\2", SPI_27_names)
 
-SPI_5_3 <- c("q_1290", "q_1744", "q_1979", "-q_1452", "q_1915", "q_1201", "q_530", 
-                 "-q_904", "q_1867", "q_1694","q_369", "-q_1444", "-q_1483", "-q_1254")
-
-SPI_5_4 <- c("q_90", "q_1763", "q_253", "-q_1896", "q_851", "q_1832", "-q_501", 
-                 "q_377", "-q_871", "q_1855", "-q_4296","-q_142", "q_379", "q_4289")
-
-SPI_5_5 <- c("q_128", "q_2745", "q_2754", "q_1392", "q_1058", "q_240", "q_1738", 
-                 "q_422", "q_1389", "q_1310", "q_1880","-q_747", "q_1609", "q_1834")
-
-SPI_5_names = c("Extraversion", "Neuroticism", "Conscientiousness", "Agreeableness", "Openness")
-
-SPI_5_list = list(SPI_5_1, SPI_5_2, SPI_5_3, SPI_5_5, SPI_5_5)
-
-
+all_names = c(SPI_5_names, SPI_27_names)
+all_names[length(all_names)+1] = "Cognitive Ability"
+names(all_names)[length(all_names)] = "cog"
