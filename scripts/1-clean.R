@@ -78,16 +78,17 @@ sapa$ses = rowMeans(sapa[,grepl("^z\\.", names(sapa))], na.rm=T)
 sapa = sapa %>%
   dplyr::select(-starts_with("z"))
 
-# -----------------------------------
-# score 27 and 5 personality factors (IRT)#
-# -----------------------------------
+# ------------------------------------------
+# score 5 personality factors (sum scores) #
+# ------------------------------------------
 
 # select just the rows that correspond to variables in the current SAPA dataset
 keys = keys[names(sapa), ]
 
-# select just the scales that are scored using the SPI_135 form
+# select just the Big 5 scales that are scored using the SPI_135 form 
 keys = keys %>%
-  select(contains("SPI_135"))
+  select(contains("SPI_135")) %>%
+  select(1:5)
 
 # score the items (this contains item and scale statistics too!)
 scored = scoreItems(keys, sapa)
@@ -95,6 +96,75 @@ scored = scoreItems(keys, sapa)
 # add scores to SAPA
 sapa = cbind(sapa, scored$scores)
 
+# -------------------------------------------
+# score 27 personality factors (IRT scores) #
+# -------------------------------------------
+
+load("../../../SAPA/IRTinfoSPI27.rdata")
+
+
+# IRT score
+dataSet <- subset(sapa, select = c(orderForItems))
+SPIirtScores <- matrix(nrow=dim(dataSet)[1], ncol=27)
+SPIirtSEs <- matrix(nrow=dim(dataSet)[1], ncol=27)
+for (i in 1:length(IRToutputSPI27)) {
+  data <- subset(dataSet, select = c(rownames(IRToutputSPI27[[i]]$irt$difficulty[[1]])))
+  calibrations <- IRToutputSPI27[[i]]
+  scored <- scoreIrt(calibrations, data, keys = NULL, cut = 0)
+  irt.data <- irt.se(calibrations, score = as.matrix(scored[,1]))
+  TScoring <- (irt.data[,"scores"]-thetaNormsMeans[i])/thetaNormsSDs[i]
+  TScores <- TScoring*10+50
+  SPIirtScores[,i] <- TScores
+  TScoreSEs <- irt.data[,"se"]*10
+  SPIirtSEs[,i] <- TScoreSEs
+  rm(TScores, TScoring, TScoreSEs, scored, calibrations, data)
+}
+
+SPIirtScores <- as.data.frame(SPIirtScores)
+colnames(SPIirtScores) <- scaleNames
+SPIirtSEs <- as.data.frame(SPIirtSEs)
+colnames(SPIirtSEs) <- scaleNames
+rm(IRToutputSPI27, thetaNormsMeans, thetaNormsSDs, scaleNames)
+SPIirtScores$SPI27_Irritability <- 100-SPIirtScores$SPI27_Irritability
+SPIirtScores$SPI27_Sociability <- 100-SPIirtScores$SPI27_Sociability
+SPIirtScores$SPI27_Honesty <- 100-SPIirtScores$SPI27_Honesty
+SPIirtScores$SPI27_Industry <- 100-SPIirtScores$SPI27_Industry
+SPIirtScores$SPI27_Order <- 100-SPIirtScores$SPI27_Order
+SPIirtScores$SPI27_ArtAppreciation <- 100-SPIirtScores$SPI27_ArtAppreciation
+SPIirtScores$SPI27_Adaptability <- 100-SPIirtScores$SPI27_Adaptability
+
+#add to sapa dataset
+sapa = cbind(sapa, SPIirtScores)
+
+# -------------------------------------------
+# score ICAR cognition scores (IRT scores) #
+# -------------------------------------------
+load("../../../SAPA/IRTinfoICAR.rdata")
+
+# IRT score
+dataSet <- subset(sapa, select = c(orderForItems))
+ICARirtScores <- matrix(nrow=dim(dataSet)[1], ncol=5)
+ICARirtSEs <- matrix(nrow=dim(dataSet)[1], ncol=5)
+for (i in 1:length(IRToutputICAR)) {
+  data <- subset(dataSet, select = c(names(IRToutputICAR[[i]]$irt$difficulty[[1]])))
+  calibrations <- IRToutputICAR[[i]]
+  scored <- scoreIrt(calibrations, data, keys = NULL, cut = 0)
+  irt.data <- irt.se(calibrations, score = as.matrix(scored[,1]))
+  TScoring <- (irt.data[,"scores"]-thetaNormsMeans[i])/thetaNormsSDs[i]
+  TScores <- TScoring*10+50
+  ICARirtScores[,i] <- TScores
+  TScoreSEs <- irt.data[,"se"]*10
+  ICARirtSEs[,i] <- TScoreSEs
+  rm(TScores, TScoring, TScoreSEs, scored, calibrations, data)
+}
+ICARirtScores <- as.data.frame(ICARirtScores)
+colnames(ICARirtScores) <- scaleNames
+ICARirtSEs <- as.data.frame(ICARirtSEs)
+colnames(ICARirtSEs) <- scaleNames
+rm(IRToutputICAR, thetaNormsMeans, thetaNormsSDs, scaleNames)
+
+#add to sapa dataset
+sapa = cbind(sapa, ICARirtScores)
 # remove individual items
 sapa = sapa %>%
   select(-contains("q_"))
