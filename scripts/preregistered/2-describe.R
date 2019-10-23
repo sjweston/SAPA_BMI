@@ -13,6 +13,6 @@ load("data/cleaned.Rdata")
 # calculate descriptives             #
 # ------------------------------------
 
-descriptives = describeBy(sapa, group = "sex")
+descriptives = describeBy(sapa, group = "gender")
 
 save(descriptives, file = "data/descriptives.Rdata")

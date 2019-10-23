@@ -1,3 +1,15 @@
+
+# this script creates a "toy" dataset, using a publicly available dataset collected through 
+# the SAPA-project (sapa-project.org). This toy dataset was used to create the scripts used 
+# to clean and analyze the data. 
+
+# None of the data used to create the toy dataset will be used in the final analyses. However, 
+# there is great benefit in using data collected from the same source, as cleaning procedures 
+# will be similar, if not identical, and analytic issues, such as convergence problems, 
+# skewness, and sample size limitations can be anticipated prior to working with the real data. 
+
+
+# ------------------------------------
 # load packages and data             #
 # ------------------------------------
 set.seed(052319)

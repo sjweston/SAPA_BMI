@@ -41,9 +41,9 @@ female_log %>%
   gather("key", "value", Sensitivity, Specificity) %>%
   unite(category, category, key) %>%
   spread(category, value) %>%
-  mutate(trait_name = factor(trait_name, levels = c("cog", "edu", names(SPI_27_names), names(SPI_5_names)))) %>% 
+  mutate(trait_name = factor(trait_name, levels = c("cog", names(SPI_27_names), names(SPI_5_names)))) %>% 
   arrange(gender, trait_name) %>% 
-  mutate(trait_name = rep(c("Cognitive Ability", "Socioeconomic status", SPI_27_names, SPI_5_names),times = 2)) %>%
+  mutate(trait_name = rep(c("Cognitive Ability", SPI_27_names, SPI_5_names),times = 2)) %>%
   dplyr::select(-gender) %>%
   kable(., digits = 2, col.names = rep(c("Trait", rep(c("Sensitivitiy", "Specificity"), 4)))) %>%
   kable_styling() %>%

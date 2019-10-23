@@ -5,15 +5,13 @@
 set.seed(052319)
 
 # load packages
-packages = c("tidyverse", "janitor", "psych", "devtools", "PAutilities", "measurements", "here")
+packages = c("tidyverse", "janitor", "psych", "devtools", "PAutilities", "measurements")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
-#read in data
-load(here("../../data/SAPA/collaboration/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
-sapa = SAPAdata07feb2017thru22jul2019x
+#simulate toy dataset to write code
+source("scripts/create_toy.R")
 
-source(here("scripts/personality_scales.R"))
 keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
 
 # super key -- this contains the master key list for all of SAPA. every item ever administered and every scale you can score
@@ -25,20 +23,16 @@ keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
 # filter by age                     #
 # -----------------------------------
 
-# remove participants who are 18 years or older and from the US
+# remove participants who are 18 years or older
 sapa = sapa %>%
   filter(age < 18) %>%
-  filter(country == "USA") %>%
-  filter(!is.na(sex)) %>%
+  filter(!is.na(gender)) %>%
   filter(!is.na(height)) %>%
-  filter(!is.na(weight))
+  filter(!is.na(weight)) 
+
 # -----------------------------------
 # score SES                         #
 # -----------------------------------
-
-# make sure occupational variables are numeric
-sapa = sapa %>%
-  mutate_at(vars(matches("^(p)\\d(occ)")), as.numeric)
 
 #or years
 sapa = sapa %>%
@@ -47,7 +41,6 @@ sapa = sapa %>%
   p1edu == "HSgrad" ~ "12", 
   p1edu == "SomeCollege" ~ "14", 
   p1edu == "CurrentInUniv" ~ "14", 
-  p1edu == "AssociateDegree" ~ "14", 
   p1edu == "CollegeDegree" ~ "16", 
   p1edu == "InGradOrProSchool" ~ "18", 
   p1edu == "GradOrProDegree" ~ "20")) 
@@ -57,8 +50,7 @@ sapa = sapa %>%
     p2edu == "less12yrs" ~ "6", 
     p2edu == "HSgrad" ~ "12", 
     p2edu == "SomeCollege" ~ "14", 
-    p2edu == "CurrentInUniv" ~ "14",   
-    p2edu == "AssociateDegree" ~ "14", 
+    p2edu == "CurrentInUniv" ~ "14", 
     p2edu == "CollegeDegree" ~ "16", 
     p2edu == "InGradOrProSchool" ~ "18", 
     p2edu == "GradOrProDegree" ~ "20")) 
@@ -94,12 +86,12 @@ sapa = sapa %>%
 keys = keys[names(sapa), ]
 
 # select just the Big 5 scales that are scored using the SPI_135 form 
-bfkeys = keys %>%
+keys = keys %>%
   select(contains("SPI_135")) %>%
   select(1:5)
 
 # score the items (this contains item and scale statistics too!)
-scored = scoreItems(bfkeys, sapa)
+scored = scoreItems(keys, sapa)
 
 # add scores to SAPA
 sapa = cbind(sapa, scored$scores)
@@ -108,81 +100,51 @@ sapa = cbind(sapa, scored$scores)
 # score 27 personality factors (IRT scores) #
 # -------------------------------------------
 
-load("../../data/SAPA/IRTinfoSPI27.rdata")
-
-# #reverse score items that should be negatively keyed
-# spi_keys = keys %>%
-#   select(contains("SPI_135"))%>%
-#   select(6:32) %>%
-#   mutate(item = rownames(.)) %>%
-#   gather("scale", "key", -item) %>%
-#   filter(key != 0)
-# 
-# #confirm each item is only in dataset once
-# length(unique(spi_keys$item)) == nrow(spi_keys)
-# 
-# reverse = spi_keys %>%
-#   filter(key == -1) 
-# reverse = reverse[,"item"]
-# reverse_df = apply(sapa[, reverse], 2, function(x) max(x, na.rm=T) + 1 - x)
-# sapa[,reverse] = reverse_df
-
+load("../../../SAPA/IRTinfoSPI27.rdata")
 
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
-
 SPIirtScores <- matrix(nrow=dim(dataSet)[1], ncol=27)
-
-scaleNames = gsub("SPI27_", "", names(IRToutputSPI27))
-spi_keys = keys %>%
-  select(matches("SPI_135")) %>%
-  select(-c(1:5)) %>%
-  mutate(item = rownames(.)) %>%
-  gather("scale", "key", -item) %>%
-  filter(key != 0)
-
+SPIirtSEs <- matrix(nrow=dim(dataSet)[1], ncol=27)
 for (i in 1:length(IRToutputSPI27)) {
   data <- subset(dataSet, select = c(rownames(IRToutputSPI27[[i]]$irt$difficulty[[1]])))
   calibrations <- IRToutputSPI27[[i]]
-  #check calibration direction
-  loadings = calibrations$fa$loadings[,1]
-  loadings = ifelse(loadings < 0, -1, 1)
-  loadings = data.frame(item = names(loadings), loadings = loadings)
-  keys_direction = spi_keys %>%
-    filter(grepl(scaleNames[i], scale)) %>%
-    full_join(loadings)
-  same = sum(keys_direction$key == keys_direction$loadings)
-  if(same == 0) data[,1:ncol(data)] = apply(data[,1:ncol(data)], 2, function(x) max(x, na.rm=T) + 1 - x)
-  if (same > 0 & same < 5) print("Error in loadings")
   scored <- scoreIrt(calibrations, data, keys = NULL, cut = 0)
-  SPIirtScores[,i] <- scored$theta1
+  irt.data <- irt.se(calibrations, score = as.matrix(scored[,1]))
+  TScoring <- (irt.data[,"scores"]-thetaNormsMeans[i])/thetaNormsSDs[i]
+  TScores <- TScoring*10+50
+  SPIirtScores[,i] <- TScores
+  TScoreSEs <- irt.data[,"se"]*10
+  SPIirtSEs[,i] <- TScoreSEs
+  rm(TScores, TScoring, TScoreSEs, scored, calibrations, data)
 }
 
 SPIirtScores <- as.data.frame(SPIirtScores)
-colnames(SPIirtScores) <- paste0("SPI_135_27_5_", scaleNames)
+colnames(SPIirtScores) <- scaleNames
+SPIirtSEs <- as.data.frame(SPIirtSEs)
+colnames(SPIirtSEs) <- scaleNames
+rm(IRToutputSPI27, thetaNormsMeans, thetaNormsSDs, scaleNames)
+SPIirtScores$SPI27_Irritability <- 100-SPIirtScores$SPI27_Irritability
+SPIirtScores$SPI27_Sociability <- 100-SPIirtScores$SPI27_Sociability
+SPIirtScores$SPI27_Honesty <- 100-SPIirtScores$SPI27_Honesty
+SPIirtScores$SPI27_Industry <- 100-SPIirtScores$SPI27_Industry
+SPIirtScores$SPI27_Order <- 100-SPIirtScores$SPI27_Order
+SPIirtScores$SPI27_ArtAppreciation <- 100-SPIirtScores$SPI27_ArtAppreciation
+SPIirtScores$SPI27_Adaptability <- 100-SPIirtScores$SPI27_Adaptability
 
 #add to sapa dataset
 sapa = cbind(sapa, SPIirtScores)
 
-# sc <- scoreItems(spi.keys,sapa)
-# sc = as.data.frame(sc$scores)
-# 
-# colnames(sc) = paste0("SPI_135_27_5_", names(sc))
-# 
-# sapa = cbind(sapa, sc[,6:32])
-
-
 # -------------------------------------------
 # score ICAR cognition scores (IRT scores) #
 # -------------------------------------------
-load("../../data/SAPA/IRTinfoICAR.rdata")
+load("../../../SAPA/IRTinfoICAR.rdata")
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
 ICARirtScores <- matrix(nrow=dim(dataSet)[1], ncol=5)
 ICARirtSEs <- matrix(nrow=dim(dataSet)[1], ncol=5)
-
 for (i in 1:length(IRToutputICAR)) {
   data <- subset(dataSet, select = c(names(IRToutputICAR[[i]]$irt$difficulty[[1]])))
   calibrations <- IRToutputICAR[[i]]
@@ -221,9 +183,7 @@ sapa = sapa %>%
 # National Center for Health Statistics. Vital Health Stat 11. 2002;(246):1-190
 
 sapa = sapa %>%
-  filter(sex != "other") %>%
-  mutate(sex = as.factor(as.character(sex))) %>%
-  mutate(sex2 = ifelse(sex == "male", "M", "F"),
+  mutate(sex = ifelse(gender == "male", "M", "F"),
          weight = conv_unit(weight, from = "lbs", to = "kg"),
          height = conv_unit(height, from = "inch", to = "cm"))
 
@@ -231,13 +191,13 @@ for(i in 1:nrow(sapa)){
   sapa$BMI_p[i] = get_BMI_percentile(weight_kg = sapa$weight[i], 
                                      height = sapa$height[i], 
                                      age_yrs = sapa$age[i], 
-                                     sex = sapa$sex2[i],
+                                     sex = sapa$sex[i],
                                      output = "percentile")
   sapa$BMI_c[i] = as.character(
     get_BMI_percentile(weight_kg = sapa$weight[i], 
                        height = sapa$height[i], 
                        age_yrs = sapa$age[i], 
-                       sex = sapa$sex2[i],
+                       sex = sapa$sex[i],
                        output = "class"))
 }
 
@@ -247,18 +207,16 @@ for(i in 1:nrow(sapa)){
 # -----------------------------------
 
 sapa = sapa %>%
-  mutate(cog = ICAR60) %>%
-  select(sex, BMI, BMI_p, BMI_c, p1edu, 
-         p1occPrestige, p1occIncomeEst, p2edu, 
+  select(gender, BMI, BMI_p, BMI_c, p1edu, p1occPrestige, p1occIncomeEst, p2edu, 
          p2occPrestige, p2occIncomeEst, ses, cog, contains("SPI"))
 
 sapa_male = sapa %>%
-  filter(sex == "male") %>%
-  dplyr::select(-sex) 
+  filter(gender == "male") %>%
+  dplyr::select(-gender) 
 
 sapa_female = sapa %>%
-  filter(sex == "female") %>%
-  dplyr::select(-sex)
+  filter(gender == "female") %>%
+  dplyr::select(-gender)
 
-save(sapa, sapa_male, sapa_female, file = "data/cleaned.Rdata")
+save(sapa, sapa_male, sapa_female, scored, file = "data/cleaned.Rdata")
 

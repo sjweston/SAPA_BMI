@@ -1,4 +1,4 @@
-keys = read.csv(here("data/superKey.csv"), header = TRUE, row.names = 1)
+keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
 
 keys = keys %>%
   select(contains("SPI_135")) 
@@ -20,7 +20,6 @@ names(SPI_5_names) = names(SPI_27_names)[1:5]
 SPI_27_names = SPI_27_names[6:32]
 #names(SPI_27_names) = SPI_27_names
 SPI_27_names = gsub("([a-z])([A-Z])", "\\1 \\2", SPI_27_names)
-
 
 all_names = c(SPI_5_names, SPI_27_names)
 all_names[length(all_names)+1] = "Cognitive Ability"

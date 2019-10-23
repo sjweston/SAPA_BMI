@@ -44,4 +44,4 @@ female_reg %>%
   add_header_above(c(" ", "Additive Model" = 1, "Interaction Model" = 2, "Additive Model" = 1, "Interaction Model" = 2)) %>%
   add_header_above(c(" ", "Female" = 3, "Male" = 3)) %>%
   group_rows("SPI: 27 Factors", 3, 56) %>%
-  group_rows("SPI: 5 Factors", 57, 66) 
+  group_rows("SPI: 5 Factors", 57, 66)

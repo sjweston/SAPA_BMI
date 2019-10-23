@@ -1,0 +1,5 @@
+source("scripts/1-clean.R")
+source("scripts/2-describe.R")
+source("scripts/3-correlation.R")
+source("scripts/4-regression.R")
+source("scripts/5-logistic.R")

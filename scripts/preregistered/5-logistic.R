@@ -22,7 +22,7 @@ ctrl <- trainControl(method = "repeatedcv", # cross-validation
                      repeats = 10, #repeated 10 times
                      verboseIter = FALSE,
                      search = "random",
-                     sampling = "smote") 
+                     sampling = "up") #resample from minority categories to create balanced classes
 
 # parition into training and test sets. objects identify just training rows
 train_male = createDataPartition(sapa_male$BMI_c, p = .75, list = FALSE)
@@ -39,7 +39,8 @@ train_female = createDataPartition(sapa_female$BMI_c, p = .75, list = FALSE)
 
 
 sapa_male_trait = sapa_male %>%
-  dplyr::select(-starts_with("p1"), -starts_with("p2"), -starts_with("edu")) %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
+  mutate(edu = scale(ses)) %>%
   mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
   gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p) %>%
   group_by(trait_name) %>%
@@ -47,7 +48,8 @@ sapa_male_trait = sapa_male %>%
   nest()
 
 sapa_female_trait = sapa_female %>%
-  dplyr::select(-starts_with("p1"), -starts_with("p2"), -starts_with("edu")) %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
+  mutate(edu = scale(ses)) %>%
   mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
   gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p) %>%
   group_by(trait_name) %>%
@@ -57,16 +59,6 @@ sapa_female_trait = sapa_female %>%
 # -----------------------------------------------------------
 # ordered logistic regression iteration (males)         #
 # -----------------------------------------------------------
-
-male_ses_only = train(BMI_c ~ ses, data = sapa_male, 
-                 subset = train_male, 
-                 method = "multinom",
-                 maxit= 1000,
-                 na.action = "na.exclude", 
-                 trControl = ctrl)
-
-accuracy = predict(male_ses_only, type="raw", newdata=sapa_male[-train_male, ])
-postResample(sapa_male[-train_male, "BMI_c"], accuracy)
 
 male_log = sapa_male_trait %>%
   # train models on training subset; use mulintomial logistic regression; use specific formula
@@ -99,13 +91,6 @@ male_log = sapa_male_trait %>%
 # ordered logistic regression iteration (females)           #
 # -----------------------------------------------------------
 
-female_ses_only = train(BMI_c ~ ses, data = sapa_female, 
-                      subset = train_female, 
-                      method = "multinom",
-                      na.action = "na.exclude", 
-                      trControl = ctrl)
-
-
 female_log = sapa_female_trait %>%
   # train models on training subset; use mulintomial logistic regression; use specific formula
   mutate(
@@ -137,4 +122,4 @@ female_log = sapa_female_trait %>%
 # save output                                  #
 # ----------------------------------------------
 
-save(train_male, male_ses_only, male_log, train_female, female_ses_only, female_log, file = "data/logistic_output.Rdata")
+save(male_log, female_log, file = "data/logistic_output.Rdata")

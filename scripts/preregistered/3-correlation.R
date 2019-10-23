@@ -7,7 +7,7 @@ packages = c("tidyverse", "psych", "corrplot")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
-#load("data/cleaned.Rdata")
+load("data/cleaned.Rdata")
 
 # ------------------------------------
 # correlation matrix                 #
