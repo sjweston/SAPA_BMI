@@ -1,0 +1,486 @@
+\documentclass[man]{apa6}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Body Mass in Adolescence: The Role of Personality, Intelligence, and Socioeconomic Status},
+            pdfauthor={Sara J. Weston, Magdalena Leszko, \& David Condon},
+            pdfkeywords={adolescents, Body Mass Index, obesity, personality traits, socioeconomic status},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+
+  \title{Body Mass in Adolescence: The Role of Personality, Intelligence, and Socioeconomic Status}
+    \author{Sara J. Weston\textsuperscript{1}, Magdalena Leszko\textsuperscript{2}, \& David Condon\textsuperscript{1}}
+    \date{}
+  
+\shorttitle{BMI, Personality, and SES}
+\affiliation{
+\vspace{0.5cm}
+\textsuperscript{1} University of Oregon\\\textsuperscript{2} University of Szczecin}
+\keywords{adolescents, Body Mass Index, obesity, personality traits, socioeconomic status\newline\indent Word count: X}
+\usepackage{csquotes}
+\usepackage{upgreek}
+\captionsetup{font=singlespacing,justification=justified}
+
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage[flushleft]{threeparttable}
+\usepackage{threeparttablex}
+
+\newenvironment{lltable}{\begin{landscape}\begin{center}\begin{ThreePartTable}}{\end{ThreePartTable}\end{center}\end{landscape}}
+
+\makeatletter
+\newcommand\LastLTentrywidth{1em}
+\newlength\longtablewidth
+\setlength{\longtablewidth}{1in}
+\newcommand{\getlongtablewidth}{\begingroup \ifcsname LT@\roman{LT@tables}\endcsname \global\longtablewidth=0pt \renewcommand{\LT@entry}[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}\@nameuse{LT@\roman{LT@tables}} \fi \endgroup}
+
+
+\DeclareDelayedFloatFlavor{ThreePartTable}{table}
+\DeclareDelayedFloatFlavor{lltable}{table}
+\DeclareDelayedFloatFlavor*{longtable}{table}
+\makeatletter
+\renewcommand{\efloat@iwrite}[1]{\immediate\expandafter\protected@write\csname efloat@post#1\endcsname{}}
+\makeatother
+\usepackage{lineno}
+
+\linenumbers
+\usepackage[T1]{fontenc}
+\usepackage{tabu}
+
+\authornote{
+Enter author note here.
+
+Correspondence concerning this article should be addressed to Sara J. Weston, Department of Psychology, 1451 Onyx St, Eugene, OR 97403. E-mail: \href{mailto:weston.sara@gmail.com}{\nolinkurl{weston.sara@gmail.com}}}
+
+\abstract{
+One or two sentences providing a \textbf{basic introduction} to the field, comprehensible to a scientist in any discipline.
+
+Two to three sentences of \textbf{more detailed background}, comprehensible to scientists in related disciplines.
+
+One sentence clearly stating the \textbf{general problem} being addressed by this particular study.
+
+One sentence summarizing the main result (with the words ``\textbf{here we show}'' or their equivalent).
+
+Two or three sentences explaining what the \textbf{main result} reveals in direct comparison to what was thought to be the case previously, or how the main result adds to previous knowledge.
+
+One or two sentences to put the results into a more \textbf{general context}.
+
+Two or three sentences to provide a \textbf{broader perspective}, readily comprehensible to a scientist in any discipline.
+
+
+}
+
+\begin{document}
+\maketitle
+
+\setlength{\parskip}{0pt}
+ \raggedbottom
+
+Obesity among children and adolescents is an international public health crisis. In the last 40 years, the prevalence of obesity has grown from 1 in 20 American adolescents to nearly 1 in 5 (Ogden, Carroll, Kit, \& Flegal, 2014). Currently, an estimated 16.9\% of children and adolescents under the age of 19 were obese in 2010 (Ogden, Carroll, Kit, \& Flegal, 2012).
+
+Efforts to reduce the prevalence of overweight and obesity have now been a high priority public health issue in the U.S. for several years (Frieden, Dietz, \& Collins, 2010; Healthy People, 2000, 2014; Surgeon General, 2001) and several of the prominent social programs focused on this issue consider children and adolescents as populations that are ripe for intervention (Dietz \& Gortmaker, 2001; Frieden et al., 2010; Khan et al., 2009). Yet, there is little evidence that these efforts are working (Ogden et al., 2014).
+
+The Centers for Disease Control and Prevention defines childhood and adolescent obesity as having a BMI at or above the 95th percentile for children and teens of the same age and sex whereas overweight is defined as a BMI at or above the 85th percentile and below the 95th (Disease Control \& Prevention, 2015). Although there are some alternatives to the assessment of obesity in children and adolescents, BMI -- as an estimate of body fat -- is a widely accepted index to determine overweight status and obesity in children, adolescents, and adults (Dietz \& Bellizzi, 1999). BMI is calculated by dividing a person's weight in kg by the square of their height in meters (the same formula can be used with pounds and inches, though the result must be multiplied by a conversion factor of 703). The World Health Organization's (WHO) defines overweight status, regardless of age and gender, as a BMI greater than or equal to 25 whereas a BMI greater than or equal to 30 qualifies as obese. The WHO furthers classifies overweight individuals (those with BMIs between 25 and 30) as \enquote{pre-obese} (World Health Organization, 2011).
+
+Adolescence is associated with considerable changes in body composition: all the main components of body composition (total body fat, lean body mass, bone mineral content) increase during this period (Siervogel et al., 2003), which typically begins between the ages of XX and XX years for females and between XY and XY years for males. Numerous studies (and anecdotal evidence from billions of former adolescents) suggest that this period is often psychologically challenging. Adolescents are more likely to be dissatisfied with their body (to the point of endorsing a profound dislike of one's own body), experience fear of weight gain, and have appearance and body shape concerns, and these concerns predispose them to the development of eating disorders (Killen et al., 1994; Story et al., 1991; Striegel-Moore, Silberstein, \& Rodin, 1986).
+
+The trend of increasing obesity prevalence among adolescents, coupled with its adverse health outcomes, underscores the need for obesity prevention efforts, especially those targeting adolescents. Adolescence is a vulnerable period for weight gain and most of the complications that are commonly associated with adult obesity are tied to health behaviors formed in childhood and adolescence (Hampson, Goldberg, Vogt, \& Dubanoski, 2007). As such, a more informed understanding of relations among key constructs within this developmental period is crucial.
+
+Numerous changes in body mass levels during adolescence are already well-documented, including several pointing to important sex differences. For example, developmentally appropriate increases in BMI occur at different ages for each sex, necessitating the use of age- and sex-specific reference values (Bibiloni, Pons, \& Tur, 2013). Adolescent males and females differ substantially on average in terms of body fat percentages, with females typically having more body fat than males at the same BMI (Daniels, Khoury, \& Morrison, 1997; Taylor, Gold, Manning, \& Goulding, 1997). Similarly, substantial differences have been reported between the eating habits of males and females, even when controlling for differences in knowledge of healthy eating practices and benefits (Djordjević-Nikić, Dopsaj, \& Vesković, 2013). Given these and related findings, much of the research in this area (including the work reported here) is conducted on each of the sexes independently.
+
+The primary aim of this work is to identify and evaluate the wide range of individual differences contributing to elevated BMI across both sexes. There is some evidence that socioeconomic status (Sherwood, Wall, Neumark-Sztainer, \& Story, 2009; Smith, 2004), personality (Bogg \& Roberts, 2004), and cognitive ability (Liang, Matheson, Kaye, \& Boutelle, 2014) are each protective factors for obesity, however, the unique (independent) and combined variance of these attributes has rarely been considered. Before describing the methods used to evaluate the associations among these variables and body mass in large samples of both male and female adolescents, it is first necessary to summarize prior findings within and across each domain.
+
+\hypertarget{bmi-and-personality}{%
+\subsection{BMI and personality}\label{bmi-and-personality}}
+
+Research has shown that certain personality traits are associated with behaviors that contribute to obesity such as unhealthy eating habits and physical inactivity. For example, individuals high on conscientiousness are likely to be more self-disciplined about their diet (see Bogg \& Roberts, 2004; Terracciano et al., 2009) and are more physically active (Rhodes \& Smith, 2006) whereas individuals with lower levels of conscientiousness tend to engage in emotional and external eating, which is a tendency to overeat in response to food-related cues like the smell or taste of food, regardless of the individual's physical need for food (Evers et al., 2011; Heaven, Mulligan, Merrilees, Woods, \& Fairooz, 2001). Findings regarding neuroticism are inconclusive. Some researchers found that high levels of neuroticism are related to disinhibition and susceptibility to hunger (Provencher et al., 2008). On the other hand, individuals who have higher scores on this trait tend to be underweight (Kakizaki et al., 2008; Terracciano et al., 2009) and more likely to suffer from eating disorders (Bogg \& Roberts, 2004). Sutin and colleagues (2015) suggested two possible explanations for this phenomenon: (1) there might be a curvilinear relationship between neuroticism and abnormal weight or (2) being overweight/underweight is associated with different aspects of neuroticism. Higher scores on extraversion have also been found to contribute to obesity (e.g., Kakizaki et al., 2008; Sutin, Ferrucci, Zonderman, \& Terracciano, 2011). Similarly, individuals with higher scores on openness to experience were found to be less successful at managing their body weight and indicated a stronger drive toward overeating (Sullivan, Cloninger, Przybeck, \& Klein, 2007). In addition, higher scores on openness were negatively related to cognitive dietary restraint (Bree, Przybeck, \& Cloninger, 2006). In summary, a growing body of research confirms that personality traits influence eating behavior and therefore moderate the association between personality and BMI.
+
+\hypertarget{bmi-and-cognitive-abilities}{%
+\subsection{BMI and cognitive abilities}\label{bmi-and-cognitive-abilities}}
+
+Previous studies investigating the association between BMI and cognitive abilities found that individuals with lower levels of cognitive abilities have higher BMI (Cournot et al., 2006; Hirshman et al., 2004; Li, 1995). Adolescents who are obese are more likely to suffer from deficits in multiple cognitive domains such as attention, memory, and executive function and as a result have worse school outcomes in comparison to non-obese peers (Elias, Elias, Sullivan, Wolf, \& D'Agostino, 2005; Lawlor, Clark, Smith, \& Leon, 2006; Mond, Stich, Hay, Krämer, \& Baune, 2007; Sabia, Kivimaki, Shipley, Marmot, \& Singh-Manoux, 2008). This association remains significant even after controlling for important confounding factors, such as physical activity or maternal intelligence. The mechanisms through which cognitive abilities may adversely affect BMI remain unclear. One hypothesis of the underlying mechanism is that lower levels of cognitive abilities may result in poor control over neurological centers associated with impulsivity which can lead to impaired control over food intake (Veldwijk, Scholtens, Hornstra, \& Bemelmans, 2011). Alternatively, obesity may negatively influence cognitive function via physiological changes in brain tissue (Veldwijk et al., 2011). Therefore, there might be a bi-directional interaction between cognitive abilities and BMI. Because there is a hereditary component to both cognitive abilities and BMI, a number of genetic factors may be involved in explaining this association (Teasdale, Sørensen, \& Stunkard, 1992).
+
+\hypertarget{the-relationship-between-ses-and-bmi}{%
+\subsection{The relationship between SES and BMI}\label{the-relationship-between-ses-and-bmi}}
+
+The term \enquote{socioeconomic status} (SES) is an aggregate construct defined according to one's level of resources or prestige in relation to others (Adler \& Rehkopf, 2008; Krieger, Williams, \& Moss, 1997; Lynch, Kaplan, \& others, 2000). While the operationalization and measurement of socioeconomic status is notably inconsistent, there is general consensus that SES includes education, income, and occupational prestige (Shanahan, Hill, Roberts, Eccles, \& Friedman, 2014). Because children and adolescents are still in school and do not have income, researchers typically use measures of parental education, parental occupation, and/or household income as markers of childhood/adolescent SES (Shrewsbury \& Wardle, 2008).
+
+The relationship between SES and BMI has been widely investigated. Several studies have found that obesity among children and adults in industrialized countries is negatively associated with income and education (e.g., Booth, Macaskill, Lazarus, \& Baur, 1999; Bove \& Olson, 2006; Molnar, Gortmaker, Bull, \& Buka, 2004; Wang et al., 2007); the opposite relationship has been found in some (but not all developing countries), including urban India or Ghana (Fokeena \& Jeewon, 2012). The list of proposed mechanisms placing low-income children at increased risk for obesity relative to higher-income children includes the consumption of less whole meal and brown bread and less fresh fruits and vegetables, but more fatty milk, eggs, and meats (Smith \& Baghurst, 1992; Steele, Dobson, Alexander, \& Russell, 1991). It has also been proposed that the inverse relationship between SES and BMI is driven by sedentary behavior as low SES children have been found to be less physically active and spend more time watching television and using the computer (Brown, Halvorson, Cohen, Lazorick, \& Skelton, 2015; Drenowatz et al., 2010; Morgenstern, Sargent, \& Hanewinkel, 2009). Unfortunately, additional research has shown that SES is inversely related to sedentary behavior and to rates of overweight status in children over six years of age (Hanson \& Chen, 2007; Inchley, Currie, Todd, Akhtar, \& Currie, 2005; Lioret, Maire, Volatier, \& Charles, 2007) and adolescents (Lohman et al., 2006). Still other research points to sedentary behavior as a mediator of BMI in children of low SES status (O'Dea \& Wilson, 2006), among more prominent main effects.
+
+\hypertarget{ses-and-personality}{%
+\subsection{SES and personality}\label{ses-and-personality}}
+
+Personality traits have been widely linked to not only mental and physical health but also other criteria such as socioeconomic status. Considerable research suggests that individuals raised in low SES households have higher levels of neuroticism, lower openness to experience and maladaptive coping mechanisms, including external locus of control and lack of problem-focused coping (Bosma, Mheen, \& Mackenbach, 1999; Körner, Geyer, Gunzelmann, \& Brähler, 2003). These individuals are also more likely to engage in risky health behaviors and have higher levels of hostility (Barefoot et al., 1991; Kubzansky, Kawachi, \& Sparrow, 1999) whereas children from families with higher SES are less impulsive on average (Delaney \& Doyle, 2012), significantly less likely to be risk-seeking (Deckers, Falk, Kosse, \& Schildberg-Hörisch, 2015), and more altruistic (Bauer, Chytilová, \& Pertold-Gebicka, 2014; Deckers et al., 2015).
+
+It should be noted that associations between SES and personality are likely bidirectional. Certainly across the lifespan, there is strong evidence of the effects of personality on socioeconomic status in adulthood. Research shows children's conscientiousness is a strong predictor of income and occupational status, even after controlling for IQ (Duckworth, Weir, Tsukayama, \& Kwok, 2012). Individuals high on conscientiousness tend to save more money and are more hardworking, dependable, persistent and goal-oriented (e.g., Barrick \& Mount, 1991). In addition, they spend money more cautiously (e.g., Wilcox, Block, \& Eisenstein, 2011). Some studies have also shown empirical support for the influence of agreeableness on SES. Individuals high on agreeableness are more likely to choose professions that are paid less such as teaching, nursing or volunteer work (Larson, Rottinghaus, \& Borgen, 2002; Lodi-Smith \& Roberts, 2007). Findings on other personality traits are inconsistent (Sutin et al., 2015).
+
+\hypertarget{ses-and-cognitive-abilities}{%
+\subsection{SES and cognitive abilities}\label{ses-and-cognitive-abilities}}
+
+A growing body of research has documented that socioeconomic status (SES) predicts a variety of children's outcomes including physical and mental health, cognitive ability, and academic achievement (Adler \& Rehkopf, 2008; Merikangas et al., 2010). Interestingly, the differences in cognitive abilities between children from families with high and low SES can be observed as early as infancy and persists, on average, throughout adolescence (Lipina, Martelli, Vuelta, \& Colombo, 2005). A number of studies have demonstrated that low-SES children performed worse in working memory or executive attention tasks in comparison to children from families with high SES (Blair et al., 2011; Hughes, Ensor, Wilson, \& Graham, 2009; Mezzacappa, 2004). Although cognitive ability has been shown to be highly heritable (e.g., Haworth et al., 2010), SES also seems to have an important influence on children's school performance that is potentially independent of cognitive ability (Conger \& Donnellan, 2007).
+
+\hypertarget{ses-as-a-moderator}{%
+\subsection{SES as a moderator?}\label{ses-as-a-moderator}}
+
+Given the known relationships between SES and both BMI and individual differences in temperament and congitive ability. it should be no surprise that the relationship between BMI and individual differences is unclear. Futher complicating the relationships are person-situation transactions, which may change the relationship between individual differences and behavior or outcomes. One example is the \enquote{strong-situation hypothesis} (Cooper \& Withey, 2009), which posits that some situations demand specific responses, overpowering any potential impact of personality. Strong situtations limit personal expression or choice through constraint of resources or options. In the case of BMI, low SES may represent a strong situation in that individuals from poorer backgrounds have fewer dining options or leisure opportunites, and so food choices or activity levels reflect availability rather than preference. In addition to overpowering individual differences, situations may carry different psychological meaning for different persons due to their temperament (Wagerman \& Funder, 2009). There is some evidence that socioeconomic status moderates personality expression. For example, phenotypic expression of personality is more closely assoicated with genetics among those with advantaged socioeconomic backgrounds (Tuvblad, Grann, \& Lichtenstein, 2006), and adolescent impulsivity has stronger effects among the disadvantaged (Lynam et al., 2000). For some trait-behavior relationships, however, socioeconomic status has no effect (c.f., Ayer et al., 2011).
+
+\hypertarget{the-present-study}{%
+\subsection{The present study}\label{the-present-study}}
+
+In this study, we use a large sample of adolescents in the United States to examine the relationship between personality and cognitive ability to BMI above and beyond the influence of SES; moreover, we examine whether the relationship between individual differences and BMI changes across socioeconomic strata.
+
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study.
+
+\hypertarget{participants}{%
+\subsection{Participants}\label{participants}}
+
+\hypertarget{material}{%
+\subsection{Material}\label{material}}
+
+\hypertarget{procedure}{%
+\subsection{Procedure}\label{procedure}}
+
+\hypertarget{data-analysis}{%
+\subsection{Data analysis}\label{data-analysis}}
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+\newpage
+
+\hypertarget{references}{%
+\section{References}\label{references}}
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-adler2008us}{}%
+Adler, N. E., \& Rehkopf, D. H. (2008). US disparities in health: Descriptions, causes, and mechanisms. \emph{Annu. Rev. Public Health}, \emph{29}, 235--252.
+
+\leavevmode\hypertarget{ref-ayer2011adolescent}{}%
+Ayer, L., Rettew, D., Althoff, R. R., Willemsen, G., Ligthart, L., Hudziak, J. J., \& Boomsma, D. I. (2011). Adolescent personality profiles, neighborhood income, and young adult alcohol use: A longitudinal study. \emph{Addictive Behaviors}, \emph{36}(12), 1301--1304.
+
+\leavevmode\hypertarget{ref-barefoot1991hostility}{}%
+Barefoot, J. C., Peterson, B. L., Dahlstrom, W. G., Siegler, I. C., Anderson, N. B., \& Williams Jr, R. B. (1991). Hostility patterns and health implications: Correlates of cook-medley hostility scale scores in a national survey. \emph{Health Psychology}, \emph{10}(1), 18.
+
+\leavevmode\hypertarget{ref-barrick1991big}{}%
+Barrick, M. R., \& Mount, M. K. (1991). The big five personality dimensions and job performance: A meta-analysis. \emph{Personnel Psychology}, \emph{44}(1), 1--26.
+
+\leavevmode\hypertarget{ref-bauer2014parental}{}%
+Bauer, M., Chytilová, J., \& Pertold-Gebicka, B. (2014). Parental background and other-regarding preferences in children. \emph{Experimental Economics}, \emph{17}(1), 24--46.
+
+\leavevmode\hypertarget{ref-bibiloni2013prevalence}{}%
+Bibiloni, M. del M., Pons, A., \& Tur, J. A. (2013). Prevalence of overweight and obesity in adolescents: A systematic review. \emph{ISRN Obesity}, \emph{2013}.
+
+\leavevmode\hypertarget{ref-blair2011salivary}{}%
+Blair, C., Granger, D. A., Willoughby, M., Mills-Koonce, R., Cox, M., Greenberg, M. T., \ldots{} Investigators, F. (2011). Salivary cortisol mediates effects of poverty and parenting on executive functions in early childhood. \emph{Child Development}, \emph{82}(6), 1970--1984.
+
+\leavevmode\hypertarget{ref-bogg2004conscientiousness}{}%
+Bogg, T., \& Roberts, B. W. (2004). Conscientiousness and health-related behaviors: A meta-analysis of the leading behavioral contributors to mortality. \emph{Psychological Bulletin}, \emph{130}(6), 887.
+
+\leavevmode\hypertarget{ref-booth1999sociodemographic}{}%
+Booth, M., Macaskill, P., Lazarus, R., \& Baur, L. (1999). Sociodemographic distribution of measures of body fatness among children and adolescents in new south wales, australia. \emph{International Journal of Obesity}, \emph{23}(5), 456.
+
+\leavevmode\hypertarget{ref-bosma1999social}{}%
+Bosma, H., Mheen, H. D. van de, \& Mackenbach, J. P. (1999). Social class in childhood and general health in adulthood: Questionnaire study of contribution of psychological attributes. \emph{Bmj}, \emph{318}(7175), 18--22.
+
+\leavevmode\hypertarget{ref-bove2006obesity}{}%
+Bove, C. F., \& Olson, C. M. (2006). Obesity in low-income rural women: Qualitative insights about physical activity and eating patterns. \emph{Women \& Health}, \emph{44}(1), 57--78.
+
+\leavevmode\hypertarget{ref-van2006diet}{}%
+Bree, M. B. van den, Przybeck, T. R., \& Cloninger, C. R. (2006). Diet and personality: Associations in a population-based sample. \emph{Appetite}, \emph{46}(2), 177--188.
+
+\leavevmode\hypertarget{ref-brown2015addressing}{}%
+Brown, C. L., Halvorson, E. E., Cohen, G. M., Lazorick, S., \& Skelton, J. A. (2015). Addressing childhood obesity: Opportunities for prevention. \emph{Pediatric Clinics}, \emph{62}(5), 1241--1261.
+
+\leavevmode\hypertarget{ref-conger2007interactionist}{}%
+Conger, R. D., \& Donnellan, M. B. (2007). An interactionist perspective on the socioeconomic context of human development. \emph{Annu. Rev. Psychol.}, \emph{58}, 175--199.
+
+\leavevmode\hypertarget{ref-cooper2009strong}{}%
+Cooper, W. H., \& Withey, M. J. (2009). The strong situation hypothesis. \emph{Personality and Social Psychology Review}, \emph{13}(1), 62--72.
+
+\leavevmode\hypertarget{ref-cournot2006relation}{}%
+Cournot, M., Marquie, J., Ansiau, D., Martinaud, C., Fonds, H., Ferrieres, J., \& Ruidavets, J. (2006). Relation between body mass index and cognitive function in healthy middle-aged men and women. \emph{Neurology}, \emph{67}(7), 1208--1214.
+
+\leavevmode\hypertarget{ref-daniels1997utility}{}%
+Daniels, S. R., Khoury, P. R., \& Morrison, J. A. (1997). The utility of body mass index as a measure of body fatness in children and adolescents: Differences by race and gender. \emph{Pediatrics}, \emph{99}(6), 804--807.
+
+\leavevmode\hypertarget{ref-deckers2015does}{}%
+Deckers, T., Falk, A., Kosse, F., \& Schildberg-Hörisch, H. (2015). How does socio-economic status shape a child's personality?
+
+\leavevmode\hypertarget{ref-delaney2012socioeconomic}{}%
+Delaney, L., \& Doyle, O. (2012). Socioeconomic differences in early childhood time preferences. \emph{Journal of Economic Psychology}, \emph{33}(1), 237--247.
+
+\leavevmode\hypertarget{ref-dietz1999introduction}{}%
+Dietz, W. H., \& Bellizzi, M. C. (1999). Introduction: The use of body mass index to assess obesity in children. Oxford University Press.
+
+\leavevmode\hypertarget{ref-dietz2001preventing}{}%
+Dietz, W. H., \& Gortmaker, S. L. (2001). Preventing obesity in children and adolescents. \emph{Annual Review of Public Health}, \emph{22}(1), 337--353.
+
+\leavevmode\hypertarget{ref-centers2015bmi}{}%
+Disease Control, C. for, \& Prevention. (2015). About bmi for children and teens. \emph{Retrieved from CDC Website: Http://Www. Cdc. Gov/Healthyweight/Assessing/Bmi/Childrens\_bmi/About\_childrens\_bmi. Html}.
+
+\leavevmode\hypertarget{ref-djordjevic2013nutritional}{}%
+Djordjević-Nikić, M., Dopsaj, M., \& Vesković, A. (2013). Nutritional and physical activity behaviours and habits in adolescent population of belgrade. \emph{Vojnosanitetski Pregled}, \emph{70}(6), 548--554.
+
+\leavevmode\hypertarget{ref-drenowatz2010influence}{}%
+Drenowatz, C., Eisenmann, J. C., Pfeiffer, K. A., Welk, G., Heelan, K., Gentile, D., \& Walsh, D. (2010). Influence of socio-economic status on habitual physical activity and sedentary behavior in 8-to 11-year old children. \emph{BMC Public Health}, \emph{10}(1), 214.
+
+\leavevmode\hypertarget{ref-duckworth2012does}{}%
+Duckworth, A. L., Weir, D. R., Tsukayama, E., \& Kwok, D. (2012). Who does well in life? Conscientious adults excel in both objective and subjective success. \emph{Frontiers in Psychology}, \emph{3}, 356.
+
+\leavevmode\hypertarget{ref-elias2005obesity}{}%
+Elias, M. F., Elias, P. K., Sullivan, L. M., Wolf, P. A., \& D'Agostino, R. B. (2005). Obesity, diabetes and cognitive deficit: The framingham heart study. \emph{Neurobiology of Aging}, \emph{26}(1), 11--16.
+
+\leavevmode\hypertarget{ref-evers2011shaping}{}%
+Evers, C., Stok, F. M., Danner, U. N., Salmon, S. J., Ridder, D. T. de, \& Adriaanse, M. A. (2011). The shaping role of hunger on self-reported external eating status. \emph{Appetite}, \emph{57}(2), 318--320.
+
+\leavevmode\hypertarget{ref-fokeena2012there}{}%
+Fokeena, W. B., \& Jeewon, R. (2012). Is there an association between socioeconomic status and body mass index among adolescents in mauritius? \emph{The Scientific World Journal}, \emph{2012}.
+
+\leavevmode\hypertarget{ref-frieden2010reducing}{}%
+Frieden, T. R., Dietz, W., \& Collins, J. (2010). Reducing childhood obesity through policy change: Acting now to prevent obesity. \emph{Health Affairs}, \emph{29}(3), 357--363.
+
+\leavevmode\hypertarget{ref-hampson2007mechanisms}{}%
+Hampson, S. E., Goldberg, L. R., Vogt, T. M., \& Dubanoski, J. P. (2007). Mechanisms by which childhood personality traits influence adult health status: Educational attainment and healthy behaviors. \emph{Health Psychology}, \emph{26}(1), 121.
+
+\leavevmode\hypertarget{ref-hanson2007socioeconomic}{}%
+Hanson, M. D., \& Chen, E. (2007). Socioeconomic status and health behaviors in adolescence: A review of the literature. \emph{Journal of Behavioral Medicine}, \emph{30}(3), 263.
+
+\leavevmode\hypertarget{ref-haworth2010heritability}{}%
+Haworth, C. M., Wright, M. J., Luciano, M., Martin, N. G., Geus, E. J. de, Beijsterveldt, C. E. van, \ldots{} others. (2010). The heritability of general cognitive ability increases linearly from childhood to young adulthood. \emph{Molecular Psychiatry}, \emph{15}(11), 1112.
+
+\leavevmode\hypertarget{ref-healthy2000healthy}{}%
+Healthy People. (2000). \emph{Healthy people 2010: Understanding and improving health}. US Dept. of Health; Human Services.
+
+\leavevmode\hypertarget{ref-us2014healthy}{}%
+Healthy People. (2014). Healthy people 2020. Washington, dc. \emph{US Department of Health and Human Services and Office of Disease Prevention and Health Promotion}.
+
+\leavevmode\hypertarget{ref-heaven2001neuroticism}{}%
+Heaven, P. C., Mulligan, K., Merrilees, R., Woods, T., \& Fairooz, Y. (2001). Neuroticism and conscientiousness as predictors of emotional, external, and restrained eating behaviors. \emph{International Journal of Eating Disorders}, \emph{30}(2), 161--166.
+
+\leavevmode\hypertarget{ref-hirshman2004evidence}{}%
+Hirshman, E., Merritt, P., Wang, C. C., Wierman, M., Budescu, D. V., Kohrt, W., \ldots{} Bhasin, S. (2004). Evidence that androgenic and estrogenic metabolites contribute to the effects of dehydroepiandrosterone on cognition in postmenopausal women. \emph{Hormones and Behavior}, \emph{45}(2), 144--155.
+
+\leavevmode\hypertarget{ref-hughes2009tracking}{}%
+Hughes, C., Ensor, R., Wilson, A., \& Graham, A. (2009). Tracking executive function across the transition to school: A latent variable approach. \emph{Developmental Neuropsychology}, \emph{35}(1), 20--36.
+
+\leavevmode\hypertarget{ref-inchley2005persistent}{}%
+Inchley, J. C., Currie, D. B., Todd, J. M., Akhtar, P. C., \& Currie, C. E. (2005). Persistent socio-demographic differences in physical activity among scottish schoolchildren 1990--2002. \emph{The European Journal of Public Health}, \emph{15}(4), 386--388.
+
+\leavevmode\hypertarget{ref-kakizaki2008personality}{}%
+Kakizaki, M., Kuriyama, S., Sato, Y., Shimazu, T., Matsuda-Ohmori, K., Nakaya, N., \ldots{} Tsuji, I. (2008). Personality and body mass index: A cross-sectional analysis from the miyagi cohort study. \emph{Journal of Psychosomatic Research}, \emph{64}(1), 71--80.
+
+\leavevmode\hypertarget{ref-khan2009recommended}{}%
+Khan, L. K., Sobush, K., Keener, D., Goodman, K., Lowry, A., Kakietek, J., \& Zaro, S. (2009). Recommended community strategies and measurements to prevent obesity in the united states. \emph{Morbidity and Mortality Weekly Report: Recommendations and Reports}, \emph{58}(7), 1--29.
+
+\leavevmode\hypertarget{ref-killen1994pursuit}{}%
+Killen, J. D., Taylor, C. B., Hayward, C., Wilson, D. M., Haydel, K. F., Hammer, L. D., \ldots{} others. (1994). Pursuit of thinness and onset of eating disorder symptoms in a community sample of adolescent girls: A three-year prospective analysis. \emph{International Journal of Eating Disorders}, \emph{16}(3), 227--238.
+
+\leavevmode\hypertarget{ref-korner2003influence}{}%
+Körner, A., Geyer, M., Gunzelmann, T., \& Brähler, E. (2003). The influence of socio-demographic factors on personality dimensions in the elderly. \emph{Zeitschrift Fur Gerontologie Und Geriatrie}, \emph{36}(2), 130--137.
+
+\leavevmode\hypertarget{ref-krieger1997measuring}{}%
+Krieger, N., Williams, D. R., \& Moss, N. E. (1997). Measuring social class in us public health research: Concepts, methodologies, and guidelines. \emph{Annual Review of Public Health}, \emph{18}(1), 341--378.
+
+\leavevmode\hypertarget{ref-kubzansky1999socioeconomic}{}%
+Kubzansky, L. D., Kawachi, I., \& Sparrow, D. (1999). Socioeconomic status, hostility, and risk factor clustering in the normative aging study: Any help from the concept of allostatic load? \emph{Annals of Behavioral Medicine}, \emph{21}(4), 330--338.
+
+\leavevmode\hypertarget{ref-larson2002meta}{}%
+Larson, L. M., Rottinghaus, P. J., \& Borgen, F. H. (2002). Meta-analyses of big six interests and big five personality factors. \emph{Journal of Vocational Behavior}, \emph{61}(2), 217--239.
+
+\leavevmode\hypertarget{ref-lawlor2006childhood}{}%
+Lawlor, D., Clark, H., Smith, G. D., \& Leon, D. (2006). Childhood intelligence, educational attainment and adult body mass index: Findings from a prospective cohort and within sibling-pairs analysis. \emph{International Journal of Obesity}, \emph{30}(12), 1758.
+
+\leavevmode\hypertarget{ref-li1995study}{}%
+Li, X. (1995). A study of intelligence and personality in children with simple obesity. \emph{International Journal of Obesity and Related Metabolic Disorders: Journal of the International Association for the Study of Obesity}, \emph{19}(5), 355--357.
+
+\leavevmode\hypertarget{ref-liang2014neurocognitive}{}%
+Liang, J., Matheson, B., Kaye, W., \& Boutelle, K. (2014). Neurocognitive correlates of obesity and obesity-related behaviors in children and adolescents. \emph{International Journal of Obesity}, \emph{38}(4), 494.
+
+\leavevmode\hypertarget{ref-lioret2007child}{}%
+Lioret, S., Maire, B., Volatier, J., \& Charles, M. (2007). Child overweight in france and its relationship with physical activity, sedentary behaviour and socioeconomic status. \emph{European Journal of Clinical Nutrition}, \emph{61}(4), 509.
+
+\leavevmode\hypertarget{ref-lipina2005performance}{}%
+Lipina, S. J., Martelli, M. I., Vuelta, B., \& Colombo, J. A. (2005). Performance on the a-not-b task of argentinean infants from unsatisfied and satisfied basic needs homes. \emph{Interamerican Journal of Psychology}, \emph{39}(1), 49--60.
+
+\leavevmode\hypertarget{ref-lodi2007social}{}%
+Lodi-Smith, J., \& Roberts, B. W. (2007). Social investment and personality: A meta-analysis of the relationship of personality traits to investment in work, family, religion, and volunteerism. \emph{Personality and Social Psychology Review}, \emph{11}(1), 68--86.
+
+\leavevmode\hypertarget{ref-lohman2006associations}{}%
+Lohman, T. G., Ring, K., Schmitz, K. H., Treuth, M. S., Loftin, M., Yang, S., \ldots{} Going, S. (2006). Associations of body size and composition with physical activity in adolescent girls. \emph{Medicine and Science in Sports and Exercise}, \emph{38}(6), 1175.
+
+\leavevmode\hypertarget{ref-lynam2000interaction}{}%
+Lynam, D. R., Caspi, A., Moffit, T. E., Wikström, P.-O., Loeber, R., \& Novak, S. (2000). The interaction between impulsivity and neighborhood context on offending: The effects of impulsivity are stronger in poorer neighborhoods. \emph{Journal of Abnormal Psychology}, \emph{109}(4), 563.
+
+\leavevmode\hypertarget{ref-lynch2000socioeconomic}{}%
+Lynch, J., Kaplan, G., \& others. (2000). \emph{Socioeconomic position} (Vol. 2000). Social epidemiology. New York: Oxford University Press.
+
+\leavevmode\hypertarget{ref-merikangas2010prevalence}{}%
+Merikangas, K. R., He, J.-P., Brody, D., Fisher, P. W., Bourdon, K., \& Koretz, D. S. (2010). Prevalence and treatment of mental disorders among us children in the 2001--2004 nhanes. \emph{Pediatrics}, \emph{125}(1), 75--81.
+
+\leavevmode\hypertarget{ref-mezzacappa2004alerting}{}%
+Mezzacappa, E. (2004). Alerting, orienting, and executive attention: Developmental properties and sociodemographic correlates in an epidemiological sample of young, urban children. \emph{Child Development}, \emph{75}(5), 1373--1386.
+
+\leavevmode\hypertarget{ref-molnar2004unsafe}{}%
+Molnar, B. E., Gortmaker, S. L., Bull, F. C., \& Buka, S. L. (2004). Unsafe to play? Neighborhood disorder and lack of safety predict reduced physical activity among urban children and adolescents. \emph{American Journal of Health Promotion}, \emph{18}(5), 378--386.
+
+\leavevmode\hypertarget{ref-mond2007associations}{}%
+Mond, J., Stich, H., Hay, P., Krämer, A., \& Baune, B. (2007). Associations between obesity and developmental functioning in pre-school children: A population-based study. \emph{International Journal of Obesity}, \emph{31}(7), 1068.
+
+\leavevmode\hypertarget{ref-morgenstern2009relation}{}%
+Morgenstern, M., Sargent, J. D., \& Hanewinkel, R. (2009). Relation between socioeconomic status and body mass index: Evidence of an indirect path via television use. \emph{Archives of Pediatrics \& Adolescent Medicine}, \emph{163}(8), 731--738.
+
+\leavevmode\hypertarget{ref-o2006socio}{}%
+O'Dea, J. A., \& Wilson, R. (2006). Socio-cognitive and nutritional factors associated with body mass index in children and adolescents: Possibilities for childhood obesity prevention. \emph{Health Education Research}, \emph{21}(6), 796--805.
+
+\leavevmode\hypertarget{ref-ogden2012prevalence}{}%
+Ogden, C. L., Carroll, M. D., Kit, B. K., \& Flegal, K. M. (2012). Prevalence of obesity and trends in body mass index among us children and adolescents, 1999-2010. \emph{Jama}, \emph{307}(5), 483--490.
+
+\leavevmode\hypertarget{ref-ogden2014prevalence}{}%
+Ogden, C. L., Carroll, M. D., Kit, B. K., \& Flegal, K. M. (2014). Prevalence of childhood and adult obesity in the united states, 2011-2012. \emph{Jama}, \emph{311}(8), 806--814.
+
+\leavevmode\hypertarget{ref-provencher2008personality}{}%
+Provencher, V., Bégin, C., Gagnon-Girouard, M.-P., Tremblay, A., Boivin, S., \& Lemieux, S. (2008). Personality traits in overweight and obese women: Associations with bmi and eating behaviors. \emph{Eating Behaviors}, \emph{9}(3), 294--302.
+
+\leavevmode\hypertarget{ref-rhodes2006personality}{}%
+Rhodes, R., \& Smith, N. (2006). Personality correlates of physical activity: A review and meta-analysis. \emph{British Journal of Sports Medicine}, \emph{40}(12), 958--965.
+
+\leavevmode\hypertarget{ref-sabia2008body}{}%
+Sabia, S., Kivimaki, M., Shipley, M. J., Marmot, M. G., \& Singh-Manoux, A. (2008). Body mass index over the adult life course and cognition in late midlife: The whitehall ii cohort study. \emph{The American Journal of Clinical Nutrition}, \emph{89}(2), 601--607.
+
+\leavevmode\hypertarget{ref-shanahan2014conscientiousness}{}%
+Shanahan, M. J., Hill, P. L., Roberts, B. W., Eccles, J., \& Friedman, H. S. (2014). Conscientiousness, health, and aging: The life course of personality model. \emph{Developmental Psychology}, \emph{50}(5), 1407.
+
+\leavevmode\hypertarget{ref-neumarkeffect}{}%
+Sherwood, N. E., Wall, M., Neumark-Sztainer, D., \& Story, M. (2009). Effect of socioeconomic status on weight change patterns in adolescents. \emph{Preventing Chronic Disease}, \emph{6}(1).
+
+\leavevmode\hypertarget{ref-shrewsbury2008socioeconomic}{}%
+Shrewsbury, V., \& Wardle, J. (2008). Socioeconomic status and adiposity in childhood: A systematic review of cross-sectional studies 1990--2005. \emph{Obesity}, \emph{16}(2), 275--284.
+
+\leavevmode\hypertarget{ref-siervogel2003puberty}{}%
+Siervogel, R. M., Demerath, E. W., Schubert, C., Remsberg, K. E., Chumlea, W. C., Sun, S., \ldots{} Towne, B. (2003). Puberty and body composition. \emph{Hormone Research in Paediatrics}, \emph{60}(Suppl. 1), 36--45.
+
+\leavevmode\hypertarget{ref-smith1992public}{}%
+Smith, A. M., \& Baghurst, K. I. (1992). Public health implications of dietary differences between social status and occupational category groups. \emph{Journal of Epidemiology \& Community Health}, \emph{46}(4), 409--416.
+
+\leavevmode\hypertarget{ref-smiith2004}{}%
+Smith, J. P. (2004). Unraveling the ses health connection. \emph{Aging, Health, and Public Policy: Demographic and Economic Perspectives}, \emph{30}, 133--150.
+
+\leavevmode\hypertarget{ref-steele1991eats}{}%
+Steele, P., Dobson, A., Alexander, H., \& Russell, A. (1991). Who eats what? A comparison of dietary patterns among men and women in different occupational groups. \emph{Australian Journal of Public Health}, \emph{15}(4), 286--295.
+
+\leavevmode\hypertarget{ref-story1991demographic}{}%
+Story, M., Rosenwinkel, K., Himes, J. H., Resnick, M., Harris, L. J., \& Blum, R. W. (1991). Demographic and risk factors associated with chronic dieting in adolescents. \emph{American Journal of Diseases of Children}, \emph{145}(9), 994--998.
+
+\leavevmode\hypertarget{ref-striegel1986toward}{}%
+Striegel-Moore, R. H., Silberstein, L. R., \& Rodin, J. (1986). Toward an understanding of risk factors for bulimia. \emph{American Psychologist}, \emph{41}(3), 246.
+
+\leavevmode\hypertarget{ref-sullivan2007personality}{}%
+Sullivan, S., Cloninger, C., Przybeck, T., \& Klein, S. (2007). Personality characteristics in obesity and relationship with successful weight loss. \emph{International Journal of Obesity}, \emph{31}(4), 669.
+
+\leavevmode\hypertarget{ref-office2001surgeon}{}%
+Surgeon General. (2001). The surgeon general's call to action to prevent and decrease overweight and obesity.
+
+\leavevmode\hypertarget{ref-sutin2011personality}{}%
+Sutin, A. R., Ferrucci, L., Zonderman, A. B., \& Terracciano, A. (2011). Personality and obesity across the adult life span. \emph{Journal of Personality and Social Psychology}, \emph{101}(3), 579.
+
+\leavevmode\hypertarget{ref-sutin2015personality}{}%
+Sutin, A. R., Stephan, Y., Wang, L., Gao, S., Wang, P., \& Terracciano, A. (2015). Personality traits and body mass index in asian populations. \emph{Journal of Research in Personality}, \emph{58}, 137--142.
+
+\leavevmode\hypertarget{ref-taylor1997gender}{}%
+Taylor, R. W., Gold, E., Manning, P., \& Goulding, A. (1997). Gender differences in body fat content are present well before puberty. \emph{International Journal of Obesity}, \emph{21}(11), 1082.
+
+\leavevmode\hypertarget{ref-teasdale1992intelligence}{}%
+Teasdale, T., Sørensen, T., \& Stunkard, A. (1992). Intelligence and educational level in relation to body mass index of adult males. \emph{Human Biology}, \emph{64}(1).
+
+\leavevmode\hypertarget{ref-terracciano2009facets}{}%
+Terracciano, A., Sutin, A. R., McCrae, R. R., Deiana, B., Ferrucci, L., Schlessinger, D., \ldots{} Costa Jr, P. T. (2009). Facets of personality linked to underweight and overweight. \emph{Psychosomatic Medicine}, \emph{71}(6), 682.
+
+\leavevmode\hypertarget{ref-tuvblad2006heritability}{}%
+Tuvblad, C., Grann, M., \& Lichtenstein, P. (2006). Heritability for adolescent antisocial behavior differs with socioeconomic status: Gene--environment interaction. \emph{Journal of Child Psychology and Psychiatry}, \emph{47}(7), 734--743.
+
+\leavevmode\hypertarget{ref-veldwijk2011body}{}%
+Veldwijk, J., Scholtens, S., Hornstra, G., \& Bemelmans, W. J. (2011). Body mass index and cognitive ability of young children. \emph{Obesity Facts}, \emph{4}(4), 264--269.
+
+\leavevmode\hypertarget{ref-wagerman2009personality}{}%
+Wagerman, S. A., \& Funder, D. C. (2009). Personality psychology of situations.
+
+\leavevmode\hypertarget{ref-wang2007}{}%
+Wang, Y., Liang, L., Tussing, C., Braunschweig, C., Caballero B, \& Flay, B. (2007). Obesity and related risk factors among low socio-economic status minority students in chicago. \emph{Public Health Nutrition}, \emph{10}(9), 927--938.
+
+\leavevmode\hypertarget{ref-wilcox2011leave}{}%
+Wilcox, K., Block, L. G., \& Eisenstein, E. M. (2011). Leave home without it? The effects of credit card debt and available credit on spending. \emph{Journal of Marketing Research}, \emph{48}(SPL), S78--S90.
+
+\leavevmode\hypertarget{ref-who2011}{}%
+World Health Organization. (2011). Obesity and overweight. \emph{Retrieved from Http://Www.who.int/Mediacentre/Factsheets/Fs311/En/Print.html}.
+
+\endgroup
+
+
+\end{document}
