@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Personality and BMI in adolesense</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Sara J. Weston" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/rladies.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/rladies-fonts.css" rel="stylesheet" />
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: left, top, inverse, title-slide
+
+# Personality and BMI in adolesense
+### Sara J. Weston
+
+---
+
+
+
+
+
+
+class: inverse
+
+![](images/bmi_first.jpg)
+
+---
+
+class: inverse
+
+![](images/bmi_middle.jpg)
+
+---
+
+class: inverse
+
+![](images/bmi_full.jpg)
+
+---
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-1-1.png" width="720" /&gt;
+
+
+---
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-2-1.png" width="720" /&gt;
+
+---
+
+## sapa-project.org
+
+
+![](images/sapa.png)
+---
+
+.pull-left[
+### SAPA
+![SAPA participants by zipcode](images/sapa_map.png)
+
+&lt;img src="faculty_blitz_files/figure-html/sapa gender-1.png" width="720" /&gt;
+
+]
+
+.pull-right[
+
+### US Census (2010)
+&lt;img src="faculty_blitz_files/figure-html/census pop-1.png" width="720" /&gt;
+
+&lt;img src="faculty_blitz_files/figure-html/census gender-1.png" width="720" /&gt;
+
+]
+
+---
+
+## Current sample
+
+Data collected between February 7, 2017 and July 22, 2019 `\((N = 616270)\)`.
+
+- Restricted to participants younger than 18 years old `\((N =9482\)` , 69 \% female).
+
+Estimate parent's socioeconomic status by standardizing and averaging:
+- number of years of education (for each parent)
+- estimated parental occupational prestige (for each parent)
+- estimated income (for each parent)
+
+
+---
+
+
+
+&lt;img src="faculty_blitz_files/figure-html/girls het diagram-1.png" width="720" /&gt;
+
+---
+
+&lt;img src="faculty_blitz_files/figure-html/boys hetdiagram-1.png" width="720" /&gt;
+
+---
+
+### Methods
+
+1. Parition dataset into training (75%) and test (25%) samples.
+
+    - Separate partitioning and analysis by gender
+
+2. Multinomial logistic regression 33 times
+
+     - Once for each trait (Big 5, SPI 27, Cognitive ability)
+
+     - `\(BMI \sim \beta_0 + \beta_1(\text{trait score}) + \beta_2(\text{Socioeconomic status})\)`
+
+     - 10-fold cross-validation, 10 times
+
+     - Coefficient estimates are from final, averaged model in training set
+
+---
+
+
+
+&lt;img src="faculty_blitz_files/figure-html/non-interaction models SES 1-1.png" width="720" /&gt;
+
+---
+
+class: center
+
+&lt;img src="faculty_blitz_files/figure-html/girls sig models-1.png" width="720" /&gt;
+
+---
+
+class: center
+
+&lt;img src="faculty_blitz_files/figure-html/boys sig models-1.png" width="720" /&gt;
+
+---
+
+class: center
+&lt;img src="faculty_blitz_files/figure-html/boys sig models with female-1.png" width="720" /&gt;
+---
+
+### Methods
+
+3. Multinomial logistic regression 2 times
+
+     - `\(BMI \sim \beta_0 + \beta_1(\text{Socioeconomic status}) + \beta2(\text{Extraversion}) \\+ \beta_3(\text{Agreeableness}) + \beta_4(\text{Conscientiousness}) \\+ \beta_5(\text{Neuroticism})+ \beta_6(\text{Openness})\)`
+
+     - `\(BMI \sim \beta_0 + \beta_1(\text{Socioeconomic status}) + \beta_2(\text{Compassion}) \\+ \beta_3(\text{Irritabilty})+ \beta_4(\text{Well Being}) \\+ \dots + \beta_28(\text{Conservatism})\)`
+
+Examine variabile importance in the training set.
+
+Compare accuracy of prediction in test set.
+
+---
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-3-1.png" width="720" /&gt;
+
+---
+
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-4-1.png" width="720" /&gt;
+
+---
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-5-1.png" width="720" /&gt;
+
+---
+
+### Wrap-up
+
+Personality traits are associated with weight category above and beyond socio-economic status.
+
+    - Some personality traits are more strongly associated with weight than SES.
+
+As a group, narrow traits (SPI 27) have a stronger association with weight category than broad traits (Big 5).
+
+Cautionary note: these are association, and causal relationships are most likely bidirectional, even within a trait.
+
+---
+
+class: inverse
+
+### Thank you
+
+.pull-left[
+
+![](images/DavidCondon_sq.jpg)
+
+### David Condon
+]
+
+.pull-right[
+
+![](images/magdalena.jpeg)
+
+### Magdalena Leszko
+]
+
+
+---
+
+## Current sample
+
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Normal Weight &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Obese &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Overweight &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Underweight &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; female &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4561 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 786 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1018 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 165 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1967 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 440 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 392 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 153 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
