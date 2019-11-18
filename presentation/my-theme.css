@@ -12,3 +12,35 @@
   background-image: url(images/pielab.jpg);
   background-size: cover;
 }
+
+div.my-footer {
+    background-color: #1a1917;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    height: 20px;
+    width: 100%;
+}
+
+div.my-footer span {
+    font-size: 10pt;
+    color: #F7F8FA;
+    position: absolute;
+    left: 15px;
+    bottom: 2px;
+}
+
+.remark-slide-number {
+  bottom: 18px;
+  opacity: 0.5;
+  position: absolute;
+  right: 20px;
+}
+
+img.circle {
+  border-radius:50%;
+}
+
+.title-slide .remark-slide-number { 
+  display: none; 
+}

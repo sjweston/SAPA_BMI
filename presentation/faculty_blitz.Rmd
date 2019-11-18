@@ -1,6 +1,6 @@
 ---
-title: "Personality and\nBMI in adolesense"
-author: "Sara J. Weston"
+title: "Personality and\nBMI in adolescence"
+author: "Sara J. Weston <br> osf.io/tnf39"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -9,17 +9,22 @@ output:
       titleSlideClass: ["left", "top", "inverse"]
       highlightStyle: github
       highlightLines: true
-      countIncrementalSlides: false
 editor_options: 
   chunk_output_type: console
+---
+
+layout: true
+  
+<div class="my-footer"><span>osf.io/tnf39</span></div>
+
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, message = F, warning = F, results = 'hide', 
                       fig.height = 8, fig.width=10, fig.retina = 3)
 
-het.cut = .25
-sig.cutoff = .05
+het.cut = .30
+sig.cutoff = .01
 ```
 
 ```{r environment, results='hide', message = F, warning = F}
@@ -43,6 +48,17 @@ all_names = gsub("Consc", "B5: Consc", all_names)
 class: inverse
 
 ![](images/bmi_first.jpg)
+???
+
+Hi everyone
+
+My name is sara Weston and I’m one of the PIs of the personality is everywhere lab. I’m excited to share some research David condon and I are doing on bmi among adolescents.
+
+Bmi or body mass index is a commonly used indicator of health, but as a measure of health, it can be problematic, for a number of reasons. There’s one I want to draw your attention
+
+
+
+Here we see a group of children, they’re all pretty small, some might be a little smaller than others, but for the sake of simplifying this example, let’s just assume they all start out the same. Then something happens to these children, and that’s puberty, or the onset of adolescence
 
 ---
 
@@ -57,6 +73,8 @@ class: inverse
 ![](images/bmi_full.jpg)
 
 ---
+
+#### Distributions based on published CDC norms
 
 ```{r}
 cdc = read_csv(here("data/cdc_norms.csv"))
@@ -161,6 +179,8 @@ ggpubr::ggarrange(plot_boy_11, plot_girl_11,
 
 
 ---
+
+#### Distributions based on published CDC norms
 
 ```{r}
 bcolors = RColorBrewer::brewer.pal(n = 4, "GnBu")
@@ -347,10 +367,12 @@ SAPAdata07feb2017thru22jul2019x %>%
 .pull-right[
 
 ### US Census (2010)
-```{r census pop}
+```{r census pop, eval = F}
 data("df_pop_county")
 county_choropleth(df_pop_county)
 ```
+
+![](images/earth.jpeg)
 
 ```{r census gender}
 census = read_csv(here("presentation/extra_data/census_est.csv"), na = "999")
@@ -372,16 +394,19 @@ ggplot(aes(x = age, y = count, fill = sex)) +
 
 ## Current sample
 
-Data collected between February 7, 2017 and July 22, 2019 $(N = `r papaja::printnum(nrow(SAPAdata07feb2017thru22jul2019x), format = "d")`)$.
+Data collected between February 7, 2017 and July 22, 2019 
 
-- Restricted to participants younger than 18 years old $(N =`r nrow(sapa)`$ , `r round(100*(table(sapa$sex)[1]/sum(table(sapa$sex))))` \% female).
+.center[N = 616,270.]
 
-Estimate parent's socioeconomic status by standardizing and averaging:
-- number of years of education (for each parent)
-- estimated parental occupational prestige (for each parent)
-- estimated income (for each parent)
+Restricted to US participants younger than 18 years old 
 
+.center[N = 9,482, 69% female]
 
+???
+
+participants < 18 years: 101K
+participants < 18 years & USA: 22K
+participants < 18 years & USA & provide weight: 10K
 ---
 
 
@@ -404,6 +429,11 @@ psych::het.diagram(R_female,
                    cut=het.cut, digits=2, main = "Heterarchy diagram (girls)", cex=.9, l.cex = .7)
 ```
 
+???
+
+Reliabilities
+Alpha range from .75 (Open) to .88 (Extra)
+SPI ranges: .56 (EasyGoingness) to .85 (WellBeing)
 ---
 
 ```{r boys hetdiagram, fig.height=10}
@@ -429,11 +459,11 @@ psych::het.diagram(R_male,
 
 ### Methods
 
-1. Parition dataset into training (75%) and test (25%) samples.
+1. Partition dataset into training (75%) and test (25%) samples.
 
     - Separate partitioning and analysis by gender
 
-2. Multinomial logistic regression 33 times
+2. 33 multinomial logistic regression models
 
      - Once for each trait (Big 5, SPI 27, Cognitive ability)
 
@@ -450,13 +480,15 @@ female_log_reg = female_log %>%
   mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
   dplyr::select(trait_name, model, coef) %>%
   unnest() %>%
-  mutate(gender = "girls")
+  mutate(gender = "girls") %>%
+  mutate(y.level = factor(y.level, levels = c("Underweight","Overweight","Obese" )))
 
 male_log_reg = male_log %>%
   mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
   dplyr::select(trait_name, model, coef) %>%
   unnest() %>%
-  mutate(gender = "boys")
+  mutate(gender = "boys") %>%
+  mutate(y.level = factor(y.level, levels = c("Underweight","Overweight","Obese" )))
 ```
 
 
@@ -468,16 +500,27 @@ female_log_reg %>%
   mutate(direction = ifelse(estimate < 1, "neg", "pos"),
          direction = factor(direction, levels = c("pos", "neg"))) %>%
   mutate(trait_name = all_names[trait_name]) %>%
-  mutate(estimate = estimate-1) %>%
+  mutate(group = case_when(
+    trait_name == "Cognitive Ability" ~ "cog",
+    grepl("B5:", trait_name) ~ "b5",
+    TRUE ~ "spi27"),
+    group = factor(group, 
+                   levels = c("b5","cog","spi27"),
+                   labels = c("Big Five", " ", "SPI-27"))) %>%
+  mutate(estimate = estimate-1, 
+         conf.low = conf.low-1,
+         conf.high = conf.high-1) %>%
   arrange(-estimate) %>%
   ggplot(aes(x = reorder(trait_name, estimate), y = estimate, fill = direction)) +
   geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .5)+
+  geom_hline(aes(yintercept = 0), color = "gray")+
   scale_x_discrete("")+
-  scale_y_continuous(breaks = seq(-.3,.4,.1), labels = seq(.7,1.4,.1)) +
+  scale_y_continuous(breaks = seq(-.4,1,.2), labels = seq(.6,2,.2), ) +
   ylab("Estimate of OR of Personality") +
   coord_flip() +
-  ggtitle("Personality associates of BMI cateogory \ncontrolling for SES (girls age 13-17)") +
-  facet_grid(.~y.level) +
+  ggtitle("Personality associates of BMI category \ncontrolling for SES (girls age 13-17)") +
+  facet_grid(group~y.level, scales = "free", space = "free") +
   guides(fill = F) +
   theme_bw() +
   theme(text = element_text(size = 18), axis.text.x = element_text(size = 8))
@@ -495,16 +538,27 @@ male_log_reg %>%
   mutate(direction = ifelse(estimate < 1, "neg", "pos"),
          direction = factor(direction, levels = c("pos", "neg"))) %>%
   mutate(trait_name = all_names[trait_name]) %>%
-  mutate(estimate = estimate-1) %>%
+  mutate(group = case_when(
+    trait_name == "Cognitive Ability" ~ "cog",
+    grepl("B5:", trait_name) ~ "b5",
+    TRUE ~ "spi27"),
+    group = factor(group, 
+                   levels = c("b5","cog","spi27"),
+                   labels = c("Big Five", " ", "SPI-27"))) %>%
+  mutate(estimate = estimate-1, 
+         conf.low = conf.low-1,
+         conf.high = conf.high-1) %>%
   arrange(-estimate) %>%
   ggplot(aes(x = reorder(trait_name, estimate), y = estimate, fill = direction)) +
   geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .5)+
+  geom_hline(aes(yintercept = 0), color = "gray")+
   scale_x_discrete("")+
-  scale_y_continuous(breaks = seq(-.3,.4,.1), labels = seq(.7,1.4,.1)) +
+  scale_y_continuous(breaks = seq(-.4,1,.2), labels = seq(.6,2,.2), ) +
   ylab("Estimate of OR of Personality") +
   coord_flip() +
-  ggtitle("Personality associates of BMI cateogory \ncontrolling for SES (boys age 13-17)") +
-  facet_grid(.~y.level) +
+  ggtitle("Personality associates of BMI category \ncontrolling for SES (boys age 13-17)") +
+  facet_grid(group~y.level, scales = "free", space = "free") +
   guides(fill = F) +
   theme_bw() +
   theme(text = element_text(size = 18), axis.text.x = element_text(size = 8))
@@ -513,7 +567,7 @@ male_log_reg %>%
 ---
 
 class: center
-```{r boys sig models with female, results = 'asis'}
+```{r boys sig models with female, results = 'asis',fig.height = 8.5, fig.width=10, }
 
 female_results = female_log_reg %>%
   filter(p.value < sig.cutoff) %>%
@@ -533,17 +587,29 @@ male_log_reg %>%
   left_join(female_results) %>%
   mutate(same = ifelse(direction == female_direction, "*", "")) %>%
   mutate(trait_name = all_names[trait_name]) %>%
-  mutate(estimate = estimate-1) %>%
+  mutate(group = case_when(
+    trait_name == "Cognitive Ability" ~ "cog",
+    grepl("B5:", trait_name) ~ "b5",
+    TRUE ~ "spi27"),
+    group = factor(group, 
+                   levels = c("b5","cog","spi27"),
+                   labels = c("Big Five", " ", "SPI-27"))) %>%
+  mutate(estimate = estimate-1, 
+         conf.low = conf.low-1,
+         conf.high = conf.high-1) %>%
   arrange(-estimate) %>%
   ggplot(aes(x = reorder(trait_name, estimate), y = estimate, fill = direction)) +
   geom_bar(stat = "identity") +
   geom_text(aes(label = same), size = 15) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .5)+
+  geom_hline(aes(yintercept = 0), color = "gray")+
   scale_x_discrete("")+
-  scale_y_continuous(breaks = seq(-.3,.4,.1), labels = seq(.7,1.4,.1)) +
-  ylab("Estimate of OR of Personality") +
+  scale_y_continuous(breaks = seq(-.4,1,.2), labels = seq(.6,2,.2), ) +
+  ylab("Estimate of OR of Personality\n
+       *Same direction and level as girls") +
   coord_flip() +
-  ggtitle("Personality associates of BMI cateogory \n controlling for SES (boys age 13-17)") +
-  facet_grid(.~y.level) +
+  ggtitle("Personality associates of BMI category \n controlling for SES (boys age 13-17)") +
+  facet_grid(group~y.level, scales = "free", space = "free") +
   guides(fill = F) +
   theme_bw() +
   theme(text = element_text(size = 18), axis.text.x = element_text(size = 8))
@@ -554,13 +620,11 @@ male_log_reg %>%
 
 3. Multinomial logistic regression 2 times
 
-     - $BMI \sim \beta_0 + \beta_1(\text{Socioeconomic status}) + \beta2(\text{Extraversion}) \\+ \beta_3(\text{Agreeableness}) + \beta_4(\text{Conscientiousness}) \\+ \beta_5(\text{Neuroticism})+ \beta_6(\text{Openness})$
+     - $BMI \sim \text{All Big 5 Traits}$
 
-     - $BMI \sim \beta_0 + \beta_1(\text{Socioeconomic status}) + \beta_2(\text{Compassion}) \\+ \beta_3(\text{Irritabilty})+ \beta_4(\text{Well Being}) \\+ \dots + \beta_28(\text{Conservatism})$
+     - $BMI \sim \text{All SPI 27 Traits}$
 
-Examine variable importance in the training set.
-
-Compare accuracy of prediction in test set.
+Compare accuracy of prediction in test set (remaining 25%).
 
 ---
 
@@ -570,87 +634,6 @@ all_names[34] = "Socioeconomic\nStatus"
 names(all_names)[34] = "ses"
 all_names = gsub(" ", "\n", all_names)
 
-imp_27_female = imp_27_female$importance %>%
-  mutate(gender = "girls",
-         trait = rownames(.))
-imp_27_female$trait = all_names[imp_27_female$trait]
-
-imp_27_male = imp_27_male$importance %>%
-  mutate(gender = "boys",
-         trait = rownames(.))
-imp_27_male$trait = all_names[imp_27_male$trait]
-
-p_female = imp_27_female %>%
-  arrange(desc(Overall)) %>%
-  filter(row_number() < 11) %>%
-  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
-  geom_point(size = 2) +
-  geom_segment(aes(xend = trait, yend = 0))+
-  scale_x_discrete("")+
-  scale_y_continuous("Importance", limits = c(0,1.25))+
-  coord_flip()+
-  ggtitle("Girls") +
-  theme_bw(base_size = 20)
-
-p_male = imp_27_male %>%
-  arrange(desc(Overall)) %>%
-  filter(row_number() < 11) %>%
-  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
-  geom_point(size = 2) +
-  geom_segment(aes(xend = trait, yend = 0))+
-  scale_x_discrete("")+
-  scale_y_continuous("Importance", limits = c(0,1.25))+
-  coord_flip()+
-  ggtitle("Boys") +
-  theme_bw(base_size = 20)
-
-ggpubr::ggarrange(p_female, p_male)
-```
-
----
-
-
-```{r}
-all_names = gsub("B5:\\n", "", all_names)
-
-imp_5_female = imp_5_female$importance %>%
-  mutate(gender = "girls",
-         trait = rownames(.))
-imp_5_female$trait = all_names[imp_5_female$trait]
-
-imp_5_male = imp_5_male$importance %>%
-  mutate(gender = "boys",
-         trait = rownames(.))
-imp_5_male$trait = all_names[imp_5_male$trait]
-
-p_female2 = imp_5_female %>%
-  arrange(desc(Overall)) %>%
-  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
-  geom_point(size = 2) +
-  geom_segment(aes(xend = trait, yend = 0))+
-  scale_x_discrete("")+
-  scale_y_continuous("Importance", limits = c(0,1.25))+
-  coord_flip()+
-  ggtitle("Girls") +
-  theme_bw(base_size = 20)
-
-p_male2 = imp_5_male %>%
-  arrange(desc(Overall)) %>%
-  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
-  geom_point(size = 2) +
-  geom_segment(aes(xend = trait, yend = 0))+
-  scale_x_discrete("")+
-  scale_y_continuous("Importance", limits = c(0,1.25))+
-  coord_flip()+
-  ggtitle("Boys") +
-  theme_bw(base_size = 20)
-
-ggpubr::ggarrange(p_female2, p_male2)
-```
-
----
-
-```{r}
 acc.df = data.frame(expand.grid(gender = c("girls", "boys"),
                                 model = c("27 Factors", "Big 5")))
 acc.df$output = list(accuracy_27_female, accuracy_27_male, accuracy_b5_female, accuracy_b5_male)
@@ -664,7 +647,8 @@ acc.df = acc.df %>%
 acc.df %>%
   ggplot(aes(x = model, y = accuracy, fill = gender)) +
   geom_bar(stat = "identity", position = "dodge") +
-  geom_errorbar(aes(ymin = lower, ymax=upper), position = position_dodge(.9), width = .5) +
+  geom_errorbar(aes(ymin = lower, ymax=upper), position = position_dodge(.9), 
+                width = .3) +
   theme_bw(base_size = 20)
 ```
 
@@ -674,7 +658,7 @@ acc.df %>%
 
 Personality traits are associated with weight category above and beyond socio-economic status.
 
-    - Some personality traits are more strongly associated with weight than SES.
+   - Some personality traits are more strongly associated with weight than SES.
 
 As a group, narrow traits (SPI 27) have a stronger association with weight category than broad traits (Big 5).
 
@@ -733,4 +717,86 @@ class: center
 table(sapa$sex, sapa$BMI_c) %>%
   kable() %>%
   kable_styling()
+```
+
+---
+
+
+```{r}
+all_names = gsub("B5:\\n", "", all_names)
+
+imp_5_female = imp_5_female$importance %>%
+  mutate(gender = "girls",
+         trait = rownames(.))
+imp_5_female$trait = all_names[imp_5_female$trait]
+
+imp_5_male = imp_5_male$importance %>%
+  mutate(gender = "boys",
+         trait = rownames(.))
+imp_5_male$trait = all_names[imp_5_male$trait]
+
+p_female2 = imp_5_female %>%
+  arrange(desc(Overall)) %>%
+  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
+  geom_point(size = 2) +
+  geom_segment(aes(xend = trait, yend = 0))+
+  scale_x_discrete("")+
+  scale_y_continuous("Importance", limits = c(0,1.25))+
+  coord_flip()+
+  ggtitle("Girls") +
+  theme_bw(base_size = 20)
+
+p_male2 = imp_5_male %>%
+  arrange(desc(Overall)) %>%
+  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
+  geom_point(size = 2) +
+  geom_segment(aes(xend = trait, yend = 0))+
+  scale_x_discrete("")+
+  scale_y_continuous("Importance", limits = c(0,1.25))+
+  coord_flip()+
+  ggtitle("Boys") +
+  theme_bw(base_size = 20)
+
+ggpubr::ggarrange(p_female2, p_male2)
+```
+
+---
+
+```{r}
+
+imp_27_female = imp_27_female$importance %>%
+  mutate(gender = "girls",
+         trait = rownames(.))
+imp_27_female$trait = all_names[imp_27_female$trait]
+
+imp_27_male = imp_27_male$importance %>%
+  mutate(gender = "boys",
+         trait = rownames(.))
+imp_27_male$trait = all_names[imp_27_male$trait]
+
+p_female = imp_27_female %>%
+  arrange(desc(Overall)) %>%
+  filter(row_number() < 11) %>%
+  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
+  geom_point(size = 2) +
+  geom_segment(aes(xend = trait, yend = 0))+
+  scale_x_discrete("")+
+  scale_y_continuous("Importance", limits = c(0,1.25))+
+  coord_flip()+
+  ggtitle("Girls") +
+  theme_bw(base_size = 20)
+
+p_male = imp_27_male %>%
+  arrange(desc(Overall)) %>%
+  filter(row_number() < 11) %>%
+  ggplot(aes(x = reorder(trait, Overall), y = Overall)) +
+  geom_point(size = 2) +
+  geom_segment(aes(xend = trait, yend = 0))+
+  scale_x_discrete("")+
+  scale_y_continuous("Importance", limits = c(0,1.25))+
+  coord_flip()+
+  ggtitle("Boys") +
+  theme_bw(base_size = 20)
+
+ggpubr::ggarrange(p_female, p_male)
 ```

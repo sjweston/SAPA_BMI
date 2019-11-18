@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
   <head>
-    <title>Personality and BMI in adolesense</title>
+    <title>Personality and BMI in adolescence</title>
     <meta charset="utf-8" />
-    <meta name="author" content="Sara J. Weston" />
+    <meta name="author" content="Sara J. Weston   osf.io/tnf39" />
     <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="libs/remark-css-0.0.1/rladies.css" rel="stylesheet" />
     <link href="libs/remark-css-0.0.1/rladies-fonts.css" rel="stylesheet" />
@@ -14,11 +14,17 @@
     <textarea id="source">
 class: left, top, inverse, title-slide
 
-# Personality and BMI in adolesense
-### Sara J. Weston
+# Personality and BMI in adolescence
+### Sara J. Weston <br> osf.io/tnf39
 
 ---
 
+
+layout: true
+  
+&lt;div class="my-footer"&gt;&lt;span&gt;osf.io/tnf39&lt;/span&gt;&lt;/div&gt;
+
+---
 
 
 
@@ -27,6 +33,17 @@ class: left, top, inverse, title-slide
 class: inverse
 
 ![](images/bmi_first.jpg)
+???
+
+Hi everyone
+
+My name is sara Weston and I’m one of the PIs of the personality is everywhere lab. I’m excited to share some research David condon and I are doing on bmi among adolescents.
+
+Bmi or body mass index is a commonly used indicator of health, but as a measure of health, it can be problematic, for a number of reasons. There’s one I want to draw your attention
+
+
+
+Here we see a group of children, they’re all pretty small, some might be a little smaller than others, but for the sake of simplifying this example, let’s just assume they all start out the same. Then something happens to these children, and that’s puberty, or the onset of adolescence
 
 ---
 
@@ -42,10 +59,14 @@ class: inverse
 
 ---
 
+#### Distributions based on published CDC norms
+
 &lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-1-1.png" width="720" /&gt;
 
 
 ---
+
+#### Distributions based on published CDC norms
 
 &lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-2-1.png" width="720" /&gt;
 
@@ -68,7 +89,9 @@ class: inverse
 .pull-right[
 
 ### US Census (2010)
-&lt;img src="faculty_blitz_files/figure-html/census pop-1.png" width="720" /&gt;
+
+
+![](images/earth.jpeg)
 
 &lt;img src="faculty_blitz_files/figure-html/census gender-1.png" width="720" /&gt;
 
@@ -78,22 +101,30 @@ class: inverse
 
 ## Current sample
 
-Data collected between February 7, 2017 and July 22, 2019 `\((N = 616270)\)`.
+Data collected between February 7, 2017 and July 22, 2019 
 
-- Restricted to participants younger than 18 years old `\((N =9482\)` , 69 \% female).
+.center[N = 616,270.]
 
-Estimate parent's socioeconomic status by standardizing and averaging:
-- number of years of education (for each parent)
-- estimated parental occupational prestige (for each parent)
-- estimated income (for each parent)
+Restricted to US participants younger than 18 years old 
 
+.center[N = 9,482, 69% female]
 
+???
+
+participants &lt; 18 years: 101K
+participants &lt; 18 years &amp; USA: 22K
+participants &lt; 18 years &amp; USA &amp; provide weight: 10K
 ---
 
 
 
 &lt;img src="faculty_blitz_files/figure-html/girls het diagram-1.png" width="720" /&gt;
 
+???
+
+Reliabilities
+Alpha range from .75 (Open) to .88 (Extra)
+SPI ranges: .56 (EasyGoingness) to .85 (WellBeing)
 ---
 
 &lt;img src="faculty_blitz_files/figure-html/boys hetdiagram-1.png" width="720" /&gt;
@@ -102,11 +133,11 @@ Estimate parent's socioeconomic status by standardizing and averaging:
 
 ### Methods
 
-1. Parition dataset into training (75%) and test (25%) samples.
+1. Partition dataset into training (75%) and test (25%) samples.
 
     - Separate partitioning and analysis by gender
 
-2. Multinomial logistic regression 33 times
+2. 33 multinomial logistic regression models
 
      - Once for each trait (Big 5, SPI 27, Cognitive ability)
 
@@ -120,11 +151,6 @@ Estimate parent's socioeconomic status by standardizing and averaging:
 
 
 
-&lt;img src="faculty_blitz_files/figure-html/non-interaction models SES 1-1.png" width="720" /&gt;
-
----
-
-class: center
 
 &lt;img src="faculty_blitz_files/figure-html/girls sig models-1.png" width="720" /&gt;
 
@@ -144,13 +170,11 @@ class: center
 
 3. Multinomial logistic regression 2 times
 
-     - `\(BMI \sim \beta_0 + \beta_1(\text{Socioeconomic status}) + \beta2(\text{Extraversion}) \\+ \beta_3(\text{Agreeableness}) + \beta_4(\text{Conscientiousness}) \\+ \beta_5(\text{Neuroticism})+ \beta_6(\text{Openness})\)`
+     - `\(BMI \sim \text{All Big 5 Traits}\)`
 
-     - `\(BMI \sim \beta_0 + \beta_1(\text{Socioeconomic status}) + \beta_2(\text{Compassion}) \\+ \beta_3(\text{Irritabilty})+ \beta_4(\text{Well Being}) \\+ \dots + \beta_28(\text{Conservatism})\)`
+     - `\(BMI \sim \text{All SPI 27 Traits}\)`
 
-Examine variabile importance in the training set.
-
-Compare accuracy of prediction in test set.
+Compare accuracy of prediction in test set (remaining 25%).
 
 ---
 
@@ -158,20 +182,11 @@ Compare accuracy of prediction in test set.
 
 ---
 
-
-&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-4-1.png" width="720" /&gt;
-
----
-
-&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-5-1.png" width="720" /&gt;
-
----
-
 ### Wrap-up
 
 Personality traits are associated with weight category above and beyond socio-economic status.
 
-    - Some personality traits are more strongly associated with weight than SES.
+   - Some personality traits are more strongly associated with weight than SES.
 
 As a group, narrow traits (SPI 27) have a stronger association with weight category than broad traits (Big 5).
 
@@ -199,6 +214,14 @@ class: inverse
 
 
 ---
+
+class: center
+
+&lt;img src="faculty_blitz_files/figure-html/non-interaction models SES 1-1.png" width="720" /&gt;
+
+---
+
+class: center
 
 ## Current sample
 
@@ -229,13 +252,21 @@ class: inverse
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+---
+
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-5-1.png" width="720" /&gt;
+
+---
+
+&lt;img src="faculty_blitz_files/figure-html/unnamed-chunk-6-1.png" width="720" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "github",
-"highlightLines": true,
-"countIncrementalSlides": false
+"highlightLines": true
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

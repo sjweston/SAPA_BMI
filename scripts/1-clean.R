@@ -15,6 +15,7 @@ sapa = SAPAdata07feb2017thru22jul2019x
 
 source(here("scripts/personality_scales.R"))
 keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
+#remove if 
 
 # super key -- this contains the master key list for all of SAPA. every item ever administered and every scale you can score
 # each row is a single item
@@ -91,7 +92,8 @@ sapa = sapa %>%
 # ------------------------------------------
 
 # select just the rows that correspond to variables in the current SAPA dataset
-keys = keys[names(sapa), ]
+vars = names(sapa)
+keys = keys[rownames(keys) %in% vars, ]
 
 # select just the Big 5 scales that are scored using the SPI_135 form 
 bfkeys = keys %>%
@@ -99,10 +101,15 @@ bfkeys = keys %>%
   select(1:5)
 
 # score the items (this contains item and scale statistics too!)
-scored = scoreItems(bfkeys, sapa)
+scored = scoreItems(keys = bfkeys, items = sapa)
+b5scored = scoreItems(keys = spi.keys, items = sapa)
 
 # add scores to SAPA
-sapa = cbind(sapa, scored$scores)
+b5scores = as.data.frame(b5scored$scores[,1:5])
+names(b5scores) = paste0("SPI_135_27_5_", names(b5scores))
+sapa = cbind(sapa, b5scores)
+
+
 
 # -------------------------------------------
 # score 27 personality factors (IRT scores) #
@@ -260,5 +267,6 @@ sapa_female = sapa %>%
   filter(sex == "female") %>%
   dplyr::select(-sex)
 
+save(b5scored, file = "data/alpha.Rdata")
 save(sapa, sapa_male, sapa_female, file = "data/cleaned.Rdata")
 

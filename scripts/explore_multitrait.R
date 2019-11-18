@@ -22,9 +22,9 @@ train_female = createDataPartition(sapa_female$BMI_c, p = .75, list = FALSE)
 
 #standardize predictors
 pred = names(sapa_male)[grepl("SPI", names(sapa_male))]
-all_pred = c(pred, "cog", "ses")
-big5_pred = c(pred[1:5], "cog", "ses")
-fa27_pred = c(pred[-c(1:5)], "cog", "ses")
+all_pred = c(pred)
+big5_pred = c(pred[1:5])
+fa27_pred = c(pred[-c(1:5)])
 
 sapa_male = sapa_male %>%
   mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
