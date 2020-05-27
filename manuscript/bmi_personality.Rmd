@@ -67,7 +67,11 @@ csl               : apa6.csl
  \raggedbottom
 
 ```{r setup, include = FALSE}
-library("papaja")
+packages = c("tidyverse", "here", 
+             "papaja", "knitr", "kableExtra", 
+             "PAutilities", "measurements")
+lapply(packages, library, character.only = TRUE)
+rm(packages)
 ```
 
 ```{r analysis-preferences}
@@ -124,19 +128,166 @@ Given the known relationships between SES and both BMI and individual difference
 In this study, we use a large sample of adolescents in the United States to examine the relationship between personality and cognitive ability to BMI above and beyond the influence of SES; moreover, we examine whether the relationship between individual differences and BMI changes across socioeconomic strata. The current study aims to clarify the relationship between personality traits, cognitive ability, SES, and BMI through the following methods: (1) examining both broad (Big-Five) and narrow traits to better determine the aspects of personality which relate to BMI, (2) utilizing a measure of SES that accounts for monetary resource and social status, and (3) using both percentile and categorial assessments of BMI to allow for both linear and non-linear relationships between psychosocial constructs and health.
 
 # Methods
-We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. 
+
+## Data Collection
 
 ## Participants
+```{r}
+load(here("../../data/SAPA/collaboration/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
+sapa_raw = SAPAdata07feb2017thru22jul2019x
 
-## Material
+all_but_bmi = sapa_raw %>%
+  filter(age < 18) %>%
+  filter(country == "USA") %>%
+  filter(!is.na(sex)) %>%
+  filter(sex != "other")
 
-## Procedure
+sapa = all_but_bmi %>%
+  filter(!is.na(height)) %>%
+  filter(!is.na(weight))
+```
+
+During the data collection period, `r formatC(nrow(sapa_raw), big.mark = ",", format = "d")` participants provided data. Of these, `r formatC(nrow(all_but_bmi), big.mark = ",", format = "d")` were adolesecnts (between the ages of 11 and 17) living in the United States. Of this sample, only `r formatC(nrow(sapa), big.mark = ",", format = "d")` provided height and weight. This was the sample used for these analyses.
+
+```{r}
+m.age = mean(sapa$age, na.rm=T)
+s.age = sd(sapa$age, na.rm=T)
+count = table(sapa$sex)
+count.female = count["female"]
+perc.female = count.female/nrow(sapa)
+```
+
+
+The average age of participants was `r m.age` $(SD = `r s.age`)$ and `r formatC(count.female, big.mark = ",", format = "d")` (`r perc.female*100`%) self-reported their sex as female. Descriptive statistics are presented in Table \@ref(tab:desc).
+
+## Measures
+
+```{r}
+m.height = mean(sapa$height, na.rm=T)
+s.height = sd(sapa$height, na.rm=T)
+m.weight = mean(sapa$weight, na.rm=T)
+s.weight = sd(sapa$weight, na.rm=T)
+
+m.bmi = mean(sapa$BMI, na.rm=T)
+s.bmi = sd(sapa$BMI, na.rm=T)
+```
+
+```{r descriptives_by_gender, results = 'asis'}
+sapa = sapa %>%
+  select(age, sex, p1edu, p1occPrestige, p1occIncomeEst, p2edu, p2occPrestige, p2occIncomeEst, height, weight, BMI)
+
+sapa = sapa %>%
+  mutate(sex = as.factor(as.character(sex))) %>%
+  mutate(sex2 = ifelse(sex == "male", "M", "F"),
+         weight = conv_unit(weight, from = "lbs", to = "kg"),
+         height = conv_unit(height, from = "inch", to = "cm"))
+
+for(i in 1:nrow(sapa)){
+  sapa$BMI_c[i] = as.character(
+    get_BMI_percentile(weight_kg = sapa$weight[i], 
+                       height = sapa$height[i], 
+                       age_yrs = sapa$age[i], 
+                       sex = sapa$sex2[i],
+                       output = "class"))
+}
+numeric_descriptives = sapa %>%
+  mutate_at(vars(starts_with("p")), as.numeric) %>%
+  group_by(sex) %>%
+  summarize_if(is.numeric,
+               .funs = list(M = mean,
+                            S = sd), na.rm=T) %>%
+  gather("key", "value", -sex) %>%
+    separate(key, into =c("variable", "key")) %>%
+    spread(key, value) %>%
+    mutate_at(vars("M", "S"), printnum) %>%
+    unite(M, M, S, sep=" (") %>%
+    mutate(M = paste0(M, ")")) %>%
+    spread(sex, M)
+
+categor_descriptives = sapa %>%
+  select(sex, BMI_c) %>%
+  group_by(sex, BMI_c) %>%
+  summarize(N = n()) %>%
+  ungroup() %>% group_by(sex) %>%
+  mutate(perc = N/sum(N)*100) %>%
+    mutate_if(is.numeric, printnum) %>%
+    unite(N, N, perc, sep = " (") %>%
+    mutate(N = paste0(N, "%)")) %>%
+    spread(sex, N) %>%
+    rename("variable" = "BMI_c")
+```
+
+```{r desc, results = 'asis'}
+full_join(numeric_descriptives, categor_descriptives) %>%
+  mutate(variable = factor(variable, 
+                           levels  = c("age", "BMI", "height", "p1edu", 
+                                       "p1occIncomeEst", "p1occPrestige", 
+                                       "p2edu", "p2occIncomeEst", "p2occPrestige",
+                                       "weight", "Normal Weight","Obese", 
+                                       "Overweight","Underweight"),
+                           labels  = c("Age", "BMI", "Height", "Parent 1 Education", 
+                                       "Parent 1 Income (estimated)", 
+                                       "Parent 1 Occupational Prestige (estimated)", 
+                                       "Parent 2 Education",
+                                       "Parent 2 Income (estimated)", 
+                                       "Parent 2 Occupational Prestige (estimated)", 
+                                       "Weight", "Normal Weight","Obese", 
+                                       "Overweight","Underweight"))) %>%
+  apa_table(., 
+            col.names = c("Variable", "Female", "Male"), 
+          caption = "Descriptive statistics of key demographic and BMI variables by gender. Numeric variables presented with means and standard deviations. Categorical variables presented with frequencies and percentages.") 
+  
+```
+
+
+**BMI Category** Self-reported height in inches $(M = `r m.height`, SD = `r s.height`)$ was converted to meters, and self-reported weight in pounds $(M = `r m.weight`, SD = `r s.weight`)$ was converted to kilograms. Participant BMI was then calculated by dividing kilograms to meters squared $(M = `r m.bmi`, SD = `r s.bmi`)$. While some would use BMI score as the outcome of interest, this value is problematic, as there are group difference in BMI by sex. Moreover, the distribution of BMI tends to increase with development, meaning there is greater spread in BMI among older adolescents compared to younger. To account for both sex- and age-related differences in the distsribution of BMI, we calculated each participant's BMI percentile score based on the CDC norms for adolesents of that participant's age and self-reported sex (XXXX). 
+
+Importantly, lower BMI is not universally healthier. Fitting a simple linear model to this outcome may obscure the relationships of traits which produce unhealthy results in both directions -- that is, some traits may be associated with both overweight and underweight outcomes. Given the likely nonlienar associations, and also the clinical cutoffs that are implemented in many settings, we use the CDC guidelines to assign each participant to a weight category based on their BMI percentile: Underweight (0-5%), Normal(5-85%), Overweight(85-95%), and Obese(95-100%).
+
+```{r}
+load(here("data/reliability.Rdata"))
+alpha = as.numeric(b5scored$alpha)
+names(alpha) = colnames(b5scored$alpha)
+```
+
+
+**Personality.** Personality traits were measured using the 135-item SAPA Personality Inventory (SPI-135; XXXX). This scale can be used to estimate scores on both broad and narrow traits. The current study leverages this feature of the personality scale to assess the relationships of both broad and narrow traits to BMI category and compare the predictive validity of each. 
+
+Big Five trait scores were estimated using a sum-score method, in which all non-missing responses to items in a scale (14 items per scale) were averaged. There was evidence of good reliability for each trait $(
+\alpha_E = `r printnum(alpha["SPI_135_27_5_Extra"])`, 
+\alpha_A = `r printnum(alpha["SPI_135_27_5_Agree"])`,
+\alpha_C = `r printnum(alpha["SPI_135_27_5_Consc"])`,
+\alpha_N = `r printnum(alpha["SPI_135_27_5_Neuro"])`,
+\alpha_O = `r printnum(alpha["SPI_135_27_5_Open"])`)$.
+
+Narrow SPI-27 trait scores (5 items each) were estimated using an IRT-scoring approach. Calibration of the IRT parameters was performed using a separate sample [MORE INFORMATION NEEDED HERE -- If these are the parameters in the 400 pg doc on PsyArXiv, I can just reference that.]. 
+
+**Cognitive Ability.** Participants were administered between 12 and 16 cognitive ability items assessing Three-Dimensional Rotation, Verbal Reasoning, Matrix Reasoning, and Letter and Number Series from the International Cognitive Ability Resource ("ICAR" XXX). Trait scores were estimated using an IRT approach. 
+
+**Parent Socioeconomic Status (SES).** Participants reported their parents' highest level(s) of education and occupational field(s). From the latter, we estimated income, based on median income for that field, and prestige, based on median prestige values for the field. All responses were standardized within sample and averaged to create a composite score. 
 
 ## Data analysis
-<!-- We used `r cite_r("bmi_personality.bib")` for all our analyses. -->
 
+To assess the degree to which SES and individual differences are uniquely, concurrently associated with BMI category, we used multinomial logistic regression models, with "Normal" as the reference category. We estimated 33 versions of this model, with each model including both SES and either one personality trait or cognitive ability (thirty-three individual difference measures in total). In addition, we estimate each of these models with an interaction term, to estimate whether the relationship of personality to SES depends on parental socioeconomic stauts. Specific hypotheses were preregistered at [https://osf.io/ypf7r](https://osf.io/ypf7r)^[Does this footnote appear?]. 
+
+### Does the relationship of personaity to BMI depend on SES?
+
+#### Sensitivity analysis
+
+### How does personality contribute to the accuracy of BMI prediction models?
 
 # Results
+
+### Is socioeconomic status associated with BMI category?
+The goal of these analyses was to determine both the best estimate of the relationship between SES and BMI controlling for individual differences and also to estimate the sensitivity of this estimate to the inclusion of different traits. 
+
+### Which personality traits are associated with BMI?
+
+### Does the relationship of personaity to BMI depend on SES?
+
+#### Sensitivity analysis
+
+### How does personality contribute to the accuracy of BMI prediction models?
 
 # Discussion
 

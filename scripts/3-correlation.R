@@ -7,7 +7,7 @@ packages = c("tidyverse", "psych", "corrplot")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
-#load("data/cleaned.Rdata")
+load(here("data/cleaned.Rdata"))
 
 # ------------------------------------
 # correlation matrix                 #
@@ -44,7 +44,7 @@ cor.data = cor.data %>%
   mutate(rp = map(fullr, "p")) %>%
   mutate(rp = map(rp, unlist)) %>%
   dplyr::select(-fullr) %>%
-  unnest() %>%
+  unnest(cols = c(r, rp)) %>%
   mutate(pred = rep(pred,2)) %>%
   gather("key", "value", -gender, -pred) %>%
   unite(gender, gender, key) %>%

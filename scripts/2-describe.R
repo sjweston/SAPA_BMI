@@ -1,6 +1,4 @@
-# ------------------------------------
-# load packages and data             #
-# ------------------------------------
+# ---- load packages and data ----
 
 #load packages
 packages = c("tidyverse", "psych")
@@ -9,10 +7,10 @@ rm(packages)
 
 load("data/cleaned.Rdata")
 
-# ------------------------------------
-# calculate descriptives             #
-# ------------------------------------
+# ---- calculate ----
 
 descriptives = describeBy(sapa, group = "sex")
+
+# ---- save file ----
 
 save(descriptives, file = "data/descriptives.Rdata")

@@ -1,11 +1,12 @@
-# ------------------------------------
-# load packages and data             #
-# ------------------------------------
+
+# ----- load packages and data  -----
+
 
 set.seed(052319)
 
 # load packages
-packages = c("tidyverse", "janitor", "psych", "devtools", "PAutilities", "measurements", "here")
+packages = c("tidyverse", "janitor", "psych", "devtools", 
+             "PAutilities", "measurements", "here", "caret")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
@@ -15,16 +16,14 @@ sapa = SAPAdata07feb2017thru22jul2019x
 
 source(here("scripts/personality_scales.R"))
 keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
-#remove if 
 
 # super key -- this contains the master key list for all of SAPA. every item ever administered and every scale you can score
 # each row is a single item
 # each column is a scale
 # the value of a cell is 0 if that item is not part of that scale, 1 if that item positively loads on the scale, and -1 if the item negatively loads on the scale
 
-# -----------------------------------
-# filter by age                     #
-# -----------------------------------
+# ----- filter by age  ----
+
 
 # remove participants who are 18 years or older and from the US
 sapa = sapa %>%
@@ -33,9 +32,8 @@ sapa = sapa %>%
   filter(!is.na(sex)) %>%
   filter(!is.na(height)) %>%
   filter(!is.na(weight))
-# -----------------------------------
-# score SES                         #
-# -----------------------------------
+
+# ----- score SES ----
 
 # make sure occupational variables are numeric
 sapa = sapa %>%
@@ -87,9 +85,7 @@ sapa$ses = rowMeans(sapa[,grepl("^z\\.", names(sapa))], na.rm=T)
 sapa = sapa %>%
   dplyr::select(-starts_with("z"))
 
-# ------------------------------------------
-# score 5 personality factors (sum scores) #
-# ------------------------------------------
+# ----- score 5 personality factors (sum scores) ----
 
 # select just the rows that correspond to variables in the current SAPA dataset
 vars = names(sapa)
@@ -98,43 +94,24 @@ keys = keys[rownames(keys) %in% vars, ]
 # select just the Big 5 scales that are scored using the SPI_135 form 
 bfkeys = keys %>%
   select(contains("SPI_135")) %>%
-  select(1:5)
+  select(1:5) 
+
+bfkeys = keys2list(as.matrix(bfkeys), sign = T)
+
 
 # score the items (this contains item and scale statistics too!)
-scored = scoreItems(keys = bfkeys, items = sapa)
-b5scored = scoreItems(keys = spi.keys, items = sapa)
+b5scored = scoreItems(keys = bfkeys, items = sapa)
 
 # add scores to SAPA
 b5scores = as.data.frame(b5scored$scores[,1:5])
-names(b5scores) = paste0("SPI_135_27_5_", names(b5scores))
+names(b5scores) = gsub("135_27_5_", "", names(b5scores))
 sapa = cbind(sapa, b5scores)
 
 
 
-# -------------------------------------------
-# score 27 personality factors (IRT scores) #
-# -------------------------------------------
+# ----- score 27 personality factors (IRT scores) ----
 
-load("../../data/SAPA/IRTinfoSPI27.rdata")
-
-# #reverse score items that should be negatively keyed
-# spi_keys = keys %>%
-#   select(contains("SPI_135"))%>%
-#   select(6:32) %>%
-#   mutate(item = rownames(.)) %>%
-#   gather("scale", "key", -item) %>%
-#   filter(key != 0)
-# 
-# #confirm each item is only in dataset once
-# length(unique(spi_keys$item)) == nrow(spi_keys)
-# 
-# reverse = spi_keys %>%
-#   filter(key == -1) 
-# reverse = reverse[,"item"]
-# reverse_df = apply(sapa[, reverse], 2, function(x) max(x, na.rm=T) + 1 - x)
-# sapa[,reverse] = reverse_df
-
-
+load(here("../../data/SAPA/IRTinfoSPI27.rdata"))
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
@@ -163,27 +140,23 @@ for (i in 1:length(IRToutputSPI27)) {
   if(same == 0) data[,1:ncol(data)] = apply(data[,1:ncol(data)], 2, function(x) max(x, na.rm=T) + 1 - x)
   if (same > 0 & same < 5) print("Error in loadings")
   scored <- scoreIrt(calibrations, data, keys = NULL, cut = 0)
-  SPIirtScores[,i] <- scored$theta1
+  trait_scores = scored$theta1
+  trait_scores = (trait_scores - mean(trait_scores, na.rm = T))/sd(trait_scores, na.rm=T)
+  Tscores = trait_scores*10 + 50
+  SPIirtScores[,i] <- Tscores
 }
 
 SPIirtScores <- as.data.frame(SPIirtScores)
-colnames(SPIirtScores) <- paste0("SPI_135_27_5_", scaleNames)
+colnames(SPIirtScores) <- paste0("SPI_", scaleNames)
 
 #add to sapa dataset
 sapa = cbind(sapa, SPIirtScores)
 
-# sc <- scoreItems(spi.keys,sapa)
-# sc = as.data.frame(sc$scores)
-# 
-# colnames(sc) = paste0("SPI_135_27_5_", names(sc))
-# 
-# sapa = cbind(sapa, sc[,6:32])
 
 
-# -------------------------------------------
-# score ICAR cognition scores (IRT scores) #
-# -------------------------------------------
-load("../../data/SAPA/IRTinfoICAR.rdata")
+# ----- score ICAR (IRT scores) ----
+
+load(here("../../data/SAPA/IRTinfoICAR.rdata"))
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
@@ -213,19 +186,9 @@ sapa = cbind(sapa, ICARirtScores)
 # remove individual items
 sapa = sapa %>%
   select(-contains("q_"))
-# -------------------------------------------------------------------------
-# calculate BMI zscore, percentile, and category based on CDC guidelines  #
-# -------------------------------------------------------------------------
 
-# z-scores come from PAutilities package, developed by WHO Multicentre Growth Reference Study (MGRS)
-# information about the development of these reference standards can be found at
-# https://www.cdc.gov/obesity/childhood/defining.html
+# ----- calculate BMI zscore, percentile, and category based on CDC guidelines  ----
 
-# The 2000 CDC growth charts that are used to calculate BMI were developed with data from 5 national 
-# health examination surveys that occurred from 1963 to 1994 and supplemental data from surveys that 
-# occurred from 1960 to 1995.
-# Kuczmarski RJ, Ogden CL, Guo SS, et al. 2000 CDC growth charts for the United States: methods and development. 
-# National Center for Health Statistics. Vital Health Stat 11. 2002;(246):1-190
 
 sapa = sapa %>%
   filter(sex != "other") %>%
@@ -249,9 +212,8 @@ for(i in 1:nrow(sapa)){
 }
 
 
-# -----------------------------------
-# split by gender                   #
-# -----------------------------------
+
+# ----- split by gender ----
 
 sapa = sapa %>%
   mutate(cog = ICAR60) %>%
@@ -267,6 +229,22 @@ sapa_female = sapa %>%
   filter(sex == "female") %>%
   dplyr::select(-sex)
 
-save(b5scored, file = "data/alpha.Rdata")
-save(sapa, sapa_male, sapa_female, file = "data/cleaned.Rdata")
+save(b5scored, file = here("data/alpha.Rdata"))
+
+# ----- set up train/test ----
+
+# set seed
+set.seed(090919)
+
+# parition into training and test sets. objects identify just training rows
+train_male = createDataPartition(sapa_male$BMI_c, p = .75, list = FALSE)
+train_female = createDataPartition(sapa_female$BMI_c, p = .75, list = FALSE)
+
+# ---- save data -----
+save(sapa, 
+     sapa_male, sapa_female,
+     train_male, train_female, file = here("data/cleaned.Rdata"))
+
+save(b5scored, 
+     file = here("data/reliability.Rdata"))
 

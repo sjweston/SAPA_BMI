@@ -26,25 +26,28 @@ boot.n = 10000
 # we also standardize each of our variables within gender
 
 
-sapa_male_trait = sapa_male %>%
+sapa_male_trait = sapa_male[train_male, ] %>%
   dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
-  mutate(ses = scale(ses)) %>%
-  mutate(cog = scale(cog)) %>%
-  mutate(BMI_p = scale(BMI_p)) %>%
-  gather("trait_name", "trait_score", -ses, -BMI_p, -BMI, -BMI_c) %>%
-  group_by(trait_name) %>%
-  mutate(trait_score = scale(trait_score)) %>%
-  nest()
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>% #identify which rows in test and training
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>% # gather all personality variables
+  group_by(trait_name, set) %>% # group by trait and also by whether in test/train
+  mutate(trait_score = scale(trait_score)) %>% #standardize
+  mutate(ses = scale(ses)) %>% #standardize
+  mutate(BMI_p = scale(BMI_p)) %>% #standardize
+  ungroup() %>% group_by(trait_name) %>%  #group only by trait
+  nest() #nest data frames
 
-sapa_female_trait = sapa_female %>%
+
+sapa_female_trait = sapa_female[train_female, ] %>%
   dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
-  mutate(ses = scale(ses)) %>%
-  mutate(cog = scale(cog)) %>%
-  mutate(BMI_p = scale(BMI_p)) %>%
-  gather("trait_name", "trait_score", -ses, -BMI_p, -BMI, -BMI_c) %>%
-  group_by(trait_name) %>%
-  mutate(trait_score = scale(trait_score)) %>%
-  nest()
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>% #identify which rows in test and training
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>% # gather all personality variables
+  group_by(trait_name, set) %>% # group by trait and also by whether in test/train
+  mutate(trait_score = scale(trait_score)) %>% #standardize
+  mutate(ses = scale(ses)) %>% #standardize
+  mutate(BMI_p = scale(BMI_p)) %>% #standardize
+  ungroup() %>% group_by(trait_name) %>%  #group only by trait
+  nest() #nest data frames
 
 # ------------------------------------
 # regression iteration (males)       #
@@ -63,12 +66,14 @@ male_reg = male_reg %>%
   dplyr::select(-data) %>%
   gather("model", "output", cov, int) %>%
   mutate(output = map(output, broom::tidy, conf.int = FALSE)) %>%
-  unnest()
+  unnest(cols = c(output))
 
 
 # ----------------------------------------------
 # bootstrap confidence intervals (males)       #
 # ----------------------------------------------
+
+set.seed(031720)
 
 male_boot = sapa_male_trait %>%
   mutate(samples = map(data, bootstraps, times = boot.n)) %>%
@@ -80,7 +85,7 @@ male_boot = sapa_male_trait %>%
 male_boot = male_boot %>%
   dplyr::select(-splits, -id) %>%
   gather("model", "summary", -trait_name) %>%
-  unnest()
+  unnest(cols = c(summary))
 
 male_boot = male_boot %>% 
   group_by(trait_name, model, term) %>%
@@ -92,10 +97,13 @@ male_boot = male_boot %>%
 male_reg = male_reg %>%
   full_join(male_boot)
 
+save(male_reg, male_plot, file = "data/regression_output_male.Rdata")
 
 # ------------------------------------
 # regression iteration (females)       #
 # ------------------------------------
+
+# we run the models for men and women separately because R kept crashing whey trying to run this whole script.2
 
 female_reg = sapa_female_trait %>%
   mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
@@ -110,12 +118,14 @@ female_reg = female_reg %>%
   dplyr::select(-data) %>%
   gather("model", "output", cov, int) %>%
   mutate(output = map(output, broom::tidy, conf.int = FALSE)) %>%
-  unnest()
+  unnest(cols = c(output))
 
 
 # ----------------------------------------------
 # bootstrap confidence intervals (females)       #
 # ----------------------------------------------
+
+set.seed(031720)
 
 female_boot = sapa_female_trait %>%
   mutate(samples = map(data, bootstraps, times = boot.n)) %>%
@@ -139,9 +149,11 @@ female_boot = female_boot %>%
 female_reg = female_reg %>%
   full_join(female_boot)
 
+save(female_reg, female_plot, file = "data/regression_output_male.Rdata")
+
 # --------------------------
 #     save outputs         #
 # --------------------------
 
-save(male_reg, female_reg, file = "data/regression_output.Rdata")
-save(male_plot, female_plot, file = "data/regression_plots.Rdata")
+#save(male_reg, female_reg, file = "data/regression_output.Rdata")
+#save(male_plot, female_plot, file = "data/regression_plots.Rdata")

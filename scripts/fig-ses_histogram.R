@@ -7,9 +7,9 @@ lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 
-# ------------------------------------
-# Figure. SES effect histogram       #
-# ------------------------------------
+# -------------------------------------------------------
+# Figure. SES effect histogram (regression models)      #
+# -------------------------------------------------------
 
 load("data/regression_output.Rdata")
 
@@ -24,5 +24,6 @@ female_reg %>%
   geom_histogram(color = "white") +
   facet_grid(Gender~.) +
   guides(fill = FALSE) +
-  scale_x_continuous("Socioeconomic Status Coefficient Estimate") +
-  theme_minimal()
+  scale_x_continuous("Socioeconomic Status Coefficient Estimate") 
+
+

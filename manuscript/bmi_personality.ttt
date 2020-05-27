@@ -1,0 +1,29 @@
+\begin{table*}[hbt]
+\ifnextchar[{\eatarg}{}
+[tbp]
+\begin{center}
+\begin{threeparttable}
+\caption{\label{tab:desc}Descriptive statistics of key demographic and BMI variables by gender. Numeric variables presented with means and standard deviations. Categorical variables presented with frequencies and percentages.}
+\begin{tabular}{lll}
+\toprule
+Variable & Female & Male\\
+\midrule
+Age & 15.84 (1.31) & 15.93 (1.25)\\
+BMI & 23.04 (4.99) & 22.82 (4.90)\\
+Height & 162.99 (7.82) & 175.88 (9.19)\\
+Parent 1 Education & 5.15 (2.26) & 5.13 (2.27)\\
+Parent 1 Income (estimated) & 61,625.23 (21,784.89) & 61,491.45 (22,195.84)\\
+Parent 1 Occupational Prestige (estimated) & 60.76 (14.64) & 60.20 (15.22)\\
+Parent 2 Education & 4.72 (2.31) & 4.82 (2.26)\\
+Parent 2 Income (estimated) & 59,058.07 (22,926.91) & 57,247.11 (22,364.35)\\
+Parent 2 Occupational Prestige (estimated) & 57.87 (15.76) & 57.07 (15.59)\\
+Weight & 61.23 (14.48) & 70.70 (17.24)\\
+Normal Weight & 4982 (69.89\%) & 2160 (66.73\%)\\
+Obese & 857 (12.02\%) & 483 (14.92\%)\\
+Overweight & 1107 (15.53\%) & 429 (13.25\%)\\
+Underweight & 182 (2.55\%) & 165 (5.10\%)\\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{center}
+\end{table*}

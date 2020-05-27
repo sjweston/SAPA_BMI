@@ -1,6 +1,5 @@
-# ------------------------------------
-# load packages and data             #
-# ------------------------------------
+# ---- load packages and data             ----
+
 
 #load packages
 packages = c("tidyverse", "broom", "nnet", "rsample", "caret", "ROSE")
@@ -9,13 +8,9 @@ rm(packages)
 
 load("data/cleaned.Rdata")
 
-
-# ----------------------------------------------
-# set up train/test              #
-# ----------------------------------------------
-
 # set seed
 set.seed(090919)
+
 
 ctrl <- trainControl(method = "repeatedcv", # cross-validation
                      number = 10,  # 10 fold cross validation
@@ -24,15 +19,9 @@ ctrl <- trainControl(method = "repeatedcv", # cross-validation
                      search = "random",
                      sampling = "smote") 
 
-# parition into training and test sets. objects identify just training rows
-train_male = createDataPartition(sapa_male$BMI_c, p = .75, list = FALSE)
-train_female = createDataPartition(sapa_female$BMI_c, p = .75, list = FALSE)
+# ---- wrangle data for iteration         ----
 
-# ------------------------------------
-# wrangle data for iteration         #
-# ------------------------------------
-
-#end goal of wrangling is a data frame of data frames
+# end goal of wrangling is a data frame of data frames
 # nested dataframes correspond to a single personality trait
 # score refers to a participant's score on that trait
 # we also standardize each of our variables within gender
@@ -41,22 +30,28 @@ train_female = createDataPartition(sapa_female$BMI_c, p = .75, list = FALSE)
 sapa_male_trait = sapa_male %>%
   dplyr::select(-starts_with("p1"), -starts_with("p2"), -starts_with("edu")) %>%
   mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
-  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p) %>%
-  group_by(trait_name) %>%
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>%
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>%
+  group_by(trait_name, set) %>%
   mutate(trait_score = scale(trait_score)) %>%
+  ungroup() %>%
+  group_by(trait_name) %>%
   nest()
 
 sapa_female_trait = sapa_female %>%
   dplyr::select(-starts_with("p1"), -starts_with("p2"), -starts_with("edu")) %>%
   mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
-  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p) %>%
-  group_by(trait_name) %>%
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>%
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>%
+  group_by(trait_name, set) %>%
   mutate(trait_score = scale(trait_score)) %>%
+  ungroup() %>%
+  group_by(trait_name) %>%
   nest()
 
-# -----------------------------------------------------------
-# ordered logistic regression iteration (males)         #
-# -----------------------------------------------------------
+
+
+# ---- ordered logistic regression iteration (males)         ----
 
 male_ses_only = train(BMI_c ~ ses, data = sapa_male, 
                  subset = train_male, 
@@ -95,9 +90,7 @@ male_log = sapa_male_trait %>%
          # tidy output for printing
          coef = map(final_mod, broom::tidy, conf.int = TRUE))
 
-# -----------------------------------------------------------
-# ordered logistic regression iteration (females)           #
-# -----------------------------------------------------------
+# ---- ordered logistic regression iteration (females)           ----
 
 female_ses_only = train(BMI_c ~ ses, data = sapa_female, 
                       subset = train_female, 
@@ -133,8 +126,8 @@ female_log = sapa_female_trait %>%
          # tidy output for printing
          coef = map(final_mod, broom::tidy, conf.int = TRUE))
 
-# ----------------------------------------------
-# save output                                  #
-# ----------------------------------------------
+
+# ---- save output                                  
+
 
 save(train_male, male_ses_only, male_log, train_female, female_ses_only, female_log, file = "data/logistic_output.Rdata")
