@@ -77,7 +77,7 @@ sapa = sapa %>%
          z.p2edu = scale(p2edu),
          z.p1occIncomeEst = scale(p1occIncomeEst),
          z.p2occIncomeEst = scale(p2occIncomeEst),
-         z.p2occPrestige = scale(p1occPrestige),
+         z.p1occPrestige = scale(p1occPrestige),
          z.p2occPrestige = scale(p2occPrestige)) 
 
 sapa$ses = rowMeans(sapa[,grepl("^z\\.", names(sapa))], na.rm=T)
