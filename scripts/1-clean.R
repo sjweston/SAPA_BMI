@@ -31,7 +31,10 @@ sapa = sapa %>%
   filter(country == "USA") %>%
   filter(!is.na(sex)) %>%
   filter(!is.na(height)) %>%
-  filter(!is.na(weight))
+  filter(!is.na(weight)) %>%
+  filter(!is.na(p1edu) | !is.na(p2edu) |
+           !is.na(p1occIncomeEst) | !is.na(p2occIncomeEst) |
+           !is.na(p1occPrestige) | !is.na(p2occPrestige))
 
 # ----- score SES ----
 
@@ -64,11 +67,6 @@ sapa = sapa %>%
 
 sapa$p1edu = as.numeric(sapa$p1edu)
 sapa$p2edu = as.numeric(sapa$p2edu)
-
-sapa = sapa %>%
-  filter(!is.na(p1edu) | !is.na(p2edu) |
-           !is.na(p1occIncomeEst) | !is.na(p2occIncomeEst) |
-           !is.na(p1occPrestige) | !is.na(p2occPrestige))
 
 #estimate SES composite
 

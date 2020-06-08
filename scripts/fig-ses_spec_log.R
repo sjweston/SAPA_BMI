@@ -1,4 +1,4 @@
-# ---- load packages                      ----
+# ---- load packages  ----
 
 
 packages = c("tidyverse")

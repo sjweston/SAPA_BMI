@@ -192,6 +192,35 @@ pca_only = female_all %>%
 
 ggarrange(main_only, pca_only, nrow = 1)
 
+# ----- female same results ---------------------------------------------
+
+W = .8
+female_both = female_all %>%
+  filter(sig %in% c("Both"),
+         term == "trait_score",
+         model == "cov") %>%
+  gather("key","value",estimate_main, estimate_pca, conf.high_main, conf.low_main, conf.high_pca, conf.low_pca) %>%
+  separate(key, into = c("key", "version"), sep = "_") %>%
+  spread(key, value) %>%
+  arrange(desc(estimate)) %>%
+  mutate(estimate = 1-estimate,
+         conf.low = 1-conf.low,
+         conf.high = 1-conf.high) %>%
+  ggplot(aes(x = trait_name, y = estimate, fill = version)) +
+  geom_bar(stat = "identity",position = position_dodge(W), color = "black", alpha = .7) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(W), width = .5, color = "black")+ 
+  coord_flip() +
+  guides(fill = F) +
+  scale_x_discrete("") +
+  scale_y_continuous("Odds Ratio",
+                     breaks = seq(from = -1, 1.5, by = .5), 
+                     labels = seq(-2, 0.5, by = .5)) +
+  ggtitle("Coefficients significant\nonly in complete data") +
+  facet_grid(y.level~., 
+             scales = "free_y")
+
+
 # ----- male statistical significance ---------------------------------------------
 
 male_all %>%
@@ -281,3 +310,34 @@ pca_only = male_all %>%
              scales = "free_y")
 
 ggarrange(main_only, pca_only, nrow = 1)
+
+
+# ----- male same results ---------------------------------------------
+
+W = .8
+male_both = male_all %>%
+  filter(sig %in% c("Both"),
+         term == "trait_score",
+         model == "cov") %>%
+  gather("key","value",estimate_main, estimate_pca, conf.high_main, conf.low_main, conf.high_pca, conf.low_pca) %>%
+  separate(key, into = c("key", "version"), sep = "_") %>%
+  spread(key, value) %>%
+  arrange(desc(estimate)) %>%
+  mutate(estimate = 1-estimate,
+         conf.low = 1-conf.low,
+         conf.high = 1-conf.high) %>%
+  ggplot(aes(x = trait_name, y = estimate, fill = version)) +
+  geom_bar(stat = "identity",position = position_dodge(W), color = "black", alpha = .7) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(W), width = .5, color = "black")+ 
+  coord_flip() +
+  guides(fill = F) +
+  scale_x_discrete("") +
+  scale_y_continuous("Odds Ratio",
+                     breaks = seq(from = -1, 1.5, by = .5), 
+                     labels = seq(-2, 0.5, by = .5)) +
+  ggtitle("Coefficients significant\nonly in complete data") +
+  facet_grid(y.level~., 
+             scales = "free_y")
+
+
