@@ -5,14 +5,14 @@
 set.seed(052319)
 
 # load packages
-packages = c("tidyverse", "janitor", "psych", "devtools", 
+packages = c("tidyverse", "janitor", "psych", "devtools", "fastDummies",
              "PAutilities", "measurements", "here", "caret",
              "missMDA")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 #read in data
-load(here("../../data/SAPA/collaboration/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
+load(here("../../SAPA data/original data/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
 sapa = SAPAdata07feb2017thru22jul2019x
 
 source(here("scripts/personality_scales.R"))
@@ -38,7 +38,9 @@ variables_not_in_study = names(sapa)[!(names(sapa) %in% variables_in_study)]
 
 
 data_to_impute = sapa[, c("weight", "height", variables_not_in_study)] %>%
-  mutate_if(is.factor, as.numeric)
+  select(-starts_with("q_"), - contains("occ"), -BMI, -education, -insurance) 
+data_to_impute = fastDummies::dummy_cols(data_to_impute, remove_first_dummy = TRUE)
+data_to_impute = select(data_to_impute, where(is.numeric))
 
 #identify variables that are missing pairwise administrations
 prop.complete = function(x){
@@ -94,6 +96,7 @@ sapa$height[rows.female] = imputed.female$completeObs[,"height"]
 
 # ----- filter by age  ----
 
+sapa_imputed = sapa
 
 # remove participants who are 18 years or older and from the US
 sapa = sapa %>%
@@ -112,14 +115,14 @@ sapa = sapa %>%
 #or years
 sapa = sapa %>%
   mutate(p1edu = case_when(
-    p1edu == "less12yrs" ~ "6", 
-    p1edu == "HSgrad" ~ "12", 
-    p1edu == "SomeCollege" ~ "14", 
-    p1edu == "CurrentInUniv" ~ "14", 
-    p1edu == "AssociateDegree" ~ "14", 
-    p1edu == "CollegeDegree" ~ "16", 
-    p1edu == "InGradOrProSchool" ~ "18", 
-    p1edu == "GradOrProDegree" ~ "20")) 
+    p2edu == "less12yrs" ~ "6", 
+    p2edu == "HSgrad" ~ "12", 
+    p2edu == "SomeCollege" ~ "14", 
+    p2edu == "CurrentInUniv" ~ "14",   
+    p2edu == "AssociateDegree" ~ "14", 
+    p2edu == "CollegeDegree" ~ "16", 
+    p2edu == "InGradOrProSchool" ~ "18", 
+    p2edu == "GradOrProDegree" ~ "20")) 
 
 sapa = sapa %>%
   mutate(p2edu = case_when(
@@ -181,7 +184,7 @@ sapa = cbind(sapa, b5scores)
 
 # ----- score 27 personality factors (IRT scores) ----
 
-load(here("../../data/SAPA/IRTinfoSPI27.rdata"))
+load(here("../../SAPA data/created/IRTinfoSPI27.rdata"))
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
@@ -226,7 +229,7 @@ sapa = cbind(sapa, SPIirtScores)
 
 # ----- score 27 personality factors (IRT scores) ----
 
-load(here("../../data/SAPA/IRTinfoICAR.rdata"))
+load(here("../../SAPA data/created/IRTinfoICAR.rdata"))
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
@@ -299,7 +302,7 @@ sapa_female = sapa %>%
   filter(sex == "female") %>%
   dplyr::select(-sex)
 
-save(b5scored, file = here("data/alpha.Rdata"))
+#save(b5scored, file = here("data/alpha.Rdata"))
 
 # ----- set up train/test ----
 

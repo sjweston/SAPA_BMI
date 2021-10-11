@@ -1,6 +1,6 @@
-# ------------------------------------
-# load packages and data             #
-# ------------------------------------
+
+# ---- load packages and data             #----
+
 
 #load packages
 packages = c("tidyverse", "psych", "corrplot")
@@ -9,9 +9,8 @@ rm(packages)
 
 load(here("data/cleaned.Rdata"))
 
-# ------------------------------------
-# correlation matrix                 #
-# ------------------------------------
+# ---- correlation matrix -----
+
 R_male = sapa_male %>%
   dplyr::select(-BMI_c) %>%
   cor(use = "pairwise")
@@ -20,9 +19,7 @@ R_female = sapa_female %>%
   dplyr::select(-BMI_c) %>%
   cor(use = "pairwise")
 
-# ------------------------------------
-# significance of correlation        #
-# ------------------------------------
+
 
 #predictors
 pred = names(sapa_male) %>% str_subset("BMI", negate = TRUE)

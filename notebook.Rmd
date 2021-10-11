@@ -1,0 +1,561 @@
+---
+title: "BMI Percentile by SES and Individual Differences in Adolescents"
+output:
+  # html_document:
+  #   toc: yes
+  #   toc_float: TRUE
+  #   code_folding: hide
+  bookdown::pdf_document2:
+    toc: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+
+\newpage 
+
+Data for this study come from the subset of responses collected on the [SAPA-project.org](sapa-project.org) website between February 17, 2017 and July 22, 2019. The initial date is the day that the semi-random presentation of items to participants was changed to increase presentation of SPI-135 items, which are the basis for personality measurement in this study. This period also represents a new period of data collection on SAPA containing data that are not available in the public domain at the time of analysis. The end date of data collection was the first day following preregistration of analysis that the authors were able to analyze data.
+
+```{r, include = FALSE, warning = F, message = F}
+library(knitr)
+library(here)
+library(tidyverse)
+library(ggthemr)
+```
+
+```{r echo=FALSE, results='asis'}
+options(knitr.kable.NA = '')
+```
+
+\newpage 
+
+# Clean data
+
+```{r, include = FALSE}
+knitr::read_chunk(here("scripts/1-clean.R"))
+```
+
+
+```{r load packages and data, eval=F}
+```
+
+Participants were included in the analysis if they were under the age of 18, from the United States, and had reported their biological sex at birth, height, and weight.
+
+```{r filter by age, eval = F}
+```
+
+Parental education was transformed into a numeric variable: 1 (less than 12 years of education), 2 (high school graduate or GED), 3 (some college), 4 (currently in college/university), 5 (Associate’s degree), 6 (university degree), 7 (currently in graduate or professional school), and 8 (graduate or professional degree). All parental SES variables -- education, estimated income and estimated prestige, were standardized to the sample and averaged to create a single index of parental SES.
+
+```{r score SES, eval = F}
+```
+
+Big Five traits were scored using a sum-score method, averaged across non-missing responses.
+
+```{r score 5 personality factors (sum scores), eval = F}
+```
+
+The narrower traits, the SPI-27, were scored using IRT scoring. Calibration parameters were taken from a different dataset and are available on request.
+
+```{r score 27 personality factors (IRT scores), eval = F}
+```
+
+Cognition was also scored using IRT scoring, with calibrations from a separate dataset.
+
+```{r score 27 personality factors (IRT scores), eval = F}
+```
+
+BMI percentile represents a participant's percentile score on BMI relative to others of their assigned sex at birth. These were estimated from the `PAutilities` package, developed by WHO Multicentre Growth Reference Study (MGRS)
+information about the development of these reference standards can be found at
+[https://www.cdc.gov/obesity/childhood/defining.html](https://www.cdc.gov/obesity/childhood/defining.html). These standards in turn were developed using the 2000 CDC growth charts, based on data from 5 national
+health examination surveys that occurred from 1963 to 1994 and supplemental data from surveys that
+occurred from 1960 to 1995.
+
+Kuczmarski RJ, Ogden CL, Guo SS, et al. 2000 CDC growth charts for the United States: methods and development.
+National Center for Health Statistics. _Vital Health Stat 11. 2002;_(246):1-190
+
+BMI category is assigned based on BMI percentile: participants in the bottom 10% are labeled Underweight, between the top 10% and 5% are Overweight, and top 5% are Obese. All others are labelled Normal.
+
+```{r calculate BMI zscore, percentile, and category based on CDC guidelines, eval = F}
+```
+
+All analyses were performed separately by gender.
+
+```{r split by gender, eval = F}
+```
+
+The datasets were split into training (75%) and test (25%) sets; all regression models are estimated using the training sets. The test set was reserved to estimate model accuarcy, comparing models with different sets of individual differences.
+
+```{r set up train/test, eval = F}
+```
+
+
+
+\newpage 
+
+# Descriptive Statistics
+
+## Univariate descriptives
+
+```{r include = FALSE, cache = FALSE}
+knitr::read_chunk(here("scripts/2-describe.R"))
+```
+
+Descriptive statistics are estimated using the `psych` package.
+
+```{r calculate, eval = F}
+```
+
+```{r describe-load, echo = F}
+load(here("data/descriptives.Rdata"))
+```
+
+```{r describe-table, paged.print=TRUE, message = F}
+library(kableExtra)
+#pull descriptives into a list
+descriptives.df = data.frame(gender = names(descriptives))
+descriptives.df$data = descriptives
+
+#add variable names and unnest
+descriptives.df = descriptives.df %>%
+  mutate(data = map(data, function(x) mutate(x, vars = rownames(x)))) %>%
+  unnest(cols = c(data))
+```
+
+
+### Descriptives Table by Gender {.tabset}
+
+
+```{r describe-tab-f, results = 'asis'}
+descriptives.df %>%
+  select(gender, vars, n, mean, sd, min, max) %>%
+  gather(stat, value, -gender, -vars) %>%
+  unite(stat, stat, gender) %>%
+  spread(stat, value) %>%
+  select(vars, n_female, mean_female, sd_female, min_female, max_female,
+         n_male, mean_male, sd_male, min_male, max_male) %>%
+  kable(., 
+        col.names = c("Variable", rep(c("N", "Mean", "SD", "Min", "Max"), 2)), 
+        digits = 2,  
+        longtable = T,
+        booktabs = T) %>%
+  kable_styling() %>% 
+  landscape() %>%
+  add_header_above(c(" " = 1, "Female" = 5, "Male" = 5))
+```
+
+
+
+## Bivariate
+
+```{r  cache = FALSE, include = FALSE}
+knitr::read_chunk(here("scripts/3-correlation.R"))
+```
+
+```{r correlation matrix, eval = F}
+```
+
+```{r cor-load, echo = F}
+load(here("data/cor_output.Rdata"))
+```
+
+### Figure {.tabset}
+
+#### Female
+```{r corplot-f, message=FALSE, fig.width = 10, fig.height = 11}
+library(corrplot)
+corrplot(R_female, method = "square",
+         title = "\nZero-order correlations among study variables\nFemale Participants",
+         tl.col = "black",
+         mar=c(0,0,1,0))
+```
+
+#### Male
+
+```{r corplot-m, message=FALSE, fig.width = 10, fig.height = 11}
+corrplot(R_male, method = "square",
+         title = "\nZero-order correlations among study variables\nMale Participants",
+         tl.col = "black",
+         mar=c(0,0,1,0))
+```
+
+\newpage 
+
+# Regression Models (SES) {.tabset}
+
+```{r, include = FALSE, cache = FALSE}
+knitr::read_chunk(here("scripts/4-regression.R"))
+```
+
+Regression models were built that regressed BMI percentile onto parental socio-economic status and adolescent individual differences. Two basic models were constructed: one that hypothesized parental SES:
+
+$$BMIp_i = b_0 + b_1(SES_i) + b_2(ID_i) + e_i$$
+
+and an individual difference were two independent predictors of BMI, and a second that hypothesized these variables interacted with each other:
+
+$$BMIp_i = b_0 + b_1(SES_i) + b_2(ID_i) + b_3(SES_i\times ID_i) + e_i$$
+We iterated through all individual differences -- the broad Big Five personality traits, the narrow SPI-27 traits, and cognitive ability -- and tested each one independently in the model as an individual difference.
+
+Models were estimated separately for men and women.
+```{r wrangle data for iteration, eval = F}
+```
+
+## Controlling for personality {.tabset}
+
+```{r, echo = F}
+load(here("data/regression_output_male.Rdata"))
+load(here("data/regression_output_female.Rdata"))
+```
+
+
+```{r include=FALSE, cache = FALSE}
+knitr::read_chunk(here("scripts/fig-ses_spec.R"))
+```
+
+To estimate the effect of socioeconomic status on BMI percentile, we graph the estimates of the SES slope coefficient across all regression models controlling for individual differences. This presents not only the average estimate across all models (solid line), but the range of estimates -- a wide range suggests that the effect of SES on BMI is sensitive to the inclusion of different individual difference measures, while a narrow range suggests that the effect of SES on BMI is persistent through personality and cognition.
+
+```{r load packages, echo = F, warning = F, message = F, results = 'hide'}
+```
+
+
+### Female
+
+```{r Avg Female SES effect specification additive}
+```
+
+<!-- Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among girls. Adolescent girls living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. -->
+
+```{r Figure. Female SES effect specification additive}
+```
+
+
+
+### Male
+
+```{r Avg Male SES effect specification additive}
+```
+
+<!-- Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(100-avg_male[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_male[2, "mean"]*100)`% less likely, and `r 100-round(avg_male[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. -->
+
+```{r Figure. Male SES effect specification additive}
+```
+
+
+
+## Interaction with  personality {.tabset}
+
+
+To estimate the joint effect of socioeconomic status and individual differences on BMI percentile, we graph the estimates of the interaction terms of SES by individual differences by BMI percentile. Like before, we present the average effect (solid black line) and the 95% confidence intervals for each model.
+
+
+### Female
+
+```{r Avg Female SES effect specification interaction}
+```
+
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among girls. Adolescent girls living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts.
+
+```{r Figure. Female SES effect specification interaction}
+```
+
+
+### Male
+
+```{r Avg Male SES effect specification interaction}
+```
+
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(avg_male[3, "mean"]*100)-100`% more likely to be Underweight, `r round(avg_male[2, "mean"]*100)-100`% more likely, and `r round(avg_male[1, "mean"]*100)-100`% more likely to be Obese compared to low SES counterparts.
+
+```{r Figure. Male SES effect specification interaction}
+```
+
+## Code (Female)
+
+```{r regression iteration (females), eval = F}
+```
+
+## Code (Male)
+
+```{r regression iteration (males), eval = F}
+```
+
+
+\newpage 
+
+# Regression (Individual differences)
+
+
+```{r, include = FALSE, cache = FALSE}
+knitr::read_chunk(here("scripts/tab-regression.R"))
+```
+
+
+```{r load packages, echo = F, warning = F, results='hide'}
+
+```
+
+```{r table regression model, results = 'asis'}
+
+```
+
+
+```{r, include = FALSE, cache = FALSE}
+knitr::read_chunk(here("scripts/fig-regression.R"))
+```
+
+
+```{r allcode, echo = F, warning = F, results='hide', fig.width = 10, fig.height = 5}
+
+```
+
+
+\newpage 
+
+# Logistic Regression (SES) {.tabset}
+
+```{r load-log, echo=F, message=FALSE, results='hide', cache = FALSE}
+read_chunk(here("scripts/5-logistic.R"))
+```
+
+Multinomial logistic regression models were built that regressed BMI category onto parental socio-economic status and adolescent individual differences. Two basic models were constructed: one that hypothesized parental SES:
+
+$$BMI_i = b_0 + b_1(SES_i) + b_2(ID_i) + e_i$$
+
+and an individual difference were two independent predictors of BMI, and a second that hypothesized these variables interacted with each other:
+
+$$BMI_i = b_0 + b_1(SES_i) + b_2(ID_i) + b_3(SES_i\times ID_i) + e_i$$
+We iterated through all individual differences -- the broad Big Five personality traits, the narrow SPI-27 traits, and cognitive ability -- and tested each one independently in the model as an individual difference.
+
+Models were estimated separately for men and women.
+```{r wrangle data for iteration, eval = F}
+```
+## Controlling for personality {.tabset}
+
+```{r, echo = F}
+load(here("data/logistic_output.Rdata"))
+```
+
+
+```{r load-log-hist, echo=F, message=FALSE, results='hide', cache = FALSE}
+read_chunk(here("scripts/fig-ses_spec_log.R"))
+```
+
+To estimate the effect of socioeconomic status on BMI category, we graph the estimates of the SES slope coefficient across all logistic regression models controlling for individual differences. This presents not only the average estimate across all models (solid line), but the range of estimates -- a wide range suggests that the effect of SES on BMI is sensitive to the inclusion of different individual difference measures, while a narrow range suggests that the effect of SES on BMI is persistent through personality and cognition.
+
+```{r load packages, echo = F, messages = F, warning = F,results='hide'}
+```
+
+
+### Female
+
+```{r Avg Female SES effect specification additive, echo = F, messages = F, warning = F}
+```
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among girls. Adolescent girls living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts.
+
+```{r Figure. Female SES effect specification additive, echo = F, messages = F, warning = F}
+
+```
+
+
+
+### Male
+
+```{r Avg Male SES effect specification additive, echo = F, messages = F, warning = F}
+```
+
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(100-avg_male[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_male[2, "mean"]*100)`% less likely, and `r 100-round(avg_male[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts.
+
+```{r Figure. Male SES effect specification additive, echo = F, messages = F, warning = F}
+```
+
+## Interaction with  personality {.tabset}
+
+
+To estimate the joint effect of socioeconomic status and individual differences on BMI category, we graph the estimates of the interaction terms of SES by individual differences by BMI category. Like before, we present the average effect (solid black line) and the 95% confidence intervals for each model.
+
+
+### Female
+
+```{r Avg Female SES effect specification interaction, echo = F, messages = F, warning = F}
+```
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among girls. Adolescent girls living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts.
+
+```{r female-spec int figure, echo = F, messages = F, warning = F}
+<<Figure. Female SES effect specification interaction>>
+```
+
+
+### Male
+
+```{r Avg Male SES effect specification interaction, echo = F, messages = F, warning = F}
+```
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(avg_male[3, "mean"]*100)-100`% more likely to be Underweight, `r round(avg_male[2, "mean"]*100)-100`% more likely, and `r round(avg_male[1, "mean"]*100)-100`% more likely to be Obese compared to low SES counterparts.
+
+```{r Figure. Male SES effect specification interaction, echo = F, messages = F, warning = F}
+```
+
+## Code (Female)
+
+```{r ordered logistic regression iteration (females), eval = F}
+```
+
+## Code (Male)
+
+```{r ordered logistic regression iteration (males), eval = F}
+```
+
+\newpage 
+
+# Logistic Regression (Individual differences) {.tabset}
+
+## Female
+
+```{r, echo = F}
+read_chunk(here("scripts/fig-id-prob_density_log.R"))
+```
+
+
+```{r f-i-p-d-l load packages, echo = F, message = F, warning = F, results = 'hide'}
+```
+
+```{r female prob figure, echo = F, message = F}
+```
+
+
+```{r log_female_fig 27, eval = F, echo = F, message = F, fig.height = 15}
+prob_dist_data_female %>%
+  ungroup() %>%
+  filter(!(trait_name %in% b5andcog)) %>%
+  gather(key = "weight", value = "probability", -trait_name, -trait_score, -ses) %>%
+  ggplot(aes(x = trait_score, y = probability, color = weight, fill = weight)) +
+  geom_line() +
+  facet_wrap(~trait_name, scales = "free_x", ncol = 4) +
+  theme_bw() + theme(legend.position = "bottom")
+```
+
+
+
+```{r load-tab-log-female, echo=F, message=FALSE, results='hide', cache = FALSE}
+read_chunk(here("scripts/tab-logistic.R"))
+```
+
+```{r load packages, echo = F, message = F, warning = F, results = 'hide'}
+```
+
+```{r Table. Regression model additive Female, echo = F, results = 'asis'}
+```
+
+## Male
+
+```{r, echo = F}
+read_chunk(here("scripts/fig-id-prob_density_log.R"))
+```
+
+
+```{r male prob figure, echo = F, message = F}
+```
+
+
+```{r log_male_fig 27, eval = F, echo = F, message = F, fig.height = 15}
+
+```
+
+
+
+```{r load-tab-log-male, echo=F, message=FALSE, results='hide', cache = FALSE}
+read_chunk(here("scripts/tab-logistic.R"))
+```
+
+```{r load packages, echo = F, message = F, warning = F, results = 'hide'}
+```
+
+```{r Table. Regression model additive Male, echo = F, results = 'asis'}
+```
+
+
+\newpage 
+
+# Model accuracy{.tabset}
+
+```{r, echo=F}
+read_chunk(here("scripts/6-accuracy_reg.R"))
+```
+
+```{r, results = 'hide', message = F, warning = F}
+<<load packages>>
+```
+
+We use the splits generated in the Cleaning data section of the notebook to create our training and test data. (Note that to this point, only the training data have been used in the regression models).
+
+```{r, message = F, warning = F}
+<<split data>>
+```
+
+We build a function to fit the lasso models. 
+
+```{r function for fitting, message = F, warning = F}
+```
+
+We also a build a model to get the predictions in the test set from the model best fit in the training data. 
+
+```{r model for predictions, message = F, warning = F}
+```
+
+We fit these models separately for adolescent boys and adolescent girls
+
+```{r female fits, message = F, warning = F} 
+```
+
+```{r male fits, message = F, warning = F} 
+```
+
+We extract the relevant information for a table.
+
+```{r table, results = 'asis', message = F, warning = F}
+
+```
+
+
+# Sensitivity analysis:  Missing data {.tabset}
+
+Once we filter for adolescents living in the United States, approximately half our sample did not report either their height or weight. Given the sensitivity of body image, especially for the adolescent girls in our sample, we suspect these values are missing not at random (MNAR) and may impact the estimates here. To test for these effects, we imputed missing height and weight values using a principal components analysis approach, using only the other variables in the SAPA dataset that were not included in the analyses above. We repeated the regression models with 10-fold cross validation, repeated 10 times, and report here the differences in significance across models and the differences in effect sizes.
+
+```{r load-compareimpute, echo=F, message=FALSE, results='hide', cache = FALSE}
+read_chunk(here("scripts/compare_imputed_regression.R"))
+```
+
+```{r, echo = F, message = F, results = 'hide', warning = F}
+<<load packages>>
+```
+
+Imputation using a principle components analysis suggested that many of the missing BMI percentiles were between 75 and 100 for both adolescent girls and boys (see Figure \@ref(fig:senscompare)). This would be consistent with a common sense rationale for missing data; in other words, we might expect those adolescents with larger BMI to be the individuals least likely to share their height and weight. However, the proposed distributions from the imputation were heavily skewed. We would not expect to see a distribution like this unless there were some association between BMI and completing the online personality assessment, which is unlikely. 
+
+```{r senscompare, echo = F,  message = F, fig.width = 10, fig.height = 7}
+<<compare distributions>>
+```
+
+```{r, echo = F, results ='hide', message = F}
+<<load>>
+```
+
+
+## Female
+
+We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent girls (Figure \@ref(fimputesig)). Approximately 6 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. The majority of trait associations had the same significance across datasets. In all cases, SES was always a significant predictor. In one case, there was a significant interaction effect when using imputed data, but this seems likely be to sampling error.
+
+```{r fimputesig, echo = F,  message = F, fig.width = 10, fig.height = 7}
+<<female statistical significance>>
+```
+
+```{r, echo = F,  message = F, fig.width = 10, fig.height = 7}
+<<female ceof difference>>
+```
+
+## Male
+
+```{r, echo = F,  message = F, fig.width = 10, fig.height = 7}
+<<male statistical significance>>
+```
+
+```{r, echo = F,  message = F, fig.width = 10, fig.height = 7}
+<<male ceof difference>>
+```

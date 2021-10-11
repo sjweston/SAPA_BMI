@@ -1,0 +1,25 @@
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics[height=5in]{bmi_personality_files/figure-latex/SESplot-1} \caption{ }\label{fig:SESplot}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics[height=8in]{bmi_personality_files/figure-latex/personplot-1} \caption{ }\label{fig:personplot}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics[height=5in]{bmi_personality_files/figure-latex/SESplot2-1} \caption{ }\label{fig:SESplot2}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics[height=10in]{bmi_personality_files/figure-latex/sens-1} \caption{ }\label{fig:sens}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics[width=5in]{bmi_personality_files/figure-latex/auc-1} \caption{ }\label{fig:auc}
+\end{figure*}

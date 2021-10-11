@@ -58,7 +58,7 @@ classoption       : "man"
 header-includes   :
   - \usepackage[T1]{fontenc} 
   - \usepackage{tabu}
-output            : papaja::apa6_pdf
+output            : papaja::apa6_word
 replace_ampersands: yes
 csl               : apa6.csl
 
@@ -147,7 +147,7 @@ Given the known relationships between SES and both BMI and individual difference
 
 ## The present study
 
-In this study, we use a large sample of adolescents in the United States to examine the relationship between personality and cognitive ability to BMI above and beyond the influence of SES; moreover, we examine whether the relationship between individual differences and BMI changes across socioeconomic strata. The current study aims to clarify the relationship between personality traits, cognitive ability, SES, and BMI through the following methods: (1) examining both broad (Big-Five) and narrow traits to better determine the aspects of personality which relate to BMI, (2) utilizing a measure of SES that accounts for monetary resource and social status, and (3) using both percentile and categorical assessments of BMI to allow for both linear and non-linear relationships between psychosocial constructs and health.
+In this study, we use a large sample of adolescents in the United States to examine the relationship between personality and cognitive ability to BMI above and beyond the influence of SES; moreover, we examine whether the relationship between individual differences and BMI changes across socioeconomic strata. The current study aims to clarify the relationship between personality traits, cognitive ability, SES, and BMI through the following methods: (1) examining both broad (Big-Five) and narrow traits to better determine the aspects of personality which relate to BMI, (2) utilizing a measure of SES that accounts for monetary resource and social status, and (3) using both percentile and categorical assessments of BMI to allow for both linear and non-linear relationships between psychosocial constructs and health. 
 
 # Methods
 
@@ -158,7 +158,7 @@ sapa_raw = SAPAdata07feb2017thru22jul2019x
 
 ## Data Collection
 
-Data were collected through an online survey, in which participants can volunteer to complete between 25 and 250 survey questions assessing personality, cognitive ability, interets, and values (citation masked). Volunteers are compensated with feedback about their results. This website was visited `r printnum(nrow(sapa_raw), format = "d")` times during the data collection period, 
+Data were collected through an online survey, in which participants can volunteer to complete between 25 and 250 survey questions assessing personality, cognitive ability, interets, and values (citation masked). Volunteers are compensated with feedback about their results. This website was visited `r printnum(nrow(sapa_raw), format = "d")` times during the data collection period, February 8, 2017 through July 22, 2019. 
 
 ## Participants
 ```{r}
@@ -294,12 +294,11 @@ Narrow SPI-27 trait scores (5 items each) were estimated using an IRT-scoring ap
 
 ## Data analysis
 
-To assess the degree to which SES and individual differences are uniquely, concurrently associated with BMI category, we used multinomial logistic regression models, with "Normal" as the reference category. We estimated 33 versions of this model, with each model including both SES and either one personality trait or cognitive ability (thirty-three individual difference measures in total). In addition, we estimate each of these models with an interaction term, to estimate whether the relationship of personality to SES depends on parental socioeconomic status. Specific hypotheses were preregistered at [https://osf.io/ypf7r](https://osf.io/ypf7r)^[We note here that as part of the preregistered analyses, we also include linear regression models with BMI percentile as the outcome; these are not reported here in an effort to succinctly report analyses and because prior to data analysis, we noted that use of the CDC thresholds was the more clinically relevant outcome.]. 
+To assess the degree to which SES and individual differences are uniquely, concurrently associated with BMI category, we used multinomial logistic regression models, with "Normal" as the reference category. We estimated 33 versions of this model, with each model including both SES and either one personality trait or cognitive ability (thirty-three individual difference measures in total). In addition, we estimate each of these models with an interaction term, to estimate whether the relationship of personality to SES depends on parental socioeconomic status. Specific hypotheses were preregistered at [https://osf.io/ypf7r/?view_only=2932b269b0fa4cd09746c614ebccbf9a](https://osf.io/ypf7r/?view_only=2932b269b0fa4cd09746c614ebccbf9a)^[We note here that as part of the preregistered analyses, we also include linear regression models with BMI percentile as the outcome; these are not reported here in an effort to succinctly report analyses and because prior to data analysis, we noted that use of the CDC thresholds was the more clinically relevant outcome.]. 
 
 Analyses were performed separately for male and female adolescents. All variables were standardized within gender sample prior to analysis, so coefficient estimates can be interpreted as standardized effect sizes. Logistic models were estimated using 10-fold cross-validation, repeated 10 times, with SMOTE sampling, which can be useful for dealing with imbalanced classes. Coefficient estimates are from the final model set to maximize accuracy. 
 
 All analyses described above were performed on subset of our sample containing a random 75% of the adolescent girls and 75% of the adolescent boys, stratified by BMI category. The remaining 25% of the same was used in exploratory analyses that examine the overall accuracy models that predict BMI category from (1) socioeconomic status alone, (2) SES plus the Big Five personality traits, and (3) SES plus the Narrow-27.
-
 
 # Results
 

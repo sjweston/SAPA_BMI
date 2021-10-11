@@ -11,7 +11,7 @@ lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 #read in data
-load(here("../../data/SAPA/collaboration/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
+load(here("../../SAPA data/original data/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
 sapa = SAPAdata07feb2017thru22jul2019x
 
 source(here("scripts/personality_scales.R"))
@@ -45,14 +45,14 @@ sapa = sapa %>%
 #or years
 sapa = sapa %>%
   mutate(p1edu = case_when(
-  p1edu == "less12yrs" ~ "6", 
-  p1edu == "HSgrad" ~ "12", 
-  p1edu == "SomeCollege" ~ "14", 
-  p1edu == "CurrentInUniv" ~ "14", 
-  p1edu == "AssociateDegree" ~ "14", 
-  p1edu == "CollegeDegree" ~ "16", 
-  p1edu == "InGradOrProSchool" ~ "18", 
-  p1edu == "GradOrProDegree" ~ "20")) 
+    p2edu == "less12yrs" ~ "6", 
+    p2edu == "HSgrad" ~ "12", 
+    p2edu == "SomeCollege" ~ "14", 
+    p2edu == "CurrentInUniv" ~ "14",   
+    p2edu == "AssociateDegree" ~ "14", 
+    p2edu == "CollegeDegree" ~ "16", 
+    p2edu == "InGradOrProSchool" ~ "18", 
+    p2edu == "GradOrProDegree" ~ "20")) 
 
 sapa = sapa %>%
   mutate(p2edu = case_when(
@@ -109,7 +109,7 @@ sapa = cbind(sapa, b5scores)
 
 # ----- score 27 personality factors (IRT scores) ----
 
-load(here("../../data/SAPA/IRTinfoSPI27.rdata"))
+load(here("../../SAPA data/created/IRTinfoSPI27.rdata"))
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
@@ -154,7 +154,7 @@ sapa = cbind(sapa, SPIirtScores)
 
 # ----- score ICAR (IRT scores) ----
 
-load(here("../../data/SAPA/IRTinfoICAR.rdata"))
+  load(here("../../SAPA data/created/IRTinfoICAR.rdata"))
 
 # IRT score
 dataSet <- subset(sapa, select = c(orderForItems))
@@ -173,6 +173,7 @@ for (i in 1:length(IRToutputICAR)) {
   ICARirtSEs[,i] <- TScoreSEs
   rm(TScores, TScoring, TScoreSEs, scored, calibrations, data)
 }
+
 ICARirtScores <- as.data.frame(ICARirtScores)
 colnames(ICARirtScores) <- scaleNames
 ICARirtSEs <- as.data.frame(ICARirtSEs)
@@ -215,7 +216,7 @@ for(i in 1:nrow(sapa)){
 
 sapa = sapa %>%
   mutate(cog = ICAR60) %>%
-  select(sex, BMI, BMI_p, BMI_c, p1edu, 
+  select(sex, age, height, weight, BMI, BMI_p, BMI_c, p1edu, 
          p1occPrestige, p1occIncomeEst, p2edu, 
          p2occPrestige, p2occIncomeEst, ses, cog, contains("SPI"))
 

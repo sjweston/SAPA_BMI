@@ -1,0 +1,904 @@
+---
+title             : "Body Mass in Adolescence: The Role of Personality, Intelligence, and Socioeconomic Status"
+shorttitle        : "BMI, Personality, and SES"
+
+author: 
+  - name          : "Sara J. Weston"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Department of Psychology, 1451 Onyx St, Eugene, OR 97403"
+    email         : "weston.sara@gmail.com"
+  - name          : "Magdalena Leszko"
+    affiliation   : "2"
+  - name          : "David Condon"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Oregon"
+  - id            : "2"
+    institution   : "University of Szczecin"
+
+authornote: |
+
+  Enter author note here.
+
+abstract: |
+  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+  
+  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
+  
+  One sentence clearly stating the **general problem** being addressed by  this particular study.
+  
+  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+  
+  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  
+  One or two sentences to put the results into a more **general context**.
+  
+  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "adolescents, Body Mass Index, obesity, personality traits, socioeconomic status"
+wordcount         : "X"
+
+bibliography      : ["bmi_personality.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+header-includes   :
+  - \usepackage[T1]{fontenc} 
+  - \usepackage{tabu}
+output            : papaja::apa6_word
+replace_ampersands: yes
+csl               : apa6.csl
+
+---
+\setlength{\parskip}{0pt}
+ \raggedbottom
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(knitr.kable.NA = '')
+
+packages = c("tidyverse", "here", 
+             "papaja", "knitr", "kableExtra", 
+             "PAutilities", "measurements", "ggpubr",
+             "ROSE", "pROC")
+lapply(packages, library, character.only = TRUE)
+rm(packages)
+```
+
+```{r}
+spi_colnames = c("ses","cog","Extra","Agree","Consc","Neuro","Open","Adaptability","Anxiety","ArtAppreciation","AttentionSeeking","Authoritarianism","Charisma","Compassion","Conformity","Conservatism","Creativity","EasyGoingness","EmotionalExpressiveness","EmotionalStability","Honesty","Humor","Impulsivity","Industry","Intellect","Introspection","Irritability","Order","Perfectionism","SelfControl","SensationSeeking","Sociability","Trust","WellBeing")
+
+spi_names = c("SES","Cognitive Ability","Extraversion","Agreeableness","Conscientiousness","Neuroticism","Openness","Adaptability","Anxiety","Art Appreciation","Attention Seeking","Authoritarianism","Charisma","Compassion","Conformity","Conservatism","Creativity","Easy Goingness","Emotional Expressiveness","Emotional Stability","Honesty","Humor","Impulsivity","Industry","Intellect","Introspection","Irritability","Order","Perfectionism","Self Control","Sensation Seeking","Sociability","Trust","Well Being")
+```
+
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+options(knitr.kable.NA = '')
+
+find_name = function(x){
+  if(grepl("135",x)){
+    x  = all_names[x]
+  } else{
+    x = gsub("SPI_", "SPI_135_27_5_", x)
+    x = all_names[x]
+  }
+  return(x)
+}
+```
+
+
+Obesity among children and adolescents is an international public health crisis. In the last 40 years, the prevalence of obesity has grown from 1 in 20 American adolescents to nearly 1 in 5 [@ogden2014prevalence]. Efforts to reduce the prevalence of overweight and obesity have now been a high priority public health issue in the U.S. for several years [@frieden2010reducing; @us2014healthy] and several of the prominent social programs focused on this issue consider children and adolescents as populations that are ripe for intervention [@frieden2010reducing]. Yet, there is little evidence that these efforts are working [@ogden2014prevalence].
+
+Adolescence is associated with considerable changes in body composition: all the main components of body composition (total body fat, lean body mass, bone mineral content) increase during this period [@siervogel2003puberty]. This period is often psychologically challenging. Adolescents are more likely to be dissatisfied with their body (to the point of endorsing a profound dislike of one's own body), experience fear of weight gain, and have appearance and body shape concerns, and these concerns predispose them to the development of eating disorders [@striegel1986toward]. The trend of increasing obesity prevalence among adolescents, coupled with its adverse health outcomes, underscores the need for obesity prevention efforts, especially those targeting adolescents. Adolescence is a vulnerable period for weight gain and most of the complications that are commonly associated with adult obesity are tied to health behaviors formed in childhood and adolescence [@hampson2007mechanisms]. As such, a more informed understanding of relations among key constructs within this developmental period is crucial.
+
+The primary aim of this work is to identify and evaluate the wide range of individual differences contributing to elevated BMI across both sexes. There is some evidence that socioeconomic status [@neumarkeffect], and individual differences [@bogg2004conscientiousness; @liang2014neurocognitive] are each protective factors for obesity, however, the unique and combined variance of these attributes has rarely been considered. 
+
+
+## The relationship between SES and BMI
+
+While the operationalization and measurement of socioeconomic status is notably inconsistent, there is general consensus that SES includes education, income, and occupational prestige [@shanahan2014conscientiousness].  Because adolescents do not have income, researchers typically use measures of parental education,occupation, and/or household income as markers of adolescent SES [@shrewsbury2008socioeconomic]. 
+
+The relationship between SES and BMI has been widely investigated.  Several studies have found that obesity among children and adults in industrialized countries is negatively associated with income and education [e.g., @molnar2004unsafe; @wang2007]; the opposite relationship has been found in some developing countries, including urban India or Ghana [@fokeena2012there]. The list of proposed mechanisms placing low-income children at increased risk for obesity relative to higher-income children includes the consumption of less whole meal and brown bread and less fresh fruits and vegetables, but more fatty milk, eggs, and meats [@smith1992public].  It has also been proposed that the inverse relationship between SES and BMI is driven by sedentary behavior as low SES children have been found to be less physically active [@drenowatz2010influence].  Unfortunately, additional research has shown that SES is inversely related to sedentary behavior and to rates of overweight status in adolescents [@lohman2006associations].  Still other research points to sedentary behavior as a mediator of BMI in children of low SES status [@o2006socio], among more prominent main effects.
+
+## BMI and individual differences
+
+
+Research has shown that certain personality traits are associated with behaviors that contribute to obesity such as unhealthy eating habits and physical inactivity. For example, individuals high on conscientiousness are likely to be more self-disciplined about their diet [see @bogg2004conscientiousness; @terracciano2009facets] and are more physically active [@rhodes2006personality].  Findings regarding neuroticism are inconclusive. Some researchers found that high levels of neuroticism are related to disinhibition and susceptibility to hunger [@provencher2008personality]. On the other hand, individuals who have higher scores on this trait tend to be underweight [@kakizaki2008personality; @terracciano2009facets] and more likely to suffer from eating disorders [@bogg2004conscientiousness]. Sutin and colleagues [-@sutin2015personality] suggested two possible explanations for this phenomenon: (1) there might be a curvilinear relationship between neuroticism and abnormal weight or (2) being overweight/underweight is associated with different aspects of neuroticism.  Higher scores on extraversion have also been found to contribute to obesity [e.g., @kakizaki2008personality; @sutin2011personality].   
+
+Previous studies investigating the association between BMI and cognitive abilities -- another source of individual differences -- found that individuals with lower levels of cognitive abilities have higher BMI [@cournot2006relation]. Adolescents who are obese are more likely to suffer from deficits in multiple cognitive domains such as attention, memory, and executive function and as a result have worse school outcomes in comparison to non-obese peers [@mond2007associations; @sabia2008body]. This association remains significant even after controlling for important confounding factors, such as physical activity or maternal intelligence.  
+
+Considerable research suggests that individuals raised in low SES households have higher levels of neuroticism, lower openness to experience and maladaptive coping mechanisms, including external locus of control and lack of problem-focused coping [@bosma1999social; @korner2003influence].  These individuals are also more likely to engage in risky health behaviors and have higher levels of hostility [@barefoot1991hostility] whereas children from families with higher SES are less impulsive on average [@delaney2012socioeconomic], significantly less likely to be risk-seeking [@deckers2015does], and more altruistic [@deckers2015does].  
+
+A growing body of research has documented that socioeconomic status (SES) predicts a variety of children’s outcomes including physical and mental health, cognitive ability, and academic achievement [@merikangas2010prevalence].  Interestingly, the differences in cognitive abilities between children from families with high and low SES can be observed as early as infancy and persists, on average, throughout adolescence [@lipina2005performance]. Although cognitive ability has been shown to be highly heritable [e.g., @haworth2010heritability], SES also seems to have an important influence on children’s school performance that is potentially independent of cognitive ability [@conger2007interactionist].
+
+## SES as a moderator of the relationship between individual differences and BMI
+
+Given the known relationships between SES and both BMI and individual differences in temperament and cognitive ability. it should be no surprise that the relationship between BMI and individual differences is unclear. Further complicating the relationships are person-situation transactions, which may change the relationship between individual differences and behavior or outcomes. One example is the "strong-situation hypothesis" [@cooper2009strong], which posits that some situations demand specific responses, overpowering any potential impact of personality. Strong situations limit personal expression or choice through constraint of resources or options. In the case of BMI, low SES may represent a strong situation in that individuals from poorer backgrounds have fewer dining options or leisure opportunities, and so food choices or activity levels reflect availability rather than preference.  In addition to overpowering individual differences, situations may carry different psychological meaning for different persons due to their temperament [@wagerman2009personality]. There is some evidence that socioeconomic status moderates personality expression. For example, phenotypic expression of personality is more closely associated with genetics among those with advantaged socioeconomic backgrounds [@tuvblad2006heritability], and adolescent impulsivity has stronger effects among the disadvantaged [@lynam2000interaction]. For some trait-behavior relationships, however, socioeconomic status has no effect [c.f., @ayer2011adolescent].
+
+## The present study
+
+In this study, we use a large sample of adolescents in the United States to examine the relationship between personality and cognitive ability to BMI above and beyond the influence of SES; moreover, we examine whether the relationship between individual differences and BMI changes across socioeconomic strata. The current study aims to clarify the relationship between personality traits, cognitive ability, SES, and BMI through the following methods: (1) examining both broad (Big-Five) and narrow traits to better determine the aspects of personality which relate to BMI, (2) utilizing a measure of SES that accounts for monetary resource and social status, and (3) using categorical operationalization of BMI to allow non-linear relationships between psychosocial constructs and health and contextualize findings in clincially-meaningful thresholds.
+
+# Methods
+
+```{r}
+load(here("../../SAPA data/original data/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
+sapa_raw = SAPAdata07feb2017thru22jul2019x
+```
+
+## Data Collection
+
+Data were collected through an online survey, in which participants can volunteer to complete between 25 and 250 survey questions assessing personality, cognitive ability, interets, and values (citation masked). Volunteers are compensated with feedback about their results. This website was visited `r printnum(nrow(sapa_raw), format = "d")` times during the data collection period, February 8, 2017 through July 22, 2019. 
+
+## Participants
+```{r}
+all_but_bmi = sapa_raw %>%
+  filter(age < 18) %>%
+  filter(country == "USA") %>%
+  filter(!is.na(sex)) %>%
+  filter(sex != "other")
+
+sapa = all_but_bmi %>%
+  filter(!is.na(height)) %>%
+  filter(!is.na(weight))
+```
+
+During the data collection period, `r formatC(nrow(sapa_raw), big.mark = ",", format = "d")` participants provided data. Of these, `r formatC(nrow(all_but_bmi), big.mark = ",", format = "d")` were adolescents (between the ages of 11 and 17) living in the United States. Of this sample, only `r formatC(nrow(sapa), big.mark = ",", format = "d")` provided height and weight. This was the sample used for these analyses.
+
+```{r}
+m.age = mean(sapa$age, na.rm=T)
+s.age = sd(sapa$age, na.rm=T)
+count = table(sapa$sex)
+count.female = count["female"]
+perc.female = count.female/nrow(sapa)
+```
+
+
+The average age of participants was `r m.age` $(SD = `r s.age`)$ and `r formatC(count.female, big.mark = ",", format = "d")` (`r perc.female*100`%) self-reported their sex as female. Descriptive statistics are presented in Table \@ref(tab:desc).
+
+## Measures
+
+```{r}
+m.height = mean(sapa$height, na.rm=T)
+s.height = sd(sapa$height, na.rm=T)
+m.weight = mean(sapa$weight, na.rm=T)
+s.weight = sd(sapa$weight, na.rm=T)
+
+m.bmi = mean(sapa$BMI, na.rm=T)
+s.bmi = sd(sapa$BMI, na.rm=T)
+```
+
+```{r descriptives_by_gender, results = 'asis'}
+sapa = sapa %>%
+  select(age, sex, p1edu, p1occPrestige, p1occIncomeEst, p2edu, p2occPrestige, p2occIncomeEst, height, weight, BMI)
+
+sapa = sapa %>%
+  mutate(sex = as.factor(as.character(sex))) %>%
+  mutate(sex2 = ifelse(sex == "male", "M", "F"),
+         weight = conv_unit(weight, from = "lbs", to = "kg"),
+         height = conv_unit(height, from = "inch", to = "cm"))
+
+for(i in 1:nrow(sapa)){
+  sapa$BMI_c[i] = as.character(
+    get_BMI_percentile(weight_kg = sapa$weight[i], 
+                       height = sapa$height[i], 
+                       age_yrs = sapa$age[i], 
+                       sex = sapa$sex2[i],
+                       output = "class"))
+}
+numeric_descriptives = sapa %>%
+  mutate_at(vars(starts_with("p")), as.numeric) %>%
+  group_by(sex) %>%
+  summarize_if(is.numeric,
+               .funs = list(M = mean,
+                            S = sd), na.rm=T) %>%
+  gather("key", "value", -sex) %>%
+    separate(key, into =c("variable", "key")) %>%
+    spread(key, value) %>%
+    mutate_at(vars("M", "S"), printnum) %>%
+    unite(M, M, S, sep=" (") %>%
+    mutate(M = paste0(M, ")")) %>%
+    spread(sex, M)
+
+categor_descriptives = sapa %>%
+  select(sex, BMI_c) %>%
+  group_by(sex, BMI_c) %>%
+  summarize(N = n()) %>%
+  ungroup() %>% group_by(sex) %>%
+  mutate(perc = N/sum(N)*100) %>%
+    mutate_if(is.numeric, printnum) %>%
+    unite(N, N, perc, sep = " (") %>%
+    mutate(N = paste0(N, "%)")) %>%
+    spread(sex, N) %>%
+    rename("variable" = "BMI_c")
+```
+
+```{r desc, results = 'asis'}
+full_join(numeric_descriptives, categor_descriptives) %>%
+  mutate(variable = factor(variable, 
+                           levels  = c("age", "BMI", "height", "p1edu", 
+                                       "p1occIncomeEst", "p1occPrestige", 
+                                       "p2edu", "p2occIncomeEst", "p2occPrestige",
+                                       "weight", "Normal Weight","Obese", 
+                                       "Overweight","Underweight"),
+                           labels  = c("Age", "BMI", "Height", "Parent 1 Education", 
+                                       "Parent 1 Income (estimated)", 
+                                       "Parent 1 Occupational Prestige (estimated)", 
+                                       "Parent 2 Education",
+                                       "Parent 2 Income (estimated)", 
+                                       "Parent 2 Occupational Prestige (estimated)", 
+                                       "Weight", "Normal Weight","Obese", 
+                                       "Overweight","Underweight"))) %>%
+  apa_table(., 
+            col.names = c("Variable", "Female", "Male"), 
+          caption = "Descriptive statistics of key demographic and BMI variables by gender. Numeric variables presented with means and standard deviations. Categorical variables presented with frequencies and percentages.") 
+  
+```
+
+
+**BMI Category** Self-reported height in inches $(M = `r m.height`, SD = `r s.height`)$ was converted to meters, and self-reported weight in pounds $(M = `r m.weight`, SD = `r s.weight`)$ was converted to kilograms. Participant BMI was then calculated by dividing kilograms to meters squared $(M = `r m.bmi`, SD = `r s.bmi`)$. While some would use BMI score as the outcome of interest, this value is problematic, as there are group difference in BMI by sex. Moreover, the distribution of BMI tends to increase with development, meaning there is greater spread in BMI among older adolescents compared to younger. To account for both sex- and age-related differences in the distribution of BMI, we calculated each participant's BMI percentile score based on the CDC norms for adolescents of that participant's age and self-reported sex [@centers2000cdc]. 
+
+Importantly, lower BMI is not universally healthier. Fitting a simple linear model to this outcome may obscure the relationships of traits which produce unhealthy results in both directions -- that is, some traits may be associated with both overweight and underweight outcomes. Given the likely nonlinear associations, and also the clinical cutoffs that are implemented in many settings, we use the CDC guidelines to assign each participant to a weight category based on their BMI percentile: Underweight (0-5%), Normal(5-85%), Overweight(85-95%), and Obese(95-100%).
+
+```{r}
+load(here("data/reliability.Rdata"))
+alpha = as.numeric(b5scored$alpha)
+names(alpha) = colnames(b5scored$alpha)
+```
+
+
+**Personality.** Personality traits were measured using the 135-item SAPA Personality Inventory [SPI-135; @condon2018sapa]. This scale can be used to estimate scores on both broad and narrow traits. The current study leverages this feature of the personality scale to assess the relationships of both broad and narrow traits to BMI category and compare the predictive validity of each. 
+
+Big Five trait scores were estimated using a sum-score method, in which all non-missing responses to items in a scale (14 items per scale) were averaged. There was evidence of good reliability for each trait $(
+\alpha_E = `r printnum(alpha["SPI_135_27_5_Extra"])`, 
+\alpha_A = `r printnum(alpha["SPI_135_27_5_Agree"])`,
+\alpha_C = `r printnum(alpha["SPI_135_27_5_Consc"])`,
+\alpha_N = `r printnum(alpha["SPI_135_27_5_Neuro"])`,
+\alpha_O = `r printnum(alpha["SPI_135_27_5_Open"])`)$.
+
+Narrow SPI-27 trait scores (5 items each) were estimated using an IRT-scoring approach. Calibration of the IRT parameters was performed using a separate sample [MORE INFORMATION NEEDED HERE -- If these are the parameters in the 400 pg doc on PsyArXiv, I can just reference that.]. Estimates were scaled using t-scoring, resulting in means of 50 and standard deviations of 10 for the entire adolescent sample. 
+
+**Cognitive Ability.** Participants were administered between 12 and 16 cognitive ability items assessing Three-Dimensional Rotation, Verbal Reasoning, Matrix Reasoning, and Letter and Number Series from the International Cognitive Ability Resource ("ICAR" XXX). Trait scores were estimated using an IRT approach. 
+
+**Parent Socioeconomic Status (SES).** Participants reported their parents' highest level(s) of education and occupational field(s). From the latter, we estimated income, based on median income for that field, and prestige, based on median prestige values for the field. All responses were standardized within sample and averaged to create a composite score. 
+
+## Data analysis
+
+To assess the degree to which SES and individual differences are uniquely, concurrently associated with BMI category, we used multinomial logistic regression models, with "Normal" as the reference category. We estimated 33 versions of this model, with each model including both SES and either one personality trait or cognitive ability (thirty-three individual difference measures in total). In addition, we estimate each of these models with an interaction term, to estimate whether the relationship of personality to SES depends on parental socioeconomic status. Specific hypotheses were preregistered at [https://osf.io/ypf7r/?view_only=2932b269b0fa4cd09746c614ebccbf9a](https://osf.io/ypf7r/?view_only=2932b269b0fa4cd09746c614ebccbf9a)^[We note here that as part of the preregistered analyses, we also include linear regression models with BMI percentile as the outcome; these are not reported here in an effort to succinctly report analyses and because prior to data analysis, we noted that use of the CDC thresholds was the more clinically relevant outcome.]. 
+
+Analyses were performed separately for male and female adolescents. All variables were standardized within gender sample prior to analysis, so coefficient estimates can be interpreted as standardized effect sizes. Logistic models were estimated using 10-fold cross-validation, repeated 10 times, with SMOTE sampling, which can be useful for dealing with imbalanced classes. Coefficient estimates are from the final model set to maximize accuracy. 
+
+All analyses described above were performed on subset of our sample containing a random 75% of the adolescent girls and 75% of the adolescent boys, stratified by BMI category. The remaining 25% of the same was used in exploratory analyses that examine the overall accuracy models that predict BMI category from (1) socioeconomic status alone, (2) SES plus the Big Five personality traits, and (3) SES plus the Narrow-27.
+
+# Results
+
+### Is socioeconomic status associated with BMI category?
+
+```{r SESplot_prep}
+
+colors = RColorBrewer::brewer.pal(n = 3, "Dark2")
+
+load(here("data/logistic_output.Rdata"))
+female_log2 = female_log
+male_log2 = male_log
+
+female_log = female_log %>%
+  mutate(Gender = "Female") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+male_log = male_log %>%
+  mutate(Gender = "Male") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+avg_female = female_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  group_by(y.level) %>% 
+  summarize(mean = exp(mean(estimate)))
+  
+female_plot = female_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  mutate(estimate = exp(estimate),
+         conf.low = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) + 
+  geom_hline(aes(yintercept = 1), linetype = "dashed") +
+  geom_hline(aes(yintercept = mean), data = avg_female) +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_female )+
+  scale_color_manual(values = c("gray", "red")) +
+  scale_y_continuous(limits = c(0.25, 2.25))+
+  labs(x = "Specification Number",
+       y = "Odds Ratio",
+       title = "Female") +
+  guides(color = F)+
+  facet_grid(~y.level) +
+  theme_pubclean()  +
+  theme(plot.title.position = "plot")
+
+
+avg_male = male_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  group_by(y.level) %>% 
+  summarize(mean = exp(mean(estimate)))
+
+male_plot = male_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  mutate(estimate = exp(estimate),
+         conf.low = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) + 
+  geom_hline(aes(yintercept = 1), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = mean), data = avg_male, color = "black") +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_male )+
+  scale_color_manual(values = c("gray", "red")) +
+  scale_y_continuous(limits = c(0.25, 2.25))+
+  labs(x = "Specification Number",
+       y = "Odds Ratio", 
+       title = "Male") +
+  guides(color = F)+
+  facet_grid(~y.level) +
+  theme_pubclean() +
+  theme(plot.title.position = "plot")
+```
+
+```{r SESplot, out.height="5in", fig.height = 5}
+ggarrange(female_plot, male_plot, ncol = 1, nrow = 2)
+```
+
+
+To test this question, we examine the estimates of the SES coefficient in the multinomial logistic models. These results are summarized in Figure \@ref(fig:SESplot). These figures display the odds ratios associated with the SES coefficient in each model; as a reminder, there are 33 models for each gender, each model regression the BMI category variable onto SES and one of the thirty-three individual difference measures. Figure \@ref(fig:SES_plot) represents the 95% confidence interval around each estimate, for each non-reference category, with a vertical line. Lines are red if they do not contain 1 (the traditional null hypothesis, represented by the horizontal dashed line). A solid horizontal line represents the average coefficient estimate across all models. Models are ordered within weight comparison by size of the effect. 
+
+As evidenced by the figure, larger parental SES was consistently significantly associated with reduced odds of being obese among both boys and girls and reduced odds of being overweight among girls. SES was significantly associated with lower likelihood of being overweight among boys in 14 models, and lower likelihood of being underweight in only 7 and 12 models, for girls and boys, respectively. Overall, a one-standard deviation increase in parental SES was associated with being 45% less likely to be obese and 31% less likely to be overweight among girls, and with being 35% less likely to be obese and 21% less likely to be overweight among boys.
+
+We note that the association between SES and weight categories tend to be somewhat sensitive to inclusion of personality traits, as coefficient estimates range from no affect on BMI to as much as half the likelihood. 
+
+### Which personality traits are associated with BMI?
+
+```{r prep table, results = "asis"}
+
+source(here("scripts/personality_scales.R"))
+
+load(here("data/logistic_output.Rdata"))
+
+female_log_t = female_log %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "female")
+
+female_log_t = female_log_t %>%
+  filter(grepl("trait", term)) %>%
+  filter(model == "cov") %>%
+  mutate(b1_est = printnum(estimate),  
+         b1_est = ifelse(conf.low > 1 | conf.high < 1, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(conf.low),
+         conf.high = printnum(conf.high), 
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]")) %>%
+  dplyr::select(trait_name, y.level, term, b1_est, b2_conf, gender) %>%
+  gather("key", "value", b1_est, b2_conf) %>%
+  spread(y.level, value) %>%
+  ungroup() %>%
+  mutate(trait_name = find_name(as.character(trait_name))) %>% 
+  mutate(trait_name = factor(trait_name, 
+                             levels = c("Cognitive Ability", 
+                                        SPI_27_names, SPI_5_names))) %>%
+  arrange(trait_name) %>%
+  mutate(trait_name = as.character(trait_name)) %>%
+  mutate(trait_name = ifelse(!(row_number() %% 2), NA, trait_name)) %>%
+  dplyr::select(-term, -gender, -key) 
+
+male_log_t = male_log %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "male")
+
+male_log_t = male_log_t %>%
+  filter(grepl("trait", term)) %>%
+  filter(model == "cov") %>%
+  mutate(b1_est = printnum(estimate),  
+         b1_est = ifelse(conf.low > 1 | conf.high < 1, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(conf.low),
+         conf.high = printnum(conf.high), 
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]")) %>%
+  dplyr::select(trait_name, y.level, term, b1_est, b2_conf, gender) %>%
+  gather("key", "value", b1_est, b2_conf) %>%
+  spread(y.level, value) %>%
+  ungroup() %>%
+  mutate(trait_name = find_name(as.character(trait_name))) %>% 
+  mutate(trait_name = factor(trait_name, 
+                             levels = c("Cognitive Ability", 
+                                        SPI_27_names, SPI_5_names))) %>%
+  arrange(trait_name) %>%
+    mutate(trait_name = as.character(trait_name)) %>%
+  mutate(trait_name = ifelse(!(row_number() %% 2), NA, trait_name)) %>%
+  dplyr::select(-term, -gender, -key) 
+```
+
+```{r tablepers, results = 'asis'}
+cbind(female_log_t, male_log_t[,-1]) %>%
+  apa_table(., 
+        col.names = c("Trait", 
+                      rep(c("Obese", "Overweight", "Underweight"),2)),
+        booktabs = TRUE, 
+        longtable = TRUE,
+        escape = FALSE,
+        caption = "BMI category odds ratios associated with individual differences. All models control for parental SES. \\* indicates p < .05",
+        align = c("l", rep("c", 6)),
+        font_size = "small",
+        col_spanners = list(`Female` = c(2, 4), `Male` = c(5, 7)))  
+```
+
+```{r personplot, out.height="8in", fig.height = 8}
+make_new = function(x, y){
+  trait_score = seq(from = x, to = y, length.out = 200)
+  ses = 0
+  df = data.frame(trait_score, ses)
+  return(df)
+}
+
+female_prep = data.frame(trait = unique(female_log$trait_name), 
+                         stringsAsFactors = F) %>%
+  mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
+  mutate(min = -3) %>%
+  mutate(max = 3) %>%
+  mutate(newdata = map2(.x = min, .y = max, make_new)) %>%
+  select(trait_name, newdata) 
+
+prob_dist_data_female = full_join(female_prep, female_log) %>%
+  filter(model == "cov") %>%
+  select(trait_name, final_mod, newdata) %>%
+  mutate(predicted_probs = map2(final_mod, newdata, predict, type = "prob")) %>%
+  mutate(newdata = map2(newdata, predicted_probs, cbind)) %>%
+  select(trait_name, newdata) %>%
+  unnest(cols = c(newdata)) %>%
+  mutate(trait_name = gsub("SPI_", "", trait_name)) %>%
+  mutate(trait_name = gsub("cog", "Cognitive Ability", trait_name)) %>%
+  filter(trait_name %in% c("Sociability",
+                           "WellBeing",
+                           "Honesty",
+                           "Industry",
+                           "EmotionalExpressiveness",
+                           "EasyGoingness")) %>%
+  mutate(trait_name = gsub("([[:lower:]])([[:upper:]])", 
+                           "\\1 \n \\2", 
+                           trait_name)) %>%
+  ungroup() %>%
+  gather(key = "weight", value = "probability", -trait_name, -trait_score, -ses) %>%
+  ggplot(aes(x = trait_score, y = probability, color = weight, fill = weight)) +
+  geom_line() +
+  scale_color_brewer(palette = "Dark2")+
+  facet_wrap(~trait_name, scales = "free_x") +
+  labs(x = "",
+       y = "Probability",
+       title = "Female")  +
+  theme_pubclean() + theme(legend.position = "top")
+  
+  
+male_prep = data.frame(trait = unique(male_log$trait_name), 
+                         stringsAsFactors = F) %>%
+  mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
+  mutate(min = -3) %>%
+  mutate(max = 3) %>%
+  mutate(newdata = map2(.x = min, .y = max, make_new)) %>%
+  select(trait_name, newdata) 
+
+prob_dist_data_male = full_join(male_prep, male_log) %>%
+  filter(model == "cov") %>%
+  select(trait_name, final_mod, newdata) %>%
+  mutate(predicted_probs = map2(final_mod, newdata, predict, type = "prob")) %>%
+  mutate(newdata = map2(newdata, predicted_probs, cbind)) %>%
+  select(trait_name, newdata) %>%
+  unnest(cols = c(newdata)) %>%
+  mutate(trait_name = gsub("SPI_", "", trait_name)) %>%
+  mutate(trait_name = gsub("cog", "Cognitive Ability", trait_name)) %>%
+  filter(trait_name %in% c("AttentionSeeking",
+                           "Humor",
+                           "EasyGoingness")) %>%
+  mutate(trait_name = gsub("([[:lower:]])([[:upper:]])", 
+                           "\\1 \n \\2", 
+                           trait_name)) %>%
+  ungroup() %>%
+  gather(key = "weight", value = "probability", -trait_name, -trait_score, -ses) %>%
+  ggplot(aes(x = trait_score, y = probability, color = weight, fill = weight)) +
+  geom_line() +
+  scale_color_brewer(palette = "Dark2")+
+  facet_wrap(~trait_name, scales = "free_x") +
+  guides(color = F)+
+  labs(x = "",
+       y = "Probability",
+       title = "Male") +
+  theme_pubclean() 
+  
+ggarrange(prob_dist_data_female, 
+          prob_dist_data_male, 
+          ncol = 1, labels = c("A", "B"), heights = c(2,1))
+```
+
+Next we examine the coefficients associated with personality traits -- here referring to cognitive ability, the Big Five, and the Narrow 27 -- in the models described above. All results are summarized in Table \@ref(tab:tablepers).
+
+Two main patterns stand out. First, several traits were associated with both types of weight issues. More specifically, among adolescent girls, traits Sociability, Well-Being, and Emotional Expressiveness were significantly associated with reduced odds of all non-Normal categories. Trait Easy Goingness was significantly associated with increased of all non-Normal categories. In other words, adolescent girls low in Sociability, Well-Being and Emotional Expressiveness and high in Easy Goingness are at greater risk for both overweight/obesity and also underweight status. These associations are depicted in Figure \@ref(fig:person_plot)A. Furthermore, trait Honesty was associated with decreased risk of overweight and obese statuses; traits Extraversion, Neuroticism, and Industry were associated with decreased risk of obesity and underweight statuses.
+
+For adolescent boys, far fewer traits were associated with weight category compared to for adolescent girls. Again, some traits were associated with both ends of the weight spectrum: Attention Seeking and Easy Goingnesss were associated with decreased and increased risk, respectively, of both obesity and being overweight. Trait Neuroticism was associated with increased risk of both being overweight and underweight, although not obese. Humor was associated with increased risk of being obese but decreased risk of being underweight, making this the only association in which an individual difference had a consistent ordinal relationship with weight.  We note there was a gender difference in the number of traits significantly associated with BMI category; however, this difference is most likely a result of a larger sample of adolescent girls. 
+
+Of note, cognitive ability was largely unassociated with BMI category, with one exception: being associated with reduced risk for overweight compared to normal status among adolescent boys. This is surprising, given the extended literature on the relationship between cognitive ability and health. 
+
+The second pattern is that far more traits were significantly associated with (reduced or increased) risk for underweight, while relatively few traits were associated with risk for obesity or risk for being overweight. However, this pattern is most likely due to the relatively small sample of underweight adolescents in the study, compared to the other groups. 
+
+
+### Does the relationship of personality to BMI depend on SES?
+
+By adding an interaction term to each of our 33 models, we test the degree to which the relationship of personality to BMI category changes as a function of parental SES. As depicted in Figure \@ref(fig:SESplot2), the overwhelming finding was that the interaction terms were mainly non-significant. A handful of coefficients barely reach the statistical significance threshold, but this is expected due to chance alone. 
+
+```{r}
+load(here("data/logistic_output.Rdata"))
+
+female_log = female_log %>%
+  mutate(Gender = "Female") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+male_log = male_log %>%
+  mutate(Gender = "Male") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+
+avg_female = female_log %>%
+  filter(grepl(":", term)) %>%
+  filter(model == "int") %>%
+  group_by(y.level) %>% 
+  summarize(mean = mean(estimate))
+  
+female_plot = female_log %>%
+  filter(grepl(":", term)) %>%
+  filter(model == "int") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) + 
+  geom_hline(aes(yintercept = 1), linetype = "dashed") +
+  geom_hline(aes(yintercept = mean), data = avg_female) +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_female )+
+  scale_color_manual(values = c("gray", "red")) +
+  scale_y_continuous(limits = c(0.25, 3))+
+  labs(x = "Specification Number",
+       y = "Odds Ratio",
+       title = "Female") +
+  guides(color = F)+
+  facet_grid(~y.level) +
+  theme_pubclean()  +
+  theme(plot.title.position = "plot")
+
+
+avg_male = male_log %>%
+  filter(grepl(":", term)) %>%
+  filter(model == "int") %>%
+  group_by(y.level) %>% 
+  summarize(mean = mean(estimate))
+
+male_plot = male_log %>%
+  filter(grepl(":", term)) %>%
+  filter(model == "int") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) + 
+  geom_hline(aes(yintercept = 1), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = mean), data = avg_male, color = "black") +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_male )+
+  scale_color_manual(values = c("gray", "red")) +
+  scale_y_continuous(limits = c(0.25, 3))+
+  labs(x = "Specification Number",
+       y = "Odds Ratio", 
+       title = "Male") +
+  guides(color = F)+
+  facet_grid(~y.level) +
+  theme_pubclean() +
+  theme(plot.title.position = "plot")
+
+```
+
+```{r SESplot2, out.height="5in", fig.height = 5}
+ggarrange(female_plot, male_plot, ncol = 1, nrow = 2)
+```
+
+
+#### Sensitivity analysis
+
+After conducting our planned analyses, we were concerned that our results were potentially biased by the presence of data missing not at random. Specifically, we noticed that among our adolescent sample, approximately half did not report height or weight or both. The primary concern is that participants of specific BMIs may systematically skip questions about height or weight, leading to over or under estimates of in regression models.
+
+To address this concern, we imputed missing height and weight values using 32 personality variables that were collected through our online data collection tool but were not used to estimate trait scores on any scales used in the study. These variables were chosen because there were enough pairwise administrations for each pair of variables that a principle components analysis including these variables and height and weight could converge. We used a single PCA imputation with regularization. 
+
+```{r sens, fig.height=10, out.height="10in"}
+
+load(here("data/cleaned.Rdata"))
+complete = sapa[,c("BMI_c", "sex")]
+rm(list = c("sapa", "sapa_female", "sapa_male"))
+
+load(here("data/impute_pca/cleaned.Rdata"))
+imputed = sapa[,c("BMI_c", "sex")]
+rm(list = c("sapa", "sapa_female", "sapa_male"))
+
+complete$version = "complete"
+imputed$version = "imputed"
+
+impute1 = complete %>%
+  full_join(imputed) %>%
+  group_by(version, sex) %>%
+  mutate(N = n()) %>% ungroup() %>% 
+  group_by(version,BMI_c, sex) %>%
+  summarize(n = n(),
+            N = max(N)) %>%
+  mutate(density = n/N) %>%
+  ggplot(aes(x = BMI_c, y = density, fill = version)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_brewer(palette = "Dark2")+
+  facet_wrap(~sex, ncol = 1) +
+  labs(x = "", fill = "Data") +
+  theme_pubclean() +
+  theme(legend.position = "top")
+
+
+# load main results
+female_log_main = female_log2
+male_log_main = male_log2
+
+# load imputePCA results
+load(here("data/impute_pca/logistic_output.Rdata"))
+female_log_pca = female_log
+male_log_pca = male_log
+
+female_log_main = female_log_main %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "female",
+         version = "main")
+
+female_log_pca = female_log_pca %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "female",
+         version = "pca")
+
+
+female_all = full_join(female_log_main, female_log_pca) %>%
+  gather("key", "value", -gender, -version, -trait_name, -model, -y.level, -term) %>%
+  unite(key, key, version) %>%
+  spread(key, value) %>%
+  mutate(sig = case_when(
+    p.value_main < .05 & p.value_pca >= .05 ~ "Complete Only",
+    p.value_main >= .05 & p.value_pca < .05 ~ "Imputed Only",
+    p.value_main < .05 & p.value_pca < .05 ~ "Both",
+    p.value_main >= .05 & p.value_pca >= .05 ~ "Neither"
+  )) %>%
+  mutate(difference = estimate_main-estimate_pca)
+
+male_log_main = male_log_main %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "male",
+         version = "main")
+
+male_log_pca = male_log_pca %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "male",
+         version = "pca")
+
+male_all = full_join(male_log_main, male_log_pca) %>%
+  gather("key", "value", -gender, -version, -trait_name, -model, -y.level, -term) %>%
+  unite(key, key, version) %>%
+  spread(key, value) %>%
+  mutate(sig = case_when(
+    p.value_main < .05 & p.value_pca >= .05 ~ "Complete Only",
+    p.value_main >= .05 & p.value_pca < .05 ~ "Imputed Only",
+    p.value_main < .05 & p.value_pca < .05 ~ "Both",
+    p.value_main >= .05 & p.value_pca >= .05 ~ "Neither"
+  )) %>%
+  mutate(difference = estimate_main-estimate_pca)
+
+
+W = 1
+female_both = female_all %>%
+  filter(sig %in% c("Both"),
+         term == "trait_score",
+         model == "cov") %>%
+  gather("key","value",estimate_main, estimate_pca, conf.high_main, conf.low_main, conf.high_pca, conf.low_pca) %>%
+  separate(key, into = c("key", "version"), sep = "_") %>%
+  spread(key, value) %>%
+  arrange(desc(estimate)) %>%
+  mutate(estimate = estimate-1,
+         conf.low = conf.low-1,
+         conf.high = conf.high-1) %>%
+  ungroup() %>%
+  mutate(trait_name = find_name(trait_name)) %>%
+  ggplot(aes(x = trait_name, y = estimate, fill = version)) +
+  geom_bar(stat = "identity",position = position_dodge(W), color = "black", alpha = .7) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(W), width = .5, color = "black")+ 
+  coord_flip() +
+  guides(fill = F) +
+  scale_x_discrete("") +
+  scale_y_continuous("Odds Ratio",
+                     breaks = seq(from = -.5, 1.25, by = .25),
+                     labels = seq(.5, 2.25, by = .25)) +
+    scale_fill_brewer(palette = "Dark2")+
+  ggtitle("   Females: Coefficients significant\nin both analyses") +
+  facet_grid(y.level~., 
+             scales = "free_y") +
+  theme_pubclean() +
+  theme(plot.title.position = "plot")
+
+
+male_both = male_all %>%
+  filter(sig %in% c("Both"),
+         term == "trait_score",
+         model == "cov") %>%
+  gather("key","value",estimate_main, estimate_pca, conf.high_main, conf.low_main, conf.high_pca, conf.low_pca) %>%
+  separate(key, into = c("key", "version"), sep = "_") %>%
+  spread(key, value) %>%
+  arrange(desc(estimate)) %>%
+  mutate(estimate = estimate-1,
+         conf.low = conf.low-1,
+         conf.high = conf.high-1) %>%
+  ungroup() %>%
+  mutate(trait_name = find_name(trait_name)) %>%
+  ggplot(aes(x = trait_name, y = estimate, fill = version)) +
+  geom_bar(stat = "identity",position = position_dodge(W), color = "black", alpha = .7) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(W), width = .5, color = "black")+ 
+  coord_flip() +
+  guides(fill = F) +
+  scale_x_discrete("") +
+  scale_fill_brewer(palette = "Dark2")+
+  scale_y_continuous("Odds Ratio",
+                     breaks = seq(from = -1, 0.2, by = .2),
+                     labels = seq(0, 1.2, by = .2)) +
+  ggtitle("   Males: Coefficients significant\nin both analyses") +
+  facet_grid(y.level~., 
+             scales = "free_y") +
+  theme_pubclean() +
+  theme(plot.title.position = "plot")
+
+ggarrange(impute1, 
+          ggarrange(female_both, male_both, ncol = 1, nrow = 2, labels = c("B","C")),
+          nrow = 1, ncol = 2,
+          labels = c("A", ""))
+```
+
+Imputation suggested that we were under-sampling from normal weight and overweight adolescents and oversampling obese and underweight adolescents (see Figure \@ref(fig:sens)A). If imputed height and weight are included in the analyses, several key findings are no longer statistically significant. Of primary interest, the single association of cognitive ability with BMI category was no longer significant in these analyses. 
+
+However, some findings were robust to these sensitivity analyses. Interestingly, all were in the comparison of Underweight to Normal BMI category. These robust estimates are presented in Figure \@ref(fig:sens)B and \@ref(fig:sens)C. In sum, narrow traits of Well-Being
+
+### How does personality contribute to the accuracy of BMI prediction models?
+
+Completion of the preregistered analyses yielded results that suggest that low parental SES is a robust risk factor for all non-normal BMI categories, that some personality traits play a role in non-normal weight for adolescents, and that the degree to which individual differences are associated with BMI does not depend on parental SES. However, one additional and unplanned question emerges from these analyses: to what extent does personality contribute predictive validity to estimates of BMI category and does that depend on the use of broad versus narrow traits?
+
+To answer this question, we build three additional logistic regression models: BMI category regressed onto (1) parental SES, (2) parental SES plus all of the Big Five traits, and (3) parental SES plus all of the Narrow SPI 27. To avoid over-fitting, we used 10-fold cross-validation, repeated 10 times. The final model was selected using the summary metric of accuracy. These models were built using the same 75% of the sample that was used in prior analyses. Finally, these model were used to predict BMI category in the hold-out sample (25%), and these predictions were compared to reported BMI category for accuracy. Our accuracy metric is Area Under the Curve. 
+
+```{r auc, out.width="5in"}
+load(here("data/accuracy.Rdata"))
+
+acc_data = expand.grid(gender = c("Female", "Male"),
+                       model = c("SES Only", "SES + Big Five", "SES + SPI 27"))
+acc_data$CM = list(acc_female_ses, acc_male_ses,
+                   acc_female_ses_b5, acc_male_ses_b5,
+                   acc_female_ses_27, acc_male_ses_27)
+
+model_fits = list(female_ses = female_ses, 
+                  female_ses_b5 = female_ses_b5, 
+                  female_ses_27 = female_ses_27,
+                  male_ses =   male_ses,   
+                  male_ses_b5 =   male_ses_b5,   
+                  male_ses_27 =   male_ses_27)
+
+pred.v.actual <- data.frame(model = names(model_fits), stringsAsFactors = FALSE) %>% 
+  mutate(output = model_fits) %>% 
+  mutate(predicted = map(output, predict, type = "prob")) %>% 
+  mutate(actual = map(output, "trainingData")) %>%
+  mutate(actual = map(actual, function(x) x[,".outcome"])) %>% 
+  mutate(multiclass_roc = map2(actual, predicted, multiclass.roc)) %>%
+  mutate(auc = map_dbl(multiclass_roc, "auc")) %>%
+  mutate(sex = ifelse(grepl("female", model), "female", "male")) %>%
+  mutate(model = gsub(".*_", "", model),
+         model = factor(model, levels = c("ses", "b5", "27"),
+                        labels = c("SES Only", 
+                                   "SES + Big Five", 
+                                   "SES + SPI27"))) 
+
+pred.v.actual %>% ggplot(aes(x = sex, y = auc)) +
+  geom_bar(stat = "identity", 
+           alpha = .7, 
+           color = "black",
+           aes(fill = model),
+           position = "dodge") +
+  scale_y_continuous(limits = c(0,.75)) +
+  scale_fill_brewer(palette = "Dark2")+
+  labs(x = "", y = "Area Under Curve (AUC)") +
+  theme_pubclean()
+```
+
+```{r}
+auc.tab = pred.v.actual[, c("sex", "auc", "model")]
+```
+
+Results are summarized in Figure \@ref(fig:auc). Models including SES plus personality did as well or better than models with SES only $(AUC_{female} = `r printnum(auc.tab$auc[auc.tab$sex == "female" & auc.tab$model == "SES Only"])`, AUC_{male} = `r printnum(auc.tab$auc[auc.tab$sex == "male" & auc.tab$model == "SES Only"])`)$. The models using the set of narrow SPI traits $(AUC_{female} = `r printnum(auc.tab$auc[auc.tab$sex == "female" & auc.tab$model == "SES + SPI27"])`, AUC_{male} = `r printnum(auc.tab$auc[auc.tab$sex == "male" & auc.tab$model == "SES + SPI27"])`)$ added more predictive power than models using the Big Five $(AUC_{female} = `r printnum(auc.tab$auc[auc.tab$sex == "female" & auc.tab$model == "SES + Big Five"])`, AUC_{male} = `r printnum(auc.tab$auc[auc.tab$sex == "male" & auc.tab$model == "SES + Big Five"])`)$. However, the gain in predictive power was modest, improving estimates by about 10%. 
+
+# Discussion
+
+The current study included many analyses, providing a wealth of potential conclusions. We discuss our interpretations starting with the conclusions we are most confident in and working towards conclusions that have less evidentiary value.
+
+First, we begin with the conclusions we have strong confidence in. We believe it is undisputable at this point that higher parental socioeconomic status (SES) is associated with lower risk of adolescent girls and boys being underweight, overweight, and obese, implying that SES may be protective against weight problems on both ends of the spectrum. This finding was robust to the inclusion of nearly all traits, and conforms with prior findings in the literature.
+
+In addition, we conclude that some personality traits are independently associated risk for being underweight, compared to normal, even accoutning for parental SES. We are especially confident in the associations between trait neuroticism and the highly associated narrow traits well-being and emotional stability among adolescent girls, and the well-being, sensation seeking, and attention seeking among adolesecnt boys.
+
+Next, there is some evidence that personality traits may also be independently associated with risk for being overweight or obese. We have reduced confidence in these findings given that these associations were sensitive to the imputation of missing data in our study.
+
+
+## Findings in context -- research
+
+It is notable that many teens were unwilling (or perhaps unable) to provide their height and/or weight on an anonymous self-report assessment of personality. Body size is scrutinized among adolescents and, for some individuals, may be stimatized by their peers, so it is unsuprirising that at least some individuals chose not to report these values. However roughly half of our sample of US adolescents skipped one or both of these questions, suggesting large bias in self-report studies attempting to measure these variables. All studies of BMI in adolescents must take great care to attend to missigness in data and, ideally, avoid the use of self-report as the primary means by which these data are colleted.
+
+It should be noted that associations between SES and personality are likely bidirectional. Certainly across the lifespan, there is strong evidence of the effects of personality on socioeconomic status in adulthood [@duckworth2012does; @barrick1991big; @wilcox2011leave].  This suggests that some of the direct effects of personality or SES on weight are obscured by controlling for the other; indeed, the range of coefficients for SES across models implies that the choice of trait covariate may have substantial impact on the conclusions drawn in a particular study. 
+
+## Limitations
+
+The primary limitations of the current study are the use of self-reported height and weight, which imposes bias through inaccuracy and missingness, and self-selection into the study. Regarding the former, several results were robust to sensitivity analysis, including the effect of parental socioeconomic status, the lack of interaction effects, and many relationships between personality traits and risk for being underweight compared to normal.Regarding self-selection, however, we are somewhat limited in our ability to test the boundaries of our effects. We note here that broadly, people who voluntarily visit this website represent a broad range of ethnic backgrounds and geographic locations, although it tends to skew more educated than the general population in adult samples (citation masked).
+
+# Conclusion
+
+
+
+\newpage
+
+# References
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup

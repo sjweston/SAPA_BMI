@@ -8,6 +8,8 @@ rm(packages)
 colors = RColorBrewer::brewer.pal(n = 3, "Dark2")
 
 load(here("data/cleaned.Rdata"))
+# load(here("data/regression_output_male.Rdata"))
+# load(here("data/regression_output_female.Rdata"))
 load(here("data/logistic_output.Rdata"))
 
 # create newdata function
@@ -19,19 +21,19 @@ make_new = function(x, y){
 }
 
 
-source("scripts/personality_scales.R")
+source(here("scripts/personality_scales.R"))
 
 # ---- female prob figure ----
 # create new data for each trait
 
-female_prep = data.frame(trait = unique(female_log$trait_name), stringsAsFactors = F) %>%
+female_prep = data.frame(trait = unique(female_reg$trait_name), stringsAsFactors = F) %>%
   mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
   mutate(min = -3) %>%
   mutate(max = 3) %>%
   mutate(newdata = map2(.x = min, .y = max, make_new)) %>%
   select(trait_name, newdata) 
 
-prob_dist_data_female = full_join(female_prep, female_log) %>%
+prob_dist_data_female = full_join(female_prep, female_plot) %>%
   filter(model == "cov") %>%
   select(trait_name, final_mod, newdata) %>%
   mutate(predicted_probs = map2(final_mod, newdata, predict, type = "prob")) %>%
@@ -44,14 +46,14 @@ prob_dist_data_female = full_join(female_prep, female_log) %>%
 # ---- male prob figure ----
 # create new data for each trait
 
-male_prep = data.frame(trait = unique(male_log$trait_name), stringsAsFactors = F) %>%
+male_prep = data.frame(trait = unique(male_reg$trait_name), stringsAsFactors = F) %>%
   mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
   mutate(min = -3) %>%
   mutate(max = 3) %>%
   mutate(newdata = map2(.x = min, .y = max, make_new)) %>%
   select(trait_name, newdata) 
 
-prob_dist_data_male = full_join(male_prep, male_log) %>%
+prob_dist_data_male = full_join(male_prep, male_reg) %>%
   filter(model == "cov") %>%
   select(trait_name, final_mod, newdata) %>%
   mutate(predicted_probs = map2(final_mod, newdata, predict, type = "prob")) %>%

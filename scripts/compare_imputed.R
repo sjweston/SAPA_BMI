@@ -5,7 +5,7 @@ packages = c("tidyverse", "knitr", "kableExtra", "papaja", "here","ggpubr")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
-source("scripts/personality_scales.R")
+source(here("scripts/personality_scales.R"))
 
 names(SPI_27_names) = gsub("135_27_5_", "", names(SPI_27_names))
 names(SPI_5_names) = gsub("135_27_5_", "", names(SPI_5_names))

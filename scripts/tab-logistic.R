@@ -6,7 +6,7 @@ packages = c("tidyverse", "knitr", "kableExtra", "papaja", "here")
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
-source("scripts/personality_scales.R")
+source(here("scripts/personality_scales.R"))
 
 names(SPI_27_names) = gsub("135_27_5_", "", names(SPI_27_names))
 names(SPI_5_names) = gsub("135_27_5_", "", names(SPI_5_names))
@@ -14,15 +14,17 @@ names(SPI_5_names) = gsub("135_27_5_", "", names(SPI_5_names))
 # ----- Table. Regression model  -----
 
 
-load("data/logistic_output.Rdata")
+load(here("data/logistic_output.Rdata"))
 
 female_log = female_log %>%
+  filter(str_detect(trait_name, "SPI") | trait_name == "cog") %>%
   mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
   dplyr::select(trait_name, model, coef) %>%
   unnest(cols = c(coef)) %>%
   mutate(gender = "female")
 
 male_log = male_log %>%
+  filter(str_detect(trait_name, "SPI") | trait_name == "cog") %>%
   mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
   dplyr::select(trait_name, model, coef) %>%
   unnest(cols = c(coef)) %>%
@@ -42,7 +44,7 @@ female_log %>%
   mutate(term = ifelse(term == "trait_score", "main", "moderated")) %>%
   unite(col = "newkey", gender, y.level, term) %>%
   spread(newkey, value) %>%
-  ungroup() %>%
+  ungroup() %>% 
   mutate(trait_name = factor(trait_name, levels = c("cog", names(SPI_27_names), names(SPI_5_names)))) %>% 
   arrange(trait_name) %>% 
   mutate(trait_name = rep(c("Cognitive Ability", SPI_27_names, SPI_5_names),each = 2)) %>% 
@@ -58,83 +60,113 @@ female_log %>%
 
 # ----- Table. Regression model additive Female ----
 
-load("data/logistic_output.Rdata")
+load(here("data/logistic_output.Rdata"))
 
 female_log = female_log %>%
+  filter(str_detect(trait_name, "SPI") | trait_name == "cog") %>%
   mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
   dplyr::select(trait_name, model, coef) %>%
   unnest(cols = c(coef)) %>%
   mutate(gender = "female")
 
-female_log %>%
+female_log_tab = female_log %>%
   filter(grepl("trait", term)) %>%
   filter(model == "cov") %>%
-  mutate(b1_est = printnum(estimate),  
-         b1_est = ifelse(conf.low > 1 | conf.high < 1, paste0(b1_est, "*"), b1_est),
-         conf.low = printnum(conf.low),
-         conf.high = printnum(conf.high), 
-         b2_conf = paste0("[", conf.low, ", ", conf.high, "]")) %>%
-  dplyr::select(trait_name, y.level, term, b1_est, b2_conf, gender) %>%
-  gather("key", "value", b1_est, b2_conf) %>%
-  spread(y.level, value) %>%
+  mutate(b1_est = printnum(exp(estimate)),  
+         b1_est = ifelse(conf.low > 0 | conf.high < 0, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(exp(conf.low)),
+         conf.high = printnum(exp(conf.high)), 
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]"), 
+         b1_est = paste(b1_est, b2_conf)) %>%
+  dplyr::select(trait_name, y.level, term, b1_est, gender) %>%
+  #gather("key", "value", b1_est, b2_conf) %>%
+  spread(y.level, b1_est) %>%
   ungroup() %>%
   mutate(trait_name = factor(trait_name, levels = c("cog", names(SPI_27_names), names(SPI_5_names)))) %>% 
   arrange(trait_name) %>% 
-  mutate(trait_name = rep(c("Cognitive Ability", SPI_27_names, SPI_5_names),each = 2)) %>% 
-  mutate(trait_name = ifelse(!(row_number() %% 2), NA, trait_name)) %>%
-  dplyr::select(-term, -gender, -key) %>%
-  mutate(Obese = ifelse(grepl("\\*", Obese),
-                       cell_spec(Obese, "html", color = "red", bold = T),
-                       cell_spec(Obese, "html")), 
-         Overweight = ifelse(grepl("\\*", Overweight),
-                        cell_spec(Overweight, "html", color = "red", bold = T),
-                        cell_spec(Overweight, "html")), 
-         Underweight = ifelse(grepl("\\*", Underweight),
-                        cell_spec(Underweight, "html", color = "red", bold = T),
-                        cell_spec(Underweight, "html"))) %>%
-  kable(., col.names = c("Trait", "Obese", "Overweight", "Underweight"), escape = F) %>%
+  mutate(trait_name = c("Cognitive Ability", SPI_27_names, SPI_5_names)) %>% 
+  #mutate(trait_name = ifelse(!(row_number() %% 2), NA, trait_name)) %>%
+  dplyr::select(-term, -gender) 
+
+f_tab_obese_color = ifelse(
+  str_detect(female_log_tab$Obese, "\\*"), "red", "black")
+f_tab_obese_boldf = ifelse(
+  str_detect(female_log_tab$Obese, "\\*"), TRUE, FALSE)
+
+f_tab_overw_color = ifelse(
+  str_detect(female_log_tab$Overweight, "\\*"), "red", "black")
+f_tab_overw_boldf = ifelse(
+  str_detect(female_log_tab$Overweight, "\\*"), TRUE, FALSE)
+
+f_tab_underw_color = ifelse(
+  str_detect(female_log_tab$Underweight, "\\*"), "red", "black")
+f_tab_underw_boldf = ifelse(
+  str_detect(female_log_tab$Underweight, "\\*"), TRUE, FALSE)
+
+female_log_tab %>%
+  kable(., 
+        booktabs = T,
+        col.names = c("Trait", "Obese", "Overweight", "Underweight"), 
+        escape = F) %>%
   kable_styling() %>%
-  group_rows("SPI: 27 Factors", 3, 56) %>%
-  group_rows("SPI: 5 Factors", 57, 66)
+  column_spec(2, color = f_tab_obese_color, bold = f_tab_obese_boldf) %>%
+  column_spec(3, color = f_tab_overw_color, bold = f_tab_overw_boldf) %>%
+  column_spec(4, color = f_tab_underw_color, bold = f_tab_underw_boldf) %>% 
+  group_rows("SPI: 27 Factors", 2, 28) %>%
+  group_rows("SPI: 5 Factors", 29, 33)
 
 # ----- Table. Regression model additive Male ----
 
-load("data/logistic_output.Rdata")
-load("data/logistic_output.Rdata")
+load(here("data/logistic_output.Rdata"))
 
 male_log = male_log %>%
+  filter(str_detect(trait_name, "SPI") | trait_name == "cog") %>%
   mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
   dplyr::select(trait_name, model, coef) %>%
   unnest(cols = c(coef)) %>%
   mutate(gender = "male")
 
-male_log %>%
+male_log_tab = male_log %>%
   filter(grepl("trait", term)) %>%
   filter(model == "cov") %>%
-  mutate(b1_est = printnum(estimate),  
-         b1_est = ifelse(conf.low > 1 | conf.high < 1, paste0(b1_est, "*"), b1_est),
-         conf.low = printnum(conf.low),
-         conf.high = printnum(conf.high), 
-         b2_conf = paste0("[", conf.low, ", ", conf.high, "]")) %>%
-  dplyr::select(trait_name, y.level, term, b1_est, b2_conf, gender) %>%
-  gather("key", "value", b1_est, b2_conf) %>%
-  spread(y.level, value) %>%
+  mutate(b1_est = printnum(exp(estimate)),  
+         b1_est = ifelse(conf.low > 0 | conf.high < 0, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(exp(conf.low)),
+         conf.high = printnum(exp(conf.high)), 
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]"), 
+         b1_est = paste(b1_est, b2_conf)) %>%
+  dplyr::select(trait_name, y.level, term, b1_est, gender) %>%
+  #gather("key", "value", b1_est, b2_conf) %>%
+  spread(y.level, b1_est) %>%
   ungroup() %>%
   mutate(trait_name = factor(trait_name, levels = c("cog", names(SPI_27_names), names(SPI_5_names)))) %>% 
   arrange(trait_name) %>% 
-  mutate(trait_name = rep(c("Cognitive Ability", SPI_27_names, SPI_5_names),each = 2)) %>% 
-  mutate(trait_name = ifelse(!(row_number() %% 2), NA, trait_name)) %>%
-  dplyr::select(-term, -gender, -key) %>%
-  mutate(Obese = ifelse(grepl("\\*", Obese),
-                        cell_spec(Obese, "html", color = "red", bold = T),
-                        cell_spec(Obese, "html")), 
-         Overweight = ifelse(grepl("\\*", Overweight),
-                             cell_spec(Overweight, "html", color = "red", bold = T),
-                             cell_spec(Overweight, "html")), 
-         Underweight = ifelse(grepl("\\*", Underweight),
-                              cell_spec(Underweight, "html", color = "red", bold = T),
-                              cell_spec(Underweight, "html"))) %>%
-  kable(., col.names = c("Trait", "Obese", "Overweight", "Underweight"), escape = F) %>%
-  kable_styling() %>%
-  group_rows("SPI: 27 Factors", 3, 56) %>%
-  group_rows("SPI: 5 Factors", 57, 66)
+  mutate(trait_name = c("Cognitive Ability", SPI_27_names, SPI_5_names)) %>% 
+  #mutate(trait_name = ifelse(!(row_number() %% 2), NA, trait_name)) %>%
+  dplyr::select(-term, -gender) 
+
+m_tab_obese_color = ifelse(
+  str_detect(male_log_tab$Obese, "\\*"), "red", "black")
+m_tab_obese_boldf = ifelse(
+  str_detect(male_log_tab$Obese, "\\*"), TRUE, FALSE)
+
+m_tab_overw_color = ifelse(
+  str_detect(male_log_tab$Overweight, "\\*"), "red", "black")
+m_tab_overw_boldf = ifelse(
+  str_detect(male_log_tab$Overweight, "\\*"), TRUE, FALSE)
+
+m_tab_underw_color = ifelse(
+  str_detect(male_log_tab$Underweight, "\\*"), "red", "black")
+m_tab_underw_boldf = ifelse(
+  str_detect(male_log_tab$Underweight, "\\*"), TRUE, FALSE)
+
+male_log_tab %>%
+  kable(., 
+        booktabs = T,
+        col.names = c("Trait", "Obese", "Overweight", "Underweight"), 
+        escape = F) %>%kable_styling() %>%
+  column_spec(2, color = m_tab_obese_color, bold = m_tab_obese_boldf) %>%
+  column_spec(3, color = m_tab_overw_color, bold = m_tab_overw_boldf) %>%
+  column_spec(4, color = m_tab_underw_color, bold = m_tab_underw_boldf) %>% 
+  group_rows("SPI: 27 Factors", 2, 28) %>%
+  group_rows("SPI: 5 Factors", 29, 33)

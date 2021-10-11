@@ -17,7 +17,7 @@ ctrl <- trainControl(method = "repeatedcv", # cross-validation
                      repeats = 10, #repeated 10 times
                      verboseIter = FALSE,
                      search = "random",
-                     sampling = "smote") 
+                     sampling = "up") 
 # ------------------------------------
 # build model: SES                   #
 # ------------------------------------

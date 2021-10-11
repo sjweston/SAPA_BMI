@@ -61,9 +61,7 @@ test = male_log %>%
   separate(model, into = c("model", "ses")) %>%
   dplyr::select(trait_name, model, ses, final_mod) %>%
   spread(ses, final_mod) %>%
-  mutate(plot_edu = map(edu, ggeffects::ggpredict, terms = c("trait_score", "edu[meansd]")))
-
-%>%
+  mutate(plot_edu = map(edu, ggeffects::ggpredict, terms = c("trait_score", "edu[meansd]"))) %>%
   mutate(plot_inc = map(inc, sjPlot::plot_model, type = "pred", terms = c("trait_score", "income[meansd]"))) %>%
   mutate(plot_edu = map(plot_edu, "data")) %>%
   mutate(plot_inc = map(plot_inc, "data")) 

@@ -1,0 +1,1924 @@
+---
+title: "BMI Percentile by SES and Individual Differences in Adolescents"
+output:
+  bookdown::pdf_document2:
+    toc: yes
+bibliography: ["SAPA_BMI.bib", "packages.bib"]
+csl: apa.csl
+editor_options:
+  chunk_output_type: console
+---
+
+
+\newpage 
+
+Data for this study come from the subset of responses collected on the [SAPA-project.org](sapa-project.org) website between February 17, 2017 and July 22, 2019. The initial date is the day that the semi-random presentation of items to participants was changed to increase presentation of SPI-135 items, which are the basis for personality measurement in this study. This period also represents a new period of data collection on SAPA containing data that are not available in the public domain at the time of analysis. The end date of data collection was the first day following preregistration of analysis that the authors were able to analyze data.
+
+```{r notebook1, results = 'asis', warning = F, message = F, echo = F}
+library(knitr)
+library(here)
+library(tidyverse)
+library(ggthemr)
+library(janitor)
+library(psych)
+library(devtools)
+library(PAutilities)
+library(measurements)
+library(caret)
+library(corrplot)
+library(broom)
+library(sjPlot)
+library(rsample)
+library(ggpubr)
+library(papaja)
+library(glmnet)
+library(kableExtra)
+
+knitr::write_bib(c(.packages(), "bookdown"), "packages.bib")
+
+wkspc = sessionInfo()
+packages = wkspc$otherPkgs
+package.df = tibble(package = names(packages))
+package.df$list = packages
+package.df2 = package.df
+```
+
+All data cleaning and analyses were completed using `r wkspc$R.version$version.string` (`r wkspc$R.version$nickname`). Table \@ref(tab:notebook1) lists the packages (and versions) used in these analyses. 
+
+```{r, echo = F, results = 'asis'}
+package.df %>% 
+  mutate(version = map_chr(list, "Version"),
+         author = map_chr(list, "Author")) %>% 
+  select(-list) %>% 
+  kable(booktabs = T, longtable = T,
+        caption = "Packages (and their versions) used for theses analyses.",
+        col.names = c("Package", "Version", "Authors and contributors")) %>% 
+  kable_styling(latex_options = c("repeat_header")) %>% 
+  column_spec(3, width = "5in")
+
+```
+
+
+```{r notebook2, echo=FALSE, results='asis'}
+options(knitr.kable.NA = '')
+```
+
+\newpage 
+
+# Clean data
+
+```{r notebook3, eval=F}
+set.seed(052319)
+
+#read in data
+load(here("../../SAPA data/original data/SAPAdata07feb2017thru22jul2019forSara2.rdata"))
+sapa = SAPAdata07feb2017thru22jul2019x
+
+source(here("scripts/personality_scales.R"))
+keys = read.csv("data/superKey.csv", header = TRUE, row.names = 1)
+```
+
+Participants were included in the analysis if they were under the age of 18, from the United States, and had reported their biological sex at birth, height, and weight.
+
+```{r notebook4, eval = F}
+# remove participants who are 18 years or older and from the US
+sapa = sapa %>%
+  filter(age < 18) %>%
+  filter(country == "USA") %>%
+  filter(!is.na(sex)) %>%
+  filter(!is.na(height)) %>%
+  filter(!is.na(weight)) %>%
+  filter(!is.na(p1edu) | !is.na(p2edu) |
+           !is.na(p1occIncomeEst) | !is.na(p2occIncomeEst) |
+           !is.na(p1occPrestige) | !is.na(p2occPrestige))
+```
+
+Parental education was transformed into a numeric variable which indexes the (expected) number of years to complete the degree. All parental SES variables -- education, estimated income and estimated prestige, were standardized to the sample and averaged to create a single index of parental SES.
+
+```{r notebook5, eval = F}
+# make sure occupational variables are numeric
+sapa = sapa %>%
+  mutate_at(vars(matches("^(p)\\d(occ)")), as.numeric)
+
+#or years
+sapa = sapa %>%
+  mutate(p1edu = case_when(
+    p2edu == "less12yrs" ~ "6", 
+    p2edu == "HSgrad" ~ "12", 
+    p2edu == "SomeCollege" ~ "14", 
+    p2edu == "CurrentInUniv" ~ "14",   
+    p2edu == "AssociateDegree" ~ "14", 
+    p2edu == "CollegeDegree" ~ "16", 
+    p2edu == "InGradOrProSchool" ~ "18", 
+    p2edu == "GradOrProDegree" ~ "20")) 
+
+sapa = sapa %>%
+  mutate(p2edu = case_when(
+    p2edu == "less12yrs" ~ "6", 
+    p2edu == "HSgrad" ~ "12", 
+    p2edu == "SomeCollege" ~ "14", 
+    p2edu == "CurrentInUniv" ~ "14",   
+    p2edu == "AssociateDegree" ~ "14", 
+    p2edu == "CollegeDegree" ~ "16", 
+    p2edu == "InGradOrProSchool" ~ "18", 
+    p2edu == "GradOrProDegree" ~ "20")) 
+
+sapa$p1edu = as.numeric(sapa$p1edu)
+sapa$p2edu = as.numeric(sapa$p2edu)
+
+#estimate SES composite
+
+sapa = sapa %>%
+  mutate(z.p1edu = scale(p1edu),
+         z.p2edu = scale(p2edu),
+         z.p1occIncomeEst = scale(p1occIncomeEst),
+         z.p2occIncomeEst = scale(p2occIncomeEst),
+         z.p1occPrestige = scale(p1occPrestige),
+         z.p2occPrestige = scale(p2occPrestige)) 
+
+sapa$ses = rowMeans(sapa[,grepl("^z\\.", names(sapa))], na.rm=T)
+
+sapa = sapa %>%
+  dplyr::select(-starts_with("z"))
+```
+
+Big Five traits were scored using a sum-score method, averaged across non-missing responses.
+
+```{r r score 5 personality factors (sum scores), eval = F}
+# select just the rows that correspond to variables in the current SAPA dataset
+vars = names(sapa)
+keys = keys[rownames(keys) %in% vars, ]
+
+# select just the Big 5 scales that are scored using the SPI_135 form 
+bfkeys = keys %>%
+  select(contains("SPI_135")) %>%
+  select(1:5) 
+
+bfkeys = keys2list(as.matrix(bfkeys), sign = T)
+
+
+# score the items (this contains item and scale statistics too!)
+b5scored = scoreItems(keys = bfkeys, items = sapa)
+
+# add scores to SAPA
+b5scores = as.data.frame(b5scored$scores[,1:5])
+names(b5scores) = gsub("135_27_5_", "", names(b5scores))
+sapa = cbind(sapa, b5scores)
+```
+
+The narrower traits, the SPI-27, were scored using IRT scoring. Calibration parameters were taken from a different dataset and are available on request.
+
+```{r r score 27 personality factors (IRT scores), eval = F}
+load(here("../../SAPA data/created/IRTinfoSPI27.rdata"))
+
+# IRT score
+dataSet <- subset(sapa, select = c(orderForItems))
+
+SPIirtScores <- matrix(nrow=dim(dataSet)[1], ncol=27)
+
+scaleNames = gsub("SPI27_", "", names(IRToutputSPI27))
+spi_keys = keys %>%
+  select(matches("SPI_135")) %>%
+  select(-c(1:5)) %>%
+  mutate(item = rownames(.)) %>%
+  gather("scale", "key", -item) %>%
+  filter(key != 0)
+
+for (i in 1:length(IRToutputSPI27)) {
+  data <- subset(dataSet, select = c(rownames(IRToutputSPI27[[i]]$irt$difficulty[[1]])))
+  calibrations <- IRToutputSPI27[[i]]
+  #check calibration direction
+  loadings = calibrations$fa$loadings[,1]
+  loadings = ifelse(loadings < 0, -1, 1)
+  loadings = data.frame(item = names(loadings), loadings = loadings)
+  keys_direction = spi_keys %>%
+    filter(grepl(scaleNames[i], scale)) %>%
+    full_join(loadings)
+  same = sum(keys_direction$key == keys_direction$loadings)
+  if(same == 0) data[,1:ncol(data)] = apply(data[,1:ncol(data)], 2, function(x) max(x, na.rm=T) + 1 - x)
+  if (same > 0 & same < 5) print("Error in loadings")
+  scored <- scoreIrt(calibrations, data, keys = NULL, cut = 0)
+  trait_scores = scored$theta1
+  trait_scores = (trait_scores - mean(trait_scores, na.rm = T))/sd(trait_scores, na.rm=T)
+  Tscores = trait_scores*10 + 50
+  SPIirtScores[,i] <- Tscores
+}
+
+SPIirtScores <- as.data.frame(SPIirtScores)
+colnames(SPIirtScores) <- paste0("SPI_", scaleNames)
+
+#add to sapa dataset
+sapa = cbind(sapa, SPIirtScores)
+```
+
+Cognition was also scored using IRT scoring, with calibrations from a separate dataset.
+
+```{r r score ICAR (IRT scores), eval = F}
+load(here("../../SAPA data/created/IRTinfoSPI27.rdata"))
+
+# IRT score
+dataSet <- subset(sapa, select = c(orderForItems))
+
+SPIirtScores <- matrix(nrow=dim(dataSet)[1], ncol=27)
+
+scaleNames = gsub("SPI27_", "", names(IRToutputSPI27))
+spi_keys = keys %>%
+  select(matches("SPI_135")) %>%
+  select(-c(1:5)) %>%
+  mutate(item = rownames(.)) %>%
+  gather("scale", "key", -item) %>%
+  filter(key != 0)
+
+for (i in 1:length(IRToutputSPI27)) {
+  data <- subset(dataSet, select = c(rownames(IRToutputSPI27[[i]]$irt$difficulty[[1]])))
+  calibrations <- IRToutputSPI27[[i]]
+  #check calibration direction
+  loadings = calibrations$fa$loadings[,1]
+  loadings = ifelse(loadings < 0, -1, 1)
+  loadings = data.frame(item = names(loadings), loadings = loadings)
+  keys_direction = spi_keys %>%
+    filter(grepl(scaleNames[i], scale)) %>%
+    full_join(loadings)
+  same = sum(keys_direction$key == keys_direction$loadings)
+  if(same == 0) data[,1:ncol(data)] = apply(data[,1:ncol(data)], 2, function(x) max(x, na.rm=T) + 1 - x)
+  if (same > 0 & same < 5) print("Error in loadings")
+  scored <- scoreIrt(calibrations, data, keys = NULL, cut = 0)
+  trait_scores = scored$theta1
+  trait_scores = (trait_scores - mean(trait_scores, na.rm = T))/sd(trait_scores, na.rm=T)
+  Tscores = trait_scores*10 + 50
+  SPIirtScores[,i] <- Tscores
+}
+
+SPIirtScores <- as.data.frame(SPIirtScores)
+colnames(SPIirtScores) <- paste0("SPI_", scaleNames)
+
+#add to sapa dataset
+sapa = cbind(sapa, SPIirtScores)
+```
+
+BMI percentile represents a participant's percentile score on BMI relative to others of their assigned sex at birth. These were estimated from the `PAutilities` package [@R-PAutilities], developed by WHO Multicentre Growth Reference Study (MGRS).
+Information about the development of these reference standards can be found at
+[https://www.cdc.gov/obesity/childhood/defining.html](https://www.cdc.gov/obesity/childhood/defining.html). These standards in turn were developed using the 2000 CDC growth charts [@kuczmarski20022000], based on data from 5 national
+health examination surveys that occurred from 1963 to 1994 and supplemental data from surveys that
+occurred from 1960 to 1995.
+
+BMI category is assigned based on BMI percentile: participants in the bottom 10% are labeled Underweight, between the top 10% and 5% are Overweight, and top 5% are Obese. All others are labeled Normal.
+
+```{r notebook6, eval = F}
+sapa = sapa %>%
+  filter(sex != "other") %>%
+  mutate(sex = as.factor(as.character(sex))) %>%
+  mutate(sex2 = ifelse(sex == "male", "M", "F"),
+         weight = conv_unit(weight, from = "lbs", to = "kg"),
+         height = conv_unit(height, from = "inch", to = "cm"))
+
+for(i in 1:nrow(sapa)){
+  sapa$BMI_p[i] = get_BMI_percentile(weight_kg = sapa$weight[i],
+                                     height = sapa$height[i],
+                                     age_yrs = sapa$age[i],
+                                     sex = sapa$sex2[i],
+                                     output = "percentile")
+  sapa$BMI_c[i] = as.character(
+    get_BMI_percentile(weight_kg = sapa$weight[i],
+                       height = sapa$height[i],
+                       age_yrs = sapa$age[i],
+                       sex = sapa$sex2[i],
+                       output = "class"))
+}
+```
+
+All analyses were performed separately by gender.
+
+```{r notebook7, eval = F}
+sapa = sapa %>%
+  mutate(cog = ICAR60) %>%
+  select(sex, age, height, weight, BMI, BMI_p, BMI_c, p1edu,
+         p1occPrestige, p1occIncomeEst, p2edu,
+         p2occPrestige, p2occIncomeEst, ses, cog, contains("SPI"))
+
+sapa_male = sapa %>%
+  filter(sex == "male") %>%
+  dplyr::select(-sex)
+
+sapa_female = sapa %>%
+  filter(sex == "female") %>%
+  dplyr::select(-sex)
+
+save(b5scored, file = here("data/alpha.Rdata"))
+```
+
+The datasets were split into training (75%) and test (25%) sets; all regression models are estimated using the training sets. The test set was reserved to estimate model accuarcy, comparing models with different sets of individual differences.
+
+```{r notebook8, eval = F}
+# set seed
+set.seed(090919)
+
+# parition into training and test sets. objects identify just training rows
+train_male = createDataPartition(sapa_male$BMI_c, p = .75, list = FALSE)
+train_female = createDataPartition(sapa_female$BMI_c, p = .75, list = FALSE)
+
+# ---- save data -----
+save(sapa,
+     sapa_male, sapa_female,
+     train_male, train_female, file = here("data/cleaned.Rdata"))
+
+save(b5scored,
+     file = here("data/reliability.Rdata"))
+```
+
+
+
+\newpage
+
+# Descriptive Statistics
+
+## Univariate descriptives
+
+Descriptive statistics are estimated using the `psych` package [@R-psych].
+
+```{r notebook9, eval = F}
+descriptives = describeBy(sapa, group = "sex")
+```
+
+```{r notebook10, eval = F}
+save(descriptives, file = "data/descriptives.Rdata")
+```
+
+```{r notebook11, echo = F}
+load(here("data/descriptives.Rdata"))
+```
+
+```{r notebook12, results='asis', message = F}
+
+#pull descriptive statistics into a list
+descriptives.df = data.frame(gender = names(descriptives))
+descriptives.df$data = descriptives
+
+#add variable names and unnest
+descriptives.df = descriptives.df %>%
+  mutate(data = map(data, function(x) mutate(x, vars = rownames(x)))) %>%
+  unnest(cols = c(data))
+```
+
+
+### Descriptives Table by Gender {.tabset}
+
+
+```{r notebook13, results = 'asis'}
+descriptives.df %>%
+  select(gender, vars, n, mean, sd, min, max) %>%
+  gather(stat, value, -gender, -vars) %>%
+  unite(stat, stat, gender) %>%
+  spread(stat, value) %>%
+  select(vars, n_female, mean_female, sd_female, min_female, max_female,
+         n_male, mean_male, sd_male, min_male, max_male) %>%
+  kable(.,
+        col.names = c("Variable", rep(c("N", "Mean", "SD", "Min", "Max"), 2)),
+        digits = 2,
+        caption = "Univariate descriptive statistics of study variables, broken down by gender",
+        longtable = T,
+        booktabs = T) %>%
+  kable_styling() %>%
+  landscape() %>%
+  add_header_above(c(" " = 1, "Female" = 5, "Male" = 5))
+```
+
+### Distribution of BMI
+
+We present the distribution of BMI percentile in Figure \@ref(fig:dist).
+
+```{r, echo = F}
+load(here("data/cleaned.Rdata"))
+```
+
+
+```{r dist, message = F, warning = F, fig.cap = "BMI percentile distributions by gender."}
+dens_f = density(sapa_female$BMI_p)
+df_f = data.frame(BMI = dens_f$x, 
+                  y = dens_f$y,
+                  gender = "Adolescent Girls")
+
+dens_m = density(sapa_male$BMI_p)
+df_m = data.frame(BMI = dens_m$x, 
+                  y = dens_m$y,
+                  gender = "Adolescent Boys")
+df_f = df_f %>%
+  full_join(df_m) %>%
+  mutate(quantile = case_when(
+    BMI < 5 ~ "Underweight",
+    BMI < 85 ~ "Normal",
+    BMI < 95 ~ "Overweight",
+    TRUE ~ "Obese"),
+    quantile = factor(quantile, 
+                      levels = c("Underweight", "Normal", "Overweight", "Obese")))
+
+df_f %>%
+  ggplot(aes(x = BMI, y = y)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=0, ymax=y, fill=quantile)) + 
+  scale_fill_brewer() +
+  scale_x_continuous(limits = c(0,100)) +
+  labs(x = "BMI Percentile", y = "Density", fill = "CDC weight categories") +
+  facet_wrap(~gender) +
+  theme_pubr()
+ggsave(here("figures/BMI distributions.jpeg"), width = 7.5, height = 4.5)
+
+```
+
+
+## Bivariate
+
+
+```{r notebook14, eval = F}
+R_male = sapa_male %>%
+  dplyr::select(-BMI_c) %>%
+  cor(use = "pairwise")
+
+R_female = sapa_female %>%
+  dplyr::select(-BMI_c) %>%
+  cor(use = "pairwise")
+
+#predictors
+pred = names(sapa_male) %>% str_subset("BMI", negate = TRUE)
+
+
+r_bmi_male = corr.test(x = sapa_male$BMI, y = sapa_male[,pred])
+r_bmi_female = corr.test(x = sapa_female$BMI, y = sapa_female[,pred])
+
+r_bmi_male = modify(r_bmi_male, as.vector)
+r_bmi_female = modify(r_bmi_female, as.vector)
+
+cor.data = data.frame(gender = c("male", "female"))
+cor.data$fullr = list(r_bmi_male, r_bmi_female)
+
+
+cor.data = cor.data %>%
+  mutate(r = map(fullr, "r")) %>%
+  mutate(r = map(r, unlist)) %>%
+  mutate(rp = map(fullr, "p")) %>%
+  mutate(rp = map(rp, unlist)) %>%
+  dplyr::select(-fullr) %>%
+  unnest(cols = c(r, rp)) %>%
+  mutate(pred = rep(pred,2)) %>%
+  gather("key", "value", -gender, -pred) %>%
+  unite(gender, gender, key) %>%
+  spread(gender, value)
+
+save(R_male, R_female, cor.data, file = "data/cor_output.Rdata")
+```
+
+```{r notebook15, echo = F}
+load(here("data/cor_output.Rdata"))
+```
+
+
+### Girls
+
+```{r notebook16, message=FALSE, fig.width = 10, fig.height = 11, fig.cap="Zero-order correlations among study variables (Female Participants)"}
+corrplot(R_female, method = "square",
+         title = NULL,
+         tl.col = "black",
+         mar=c(0,0,1,0))
+```
+
+### Boys
+
+```{r notebook17, message=FALSE, fig.width = 10, fig.height = 11, fig.cap="Zero-order correlations among study variables (Male Participants)"}
+corrplot(R_male, method = "square",
+         title = NULL,
+         tl.col = "black",
+         mar=c(0,0,1,0))
+```
+
+\newpage
+
+# BMI percentile (Regression Models)
+
+Regression models were built that regressed BMI percentile onto parental socio-economic status and adolescent individual differences. Two basic models were constructed: one that hypothesized parental SES:
+
+$$BMIp_i = b_0 + b_1(SES_i) + b_2(ID_i) + e_i$$
+
+and an individual difference were two independent predictors of BMI, and a second that hypothesized these variables interacted with each other:
+
+$$BMIp_i = b_0 + b_1(SES_i) + b_2(ID_i) + b_3(SES_i\times ID_i) + e_i$$
+We iterated through all individual differences -- the broad Big Five personality traits, the narrow SPI-27 traits, and cognitive functioning -- and tested each one independently in the model as an individual difference.
+
+Models were estimated separately for men and women.
+
+```{r notebook18, eval = F}
+#end goal of wrangling is a data frame of data frames
+# nested data frames correspond to a single personality trait
+# score refers to a participant's score on that trait
+# we also standardize each of our variables within gender
+sapa_male_trait = sapa_male[train_male, ] %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
+  #identify which rows in test and training
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>%
+  # gather all personality variables
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>%
+  # group by trait and also by whether in test/train
+  group_by(trait_name, set) %>%
+  mutate(trait_score = scale(trait_score)) %>% #standardize
+  mutate(ses = scale(ses)) %>% #standardize
+  ungroup() %>% group_by(trait_name) %>%  #group only by trait
+  nest() #nest data frames
+
+
+sapa_female_trait = sapa_female[train_female, ] %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2")) %>%
+  #identify which rows in test and training
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>%
+  # gather all personality variables
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>%
+  # group by trait and also by whether in test/train
+  group_by(trait_name, set) %>%
+  mutate(trait_score = scale(trait_score)) %>% #standardize
+  mutate(ses = scale(ses)) %>% #standardize
+  ungroup() %>% group_by(trait_name) %>%  #group only by trait
+  nest() #nest data frames
+```
+
+```{r notebook19, eval = F}
+# number of bootstrap samples
+boot.n = 10000
+
+# ---- regression iteration (males) -----
+
+# apply to each dataset the linear model estimating coefficients
+male_reg = sapa_male_trait %>%
+  mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
+  mutate(int = map(data, ~lm(BMI_p ~ trait_score*ses, data = .)))
+
+# duplicate object for later
+male_plot = male_reg 
+
+# select summary statistics and clean using `tidy`
+male_reg = male_reg %>%
+  dplyr::select(-data) %>%
+  gather("model", "output", cov, int) %>%
+  mutate(output = map(output, broom::tidy, conf.int = FALSE)) %>%
+  unnest(cols = c(output))
+
+set.seed(031720)
+
+# bootstrap coefficient estimates
+male_boot = sapa_male_trait %>%
+  mutate(samples = map(data, bootstraps, times = boot.n)) %>%
+  dplyr::select(-data) %>%
+  unnest(samples) %>%
+  mutate(boot_cov = map(splits,
+                        ~broom::tidy(lm(BMI_p ~ trait_score + ses,
+                                        analysis(.))))) %>%
+  mutate(boot_int = map(splits,
+                        ~broom::tidy(lm(BMI_p ~ trait_score*ses,
+                                        analysis(.)))))
+# extract summary statistics
+male_boot = male_boot %>%
+  dplyr::select(-splits, -id) %>%
+  gather("model", "summary", -trait_name) %>%
+  unnest(cols = c(summary))
+
+# identify 95% CI from bootstraps
+male_boot = male_boot %>%
+  group_by(trait_name, model, term) %>%
+  summarise(conf.low = quantile(estimate, probs = .025),
+            conf.high = quantile(estimate, probs = .975)) %>%
+  ungroup() %>%
+  mutate(model = gsub("boot_", "", model))
+
+# add to summary data frame
+male_reg = male_reg %>%
+  full_join(male_boot)
+
+# save for later
+save(male_reg, male_plot, file = "data/regression_output_male.Rdata")
+
+# ---- regression iteration (females) -----
+
+
+# we run the models for men and women separately because R kept
+# crashing when trying to run this whole script.
+
+# apply to each dataset the linear model estimating coefficients
+female_reg = sapa_female_trait %>%
+  mutate(cov = map(data, ~lm(BMI_p ~ trait_score + ses, data = .))) %>%
+  mutate(int = map(data, ~lm(BMI_p ~ trait_score*ses, data = .)))
+
+# duplicate object for later
+female_plot = female_reg 
+
+# select summary statistics and clean using `tidy`
+female_reg = female_reg %>%
+  dplyr::select(-data) %>%
+  gather("model", "output", cov, int) %>%
+  mutate(output = map(output, broom::tidy, conf.int = FALSE)) %>%
+  unnest(cols = c(output))
+
+
+# ----  bootstrap confidence intervals (females) -----
+
+set.seed(031720)
+
+# bootstrap coefficient estimates
+female_boot = sapa_female_trait %>%
+  mutate(samples = map(data, bootstraps, times = boot.n)) %>%
+  dplyr::select(-data) %>%
+  unnest(samples) %>%
+  mutate(boot_cov = map(splits,
+                        ~broom::tidy(lm(BMI_p ~ trait_score + ses,
+                                        analysis(.))))) %>%
+  mutate(boot_int = map(splits,
+                        ~broom::tidy(lm(BMI_p ~ trait_score*ses,
+                                        analysis(.)))))
+# extract summary statistics
+female_boot = female_boot %>%
+  dplyr::select(-splits, -id) %>%
+  gather("model", "summary", -trait_name) %>%
+  unnest()
+
+# identify 95% CI from bootstraps
+female_boot = female_boot %>%
+  group_by(trait_name, model, term) %>%
+  summarise(conf.low = quantile(estimate, probs = .025),
+            conf.high = quantile(estimate, probs = .975)) %>%
+  ungroup() %>%
+  mutate(model = gsub("boot_", "", model))
+
+# add to summary data frame
+female_reg = female_reg %>%
+  full_join(female_boot)
+
+# save for later
+save(female_reg, female_plot, file = "data/regression_output_female.Rdata")
+```
+
+
+
+## SES controlling for personality 
+
+In this section we use the output from the models to estimate and visulaize the relationship of SES to BMI.
+
+```{r notebook20, echo = F}
+load(here("data/regression_output_male.Rdata"))
+load(here("data/regression_output_female.Rdata"))
+
+male_reg = ungroup(male_reg)
+female_reg = ungroup(female_reg)
+```
+
+
+To estimate the effect of socioeconomic status on BMI percentile, we graph the estimates of the SES slope coefficient across all regression models controlling for individual differences. This presents not only the average estimate across all models (solid line), but the range of estimates -- a wide range suggests that the effect of SES on BMI is sensitive to the inclusion of different individual difference measures, while a narrow range suggests that the effect of SES on BMI is persistent through personality and cognition.
+
+
+### Girls
+
+```{r notebook21 }
+avg_female = female_reg %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>% 
+  arrange(estimate)
+```
+
+Higher parental socioeconomic status was associated with lower BMI percentile. The largest estimated effect size suggested every one standard deviation increase in parental SES resulted in a `r printnum(abs(avg_female$estimate[[1]]))` percent lower BMI percentile score ($t = `r printnum(avg_female$statistic[[1]])`$, $p < .001$, CI = [`r printnum(avg_female$conf.low[[1]])`, `r printnum(avg_female$conf.high[[1]])`]). The smallest estimated effect size suggested every one standard deviation increase in parental SES resulted in a `r printnum(abs(avg_female$estimate[[33]]))` percent lower BMI percentile score ($t = `r printnum(avg_female$statistic[[33]])`$, $p < .001$, CI = [`r printnum(avg_female$conf.low[[33]])`, `r printnum(avg_female$conf.high[[33]])`]). Figure \@ref(fig:notebook22) depicts all confidence intervals -- all are statistically significant.
+
+```{r, echo = F}
+avg_female = avg_female %>%
+  summarize(mean = mean(estimate))
+```
+
+
+```{r notebook22, fig.cap="Estimates of SES coefficient from linear models predicing female adolescent BMI. Estimates control for individual differences. Bars represent 95% confidence intervals and are colored red if statistically significant."}
+female_plot_1 = female_reg %>%
+   ungroup() %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 0), linetype = "dashed") +
+  geom_hline(aes(yintercept = mean), data = avg_female) +
+  scale_color_manual(values = c("red", "grey")) +
+  scale_y_continuous(limits = c(-5.5, 0.25), breaks = c(-5:0))+
+  labs(x = "Specification",
+       y = "SES coefficient, controlling for personality",
+       title = "Adolescent Girls") +
+  guides(color = "none") +
+  theme_pubr()
+
+female_plot_1
+```
+
+```{r, results = 'asis', echo = F}
+female_reg %>% 
+  filter(model == "cov") %>% 
+  filter(term == "ses") %>% 
+  select(-model, -term) %>% 
+  mutate(
+    p.value = papaja::printp(p.value),
+    across(where(is.numeric), papaja::printnum)
+  ) %>% 
+  kbl(col.names = c("Controlling for", 
+                    "SES estimate",
+                    "SE",
+                    "t",
+                    "p-value",
+                    "CI-low",
+                    "CI-high"),
+      booktabs = T,
+      caption = "Effect of SES controlling for various traits (adolescent girls)") %>% 
+  kable_classic()
+```
+
+
+### Boys
+
+```{r notebook23 }
+avg_male = male_reg %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>% 
+  arrange(estimate)
+```
+
+Higher parental socioeconomic status was associated with lower BMI percentile. The largest estimated effect size suggested every one standard deviation increase in parental SES resulted in a `r printnum(abs(avg_male$estimate[[1]]))` percent lower BMI percentile score ($t = `r printnum(avg_male$statistic[[1]])`$, $p < .001$, CI = [`r printnum(avg_male$conf.low[[1]])`, `r printnum(avg_male$conf.high[[1]])`]). The smallest estimated effect size suggested every one standard deviation increase in parental SES resulted in a `r printnum(abs(avg_male$estimate[[33]]))` percent lower BMI percentile score ($t = `r printnum(avg_male$statistic[[33]])`$, $p < .001$, CI = [`r printnum(avg_male$conf.low[[33]])`, `r printnum(avg_male$conf.high[[33]])`]). Figure \@ref(fig:notebook24) depicts all confidence intervals -- all are statistically significant.
+
+
+```{r, echo = F}
+avg_male = avg_male %>%
+  summarize(mean = mean(estimate))
+```
+
+```{r notebook24, fig.cap="Estimates of SES coefficient from linear models predicing male adolescent BMI. Estimates control for individual differences. Bars represent 95% confidence intervals and are colored red if statistically significant."}
+male_plot_1 = male_reg %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  #geom_point(aes(y = estimate)) +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = mean), data = avg_male, color = "black") +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_male )+
+  scale_color_manual(values = c("red", "grey")) +
+  scale_y_continuous(limits = c(-5.5, .25), breaks = c(-5:0))+
+  labs(x = "Specification", title = "Adolescent Boys", y = NULL) +
+  guides(color = "none") +
+  theme_pubr()
+
+male_plot_1
+```
+
+```{r, results = 'asis', echo = F}
+male_reg %>% 
+  filter(model == "cov") %>% 
+  filter(term == "ses") %>% 
+  select(-model, -term) %>% 
+  mutate(
+    p.value = papaja::printp(p.value),
+    across(where(is.numeric), papaja::printnum)
+  ) %>% 
+  kbl(col.names = c("Controlling for", 
+                    "SES estimate",
+                    "SE",
+                    "t",
+                    "p-value",
+                    "CI-low",
+                    "CI-high"),
+      booktabs = T,
+      caption = "Effect of SES controlling for various traits (adolescent boys)") %>% 
+  kable_classic()
+```
+
+## Individual differences controlling for SES
+
+Next, we examine the coefficients for individual differences from the estimated linear models. These coefficients represent the partial association between each trait and BMI percentile, controlling for SES. To facilitate interpretation, we plot all results in Figure \@ref(fig:notebook25). 
+
+Two patterns stand out quickly: first, more traits are significantly associated with BMI among adolescent girls compared to adolescent boys. This may partially be driven by power (the sample of adolescent girls is more than twice the sample of adolescent boys), but we also note that effect sizes tend to be larger among girls. 
+
+Second, traits associated with Neuroticism (Neuroticism itself, but also Irritability, Anxiety, and Well-being) tend to have the largest associations with BMI. 
+
+Of note, Self-control and Cognitive Functioning are largely, negatively associated with BMI across biological sex.
+
+```{r notebook25, fig.width = 8, fig.height = 4, fig.cap = "Horizontal bars represent the coefficient estimate, with 95% confidence intervals included. Bars are colored if the estimate is statistically significant $(p < .05)$. Estimate values are printed next to each bar."}
+colors = RColorBrewer::brewer.pal(n = 3, "Dark2")
+source(here("scripts/personality_scales.R"))
+names(SPI_5_names) = str_remove(names(SPI_5_names), "135_27_5_")
+names(SPI_27_names) = str_remove(names(SPI_27_names), "135_27_5_")
+
+female_reg = female_reg %>%
+  mutate(Gender = "Female")  %>%
+  ungroup()
+
+male_reg = male_reg %>%
+  mutate(Gender = "Male")  %>%
+  ungroup()
+
+female_plot = female_reg %>%
+  filter(term == "trait_score") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no"),
+         est_r = papaja::printnum(estimate),
+         yloc = ifelse(estimate > 0, conf.high + .5, conf.low - .5),
+         trait_name = factor(trait_name,
+                             levels = c("cog", names(SPI_27_names), names(SPI_5_names)),
+                             labels = c("Cognitive Functioning", SPI_27_names, SPI_5_names))) %>%
+  ggplot(aes(x = reorder(trait_name, estimate), y = estimate)) +
+  geom_bar(stat = "identity", aes(fill = psig)) +
+  geom_hline(aes(yintercept = 0), color = "grey") +
+  geom_text(aes(label = est_r, y = yloc)) +
+  scale_fill_manual(values = c("grey", "orange")) +
+  scale_y_continuous(limits = c(-4.5, 4.5)) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .3)+
+  guides(fill = "none") +
+  labs(y = "Regression Coefficient", x = NULL) +
+  coord_flip() +
+  theme_pubr(base_size = 10)
+
+male_plot = male_reg %>%
+  filter(term == "trait_score") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no"),
+         est_r = papaja::printnum(estimate),
+         yloc = ifelse(estimate > 0, conf.high + .5, conf.low - .5),
+         trait_name = factor(trait_name,
+                             levels = c("cog", names(SPI_27_names), names(SPI_5_names)),
+                             labels = c("Cognitive Functioning", SPI_27_names, SPI_5_names))) %>%
+  ggplot(aes(x = reorder(trait_name, estimate), y = estimate)) +
+  geom_bar(stat = "identity", aes(fill = psig)) +
+  geom_hline(aes(yintercept = 0), color = "grey") +
+  geom_text(aes(label = est_r, y = yloc)) +
+  scale_fill_manual(values = c("grey", "orange")) +
+  scale_y_continuous(limits = c(-4.5, 4.5)) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .3)+
+  guides(fill = "none") +
+  labs(y = "Regression Coefficient", x = NULL) +
+  coord_flip() +
+  theme_pubr(base_size = 10)
+
+ggarrange(female_plot, male_plot, ncol = 2, labels = c("Female", "Male"))
+```
+
+### Table
+
+```{r}
+load(here("data/regression_output_male.Rdata"))
+load(here("data/regression_output_female.Rdata"))
+
+
+names(SPI_5_names) = str_remove(names(SPI_5_names), "135_27_5_")
+names(SPI_27_names) = str_remove(names(SPI_27_names), "135_27_5_")
+
+female_reg = female_reg %>%
+  mutate(gender = "female") %>%
+  ungroup()
+
+male_reg = male_reg %>%
+  mutate(gender = "male") %>%
+  ungroup()
+
+all_reg_tab = female_reg %>%
+  full_join(male_reg) %>%
+  filter(grepl("trait", term)) %>%
+  mutate(b1_est = printnum(estimate),  
+         b1_est = ifelse(conf.low > 0 | conf.high < 0, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(conf.low),
+         conf.high = printnum(conf.high), 
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]"),
+         pval = paste("p =", printp(p.value)),
+         str_replace(pval, "= <", "<")) %>% 
+  dplyr::select(trait_name, model, term, b1_est, b2_conf, pval, gender) %>%
+  gather("key", "value", b1_est, b2_conf, pval) %>%
+  unite(col = "newkey", gender, model, term) %>%
+  spread(newkey, value) %>%
+  mutate(trait_name = factor(trait_name, 
+                             levels = c("cog", names(SPI_27_names), names(SPI_5_names)),
+                             labels = c("Cognitive Ability", SPI_27_names, SPI_5_names))) %>%
+  arrange(trait_name) %>% 
+  group_by(trait_name) %>% 
+  mutate(
+    trait_name = as.character(trait_name),
+    trait_name = ifelse(row_number() == 1, 
+                        trait_name,
+                        NA_character_)) %>%
+  ungroup() %>% 
+  dplyr::select(-key)
+
+all_reg_tab %>%
+  kable(., 
+        booktabs = T, escape = F,
+        longtable = T,
+        col.names = rep(c("Trait", rep(c("b", "b", "b x SES"), 2)))) %>%
+  kable_styling() %>%
+  add_header_above(c(" ", "Additive\nModel" = 1, "Interaction\nModel" = 2, "Additive\nModel" = 1, "Interaction\nModel" = 2)) %>%
+  add_header_above(c(" ", "Female" = 3, "Male" = 3)) %>%
+  group_rows("SPI: 27 Factors", 4, 78) %>%
+  group_rows("SPI: 5 Factors", 79, 99) 
+
+```
+
+
+## Interaction  of SES with personality
+
+
+To estimate the joint effect of socioeconomic status and individual differences on BMI percentile, we graph the estimates of the interaction terms of SES by individual differences by BMI percentile. Like before, we present the average effect (solid black line) and the 95% confidence intervals for each model. Figure \@ref(fig:notebook27) shows the results for adolescent girls, while Figure \@ref(fig:notebook29) shows the results for adolescent boys.
+
+### Girls
+
+
+```{r notebook27, fig.cap = "Coefficient estimates for interaction of SES and personality traits, predicting BMI percentile (adolescent girls)" }
+avg_female = ungroup(female_reg) %>%
+  filter(grepl(":", term)) %>% 
+  summarise(mean = mean(estimate))
+
+female_plot_2 = female_reg %>%
+  filter(grepl(":", term)) %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = mean), data = avg_female, color = "black") +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_female )+
+  scale_color_manual(values = c("grey", "red")) +
+  #scale_y_continuous(limits = c(0.30, 2.20))+
+  labs(x = "Specification",
+       y = "SES x perosnality term in model", title = "Adolescent Girls") +
+  guides(color = "none") +
+  theme_pubr()
+
+female_plot_2
+```
+
+
+```{r notebook26, results = 'asis'}
+female_reg %>%
+  filter(grepl(":", term)) %>%
+  filter(p.value < .05) %>% 
+  select(-model, -term, -gender) %>% 
+  mutate(p.value = printp(p.value),
+         across(where(is.numeric), printnum)) %>% 
+  kable(booktabs = T,
+        caption = "Tests of the interaction of SES with traits when predicting BMI percentile (girls).") %>% 
+  kable_styling()
+```
+
+We present the significant interactions for adolescent girls in Table \@ref(tab:notebook26). All _p_-values were larger than .01. As SES increased, so did the relationship between Well-Being and Conservatism and BMI percentile; as SES increased, the relationship between Order and BMI percentile decreased. These relationships are depicted in Figure \@ref(fig:femaleIntPlot).
+
+```{r, echo = F}
+load(here("data/cleaned.Rdata"))
+```
+
+
+```{r femaleIntPlot, fig.cap = "Significant interactions between SES and personality in adolescent girls sample"}
+plot_wellbeing = plot_model(lm(BMI_p ~ ses*SPI_WellBeing, data = sapa_female),
+                            type = "pred", terms =c("SPI_WellBeing", "ses[meansd]"))
+plot_conservat = plot_model(lm(BMI_p ~ ses*SPI_Conservatism, data = sapa_female),
+                            type = "pred", terms =c("SPI_Conservatism", "ses[meansd]"))
+plot_order = plot_model(lm(BMI_p ~ ses*SPI_Order, data = sapa_female),
+                            type = "pred", terms =c("SPI_Order", "ses[meansd]"))
+
+ggarrange(plot_wellbeing, plot_conservat, plot_order)
+```
+
+
+
+
+
+### Boys
+
+```{r notebook28 }
+male_reg %>%
+  filter(grepl(":", term)) %>%
+  filter(p.value < .05) %>% 
+  select(-model, -term, -gender) %>% 
+  mutate(p.value = printp(p.value),
+         across(where(is.numeric), printnum)) %>% 
+  kable(booktabs = T,
+        caption = "Tests of the interaction of SES with traits when predicting BMI percentile (boys).") %>% 
+  kable_styling()
+```
+
+We present the significant interactions for adolescent boys in Table \@ref(tab:notebook28). Again, all _p_-values were larger than .01. As SES increased, so did the relationship between BMI percentile and the traits of Extraversion, Attention Seeking, Authoritarianism, Emotional Expressiveness, and Conservatism; as SES increased, the relationship between Easy-Goingness and BMI percentile decreased. These relationships are depicted in Figure \@ref(fig:maleIntPlot).
+
+```{r notebook29, fig.cap = "Coefficient estimates for interaction of SES and personality traits, predicting BMI percentile (adolescent boys)"}
+avg_male = ungroup(male_reg) %>%
+  filter(grepl(":", term)) %>% 
+  summarise(mean = mean(estimate))
+
+male_plot_2 = male_reg %>%
+  filter(grepl(":", term)) %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  arrange(estimate) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = mean), data = avg_male, color = "black") +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_male )+
+  scale_color_manual(values = c("grey", "red")) +
+  #scale_y_continuous(limits = c(0.30, 2.20))+
+  labs(x = "Specification",
+       y = "SES x perosnality term in model", title = "Adolescent Boys") +
+  guides(color = "none") +
+  theme_pubr()
+
+male_plot_2
+```
+
+```{r maleIntPlot, fig.cap = "Significant interactions between SES and personality in adolescent boys sample"}
+plot_extra = plot_model(lm(BMI_p ~ ses*SPI_Extra, data = sapa_male),
+                            type = "pred", 
+                        terms =c("SPI_Extra", "ses[meansd]")) +
+  theme_pubr(base_size = 8)
+plot_attention = plot_model(lm(BMI_p ~ ses*SPI_AttentionSeeking, data = sapa_male),
+                            type = "pred", 
+                            terms =c("SPI_AttentionSeeking", "ses[meansd]")) +
+  theme_pubr(base_size = 8)
+plot_authoritarian = plot_model(lm(BMI_p ~ ses*SPI_Authoritarianism, data = sapa_male),
+                            type = "pred", 
+                            terms =c("SPI_Authoritarianism", "ses[meansd]")) +
+  theme_pubr(base_size = 8)
+plot_emoexp = plot_model(lm(BMI_p ~ ses*SPI_EmotionalExpressiveness, data = sapa_male),
+                            type = "pred", 
+                         terms =c("SPI_EmotionalExpressiveness", "ses[meansd]")) +
+  theme_pubr(base_size = 8)
+plot_conservat = plot_model(lm(BMI_p ~ ses*SPI_Conservatism, data = sapa_male),
+                            type = "pred", 
+                            terms =c("SPI_Conservatism", "ses[meansd]")) +
+  theme_pubr(base_size = 8)
+plot_easy = plot_model(lm(BMI_p ~ ses*SPI_EasyGoingness, data = sapa_male),
+                            type = "pred", 
+                       terms =c("SPI_EasyGoingness", "ses[meansd]")) +
+  theme_pubr(base_size = 8)
+
+
+ggarrange(plot_extra, plot_attention, plot_authoritarian, plot_emoexp, plot_conservat, plot_easy)
+```
+
+
+\newpage
+
+# BMI weight category (Logistic Regression) 
+
+Multinomial logistic regression models were built that regressed BMI category onto parental socioeconomic status and adolescent individual differences. Two basic models were constructed: one that hypothesized parental SES:
+
+$$BMI_i = b_0 + b_1(SES_i) + b_2(ID_i) + e_i$$
+
+and an individual difference were two independent predictors of BMI, and a second that hypothesized these variables interacted with each other:
+
+$$BMI_i = b_0 + b_1(SES_i) + b_2(ID_i) + b_3(SES_i\times ID_i) + e_i$$
+
+We iterated through all individual differences -- the broad Big Five personality traits, the narrow SPI-27 traits, and cognitive functioning -- and tested each one independently in the model as an individual difference.
+
+Models were estimated separately for men and women.
+
+```{r notebook30, eval = F}
+set.seed(090919)
+
+ctrl <- trainControl(method = "repeatedcv", # cross-validation
+                     number = 10,  # 10 fold cross validation
+                     repeats = 10, #repeated 10 times
+                     verboseIter = FALSE,
+                     search = "random",
+                     sampling = "smote")
+sapa_male_trait = sapa_male %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2"), -starts_with("edu")) %>%
+  mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>%
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>%
+  group_by(trait_name, set) %>%
+  mutate(trait_score = scale(trait_score)) %>%
+  ungroup() %>%
+  group_by(trait_name) %>%
+  nest()
+
+sapa_female_trait = sapa_female %>%
+  dplyr::select(-starts_with("p1"), -starts_with("p2"), -starts_with("edu")) %>%
+  mutate(BMI_c = factor(BMI_c, levels = c("Normal Weight", "Underweight", "Overweight", "Obese"))) %>%
+  mutate(set = ifelse(row_number() %in% train_male[,1], "train", "test")) %>%
+  gather("trait_name", "trait_score", -ses, -BMI_c, -BMI, -BMI_p, -set) %>%
+  group_by(trait_name, set) %>%
+  mutate(trait_score = scale(trait_score)) %>%
+  ungroup() %>%
+  group_by(trait_name) %>%
+  nest()
+
+# ---- ordered logistic regression iteration (males)         ----
+
+male_ses_only = train(BMI_c ~ ses, data = sapa_male,
+                 subset = train_male,
+                 method = "multinom",
+                 maxit= 1000,
+                 na.action = "na.exclude",
+                 trControl = ctrl)
+
+accuracy = predict(male_ses_only, type="raw", newdata=sapa_male[-train_male, ])
+postResample(sapa_male[-train_male, "BMI_c"], accuracy)
+
+male_log = sapa_male_trait %>%
+  # train models on training subset; use mulintomial logistic regression; use specific formula
+  mutate(
+    cov = map(data, ~train(BMI_c ~ trait_score + ses, data = .,
+                               subset = train_male,
+                               method = "multinom",
+                               na.action = "na.exclude",
+                               trControl = ctrl)),
+    int = map(data, ~train(BMI_c ~ trait_score*ses, data = .,
+                               subset = train_male,
+                               method = "multinom",
+                               na.action = "na.exclude",
+                               trControl = ctrl))) %>%
+  gather("model", "output", cov, int) %>%
+  # create test data from all rows not used in training
+  mutate(test_data = map(data, .f = function(x) x[-train_male, ]),
+         #extract reference (true) BMI categories from test data
+         test_reference = map(test_data, "BMI_c"),
+         # predict categories from model output; na.pass puts NAs in any row with missing data
+         predicted = map2(output, test_data, predict, na.action = "na.pass"),
+         # calculate accuracy, sensitivity, specificity, etc
+         confusion = map2(predicted, test_reference, confusionMatrix),
+         # extract final model coefficients
+         final_mod = map(output, "finalModel"),
+         # tidy output for printing
+         coef = map(final_mod, broom::tidy, conf.int = TRUE))
+
+# ---- ordered logistic regression iteration (females)           ----
+
+female_ses_only = train(BMI_c ~ ses, data = sapa_female,
+                      subset = train_female,
+                      method = "multinom",
+                      na.action = "na.exclude",
+                      trControl = ctrl)
+
+
+female_log = sapa_female_trait %>%
+  # train models on training subset; use mulintomial logistic regression; use specific formula
+  mutate(
+    cov = map(data, ~train(BMI_c ~ trait_score + ses, data = .,
+                           subset = train_female,
+                           method = "multinom",
+                           na.action = "na.exclude",
+                           trControl = ctrl)),
+    int = map(data, ~train(BMI_c ~ trait_score*ses, data = .,
+                           subset = train_female,
+                           method = "multinom",
+                           na.action = "na.exclude",
+                           trControl = ctrl))) %>%
+  gather("model", "output", cov, int) %>%
+  # create test data from all rows not used in training
+  mutate(test_data = map(data, .f = function(x) x[-train_female, ]),
+         #extract reference (true) BMI categories from test data
+         test_reference = map(test_data, "BMI_c"),
+         # predict categories from model output; na.pass puts NAs in any row with missing data
+         predicted = map2(output, test_data, predict, na.action = "na.pass"),
+         # calculate accuracy, sensitivity, specificity, etc
+         confusion = map2(predicted, test_reference, confusionMatrix),
+         # extract final model coefficients
+         final_mod = map(output, "finalModel"),
+         # tidy output for printing
+         coef = map(final_mod, broom::tidy, conf.int = TRUE))
+
+
+# ---- save output
+
+
+save(train_male, male_ses_only, male_log, train_female, female_ses_only, female_log, file = "data/logistic_output.Rdata")
+
+```
+
+## Controlling for personality {.tabset}
+
+```{r notebook31, echo = F}
+load(here("data/logistic_output.Rdata"))
+```
+
+
+To estimate the effect of socioeconomic status on BMI category, we graph the estimates of the SES slope coefficient across all logistic regression models controlling for individual differences. This presents not only the average estimate across all models (solid line), but the range of estimates -- a wide range suggests that the effect of SES on BMI is sensitive to the inclusion of different individual difference measures, while a narrow range suggests that the effect of SES on BMI is persistent through personality and cognition.
+
+```{r notebook32, echo = F, messages = F, warning = F,results='hide'}
+female_log = female_log %>%
+  mutate(Gender = "Female") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+male_log = male_log %>%
+  mutate(Gender = "Male") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+```
+
+
+### Girls
+
+```{r notebook33, echo = F, messages = F, warning = F}
+avg_female = female_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  group_by(y.level) %>%
+  summarize(mean = mean(estimate))
+```
+
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among girls. Adolescent girls living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. Figure \@ref(fig:notebook 34) depicts the coefficients of SES on BMI category, controlling for personality.
+
+```{r notebook34, echo = F, messages = F, warning = F, fig.cap = "Bars represent the 95% confidence interval of the SES odds ratio for each model (one model for each personality trait and cognitive functioning, 33 in total) using the sample of adolescent girls. Bars are red if confidence intervals exclude OR = 1 (i.e., are statitstically significant). The horizontal dashed line is the null hyptothesis, and the horizontal solid line is the average estimate across models."}
+female_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  mutate(estimate = exp(estimate),
+         conf.low = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 1), linetype = "dashed") +
+  geom_hline(aes(yintercept = exp(mean)), data = avg_female) +
+  scale_color_manual(values = c("gray", "red")) +
+  labs(x = "Specification",
+       y = "Odds Ratio of SES term, controlling for personality") +
+  guides(color = "none")+
+  facet_grid(~y.level)
+```
+
+
+
+### Boys
+
+```{r notebook35, echo = F, messages = F, warning = F}
+avg_male = male_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  group_by(y.level) %>%
+  summarize(mean = mean(estimate))
+
+```
+
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(100-avg_male[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_male[2, "mean"]*100)`% less likely, and `r 100-round(avg_male[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. These results are depicted in Figure \@ref(fig:notebook36).
+
+```{r notebook36, echo = F, messages = F, warning = F, fig.cap = "Bars represent the 95% confidence interval of the SES odds ratio for each model (one model for each personality trait and cognitive functioning, 33 in total) using the sample of adolescent boys. Bars are red if confidence intervals exclude OR = 1 (i.e., are statitstically significant). The horizontal dashed line is the null hyptothesis, and the horizontal solid line is the average estimate across models."}
+male_log %>%
+  filter(term == "ses") %>%
+  filter(model == "cov") %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  mutate(estimate = exp(estimate),
+         conf.low = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 1), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = exp(mean)), data = avg_male, color = "black") +
+  #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_male )+
+  scale_color_manual(values = c("gray", "red")) +
+  #scale_y_continuous(limits = c(0.30, 2.20))+
+  labs(x = "Specification",
+       y = "Odds Ratio of SES term, controlling for personality") +
+  guides(color = "none")+
+  facet_grid(~y.level)
+
+```
+
+\newpage
+
+## Personality (controlling for SES)
+
+### Girls
+
+A primary finding is that more traits are associated with the likelihood of adolescent girls being in the underweight category than are associated with the likelihood of being overweight or obese. This is seen most clearly in the table of coefficient estimates (Table \@ref(tab:notebook40)). In addition, we show the probability of inclusion in each weight category across levels of personality (Figure \@ref(fig:notebook38)).
+
+```{r notebook37, echo = F, message = F, warning = F, results = 'hide'}
+load(here("data/cleaned.Rdata"))
+load(here("data/logistic_output.Rdata"))
+
+
+# create newdata function
+make_new = function(x, y){
+  trait_score = seq(from = x, to = y, length.out = 200)
+  ses = 0
+  df = data.frame(trait_score, ses)
+  return(df)
+}
+```
+
+```{r notebook38, echo = F, message = F, fig.cap = "Relationship of traits (cognitive functioning and Big Five) to probability of being in each weight category. Models estimated using the sample of adolescent girls."}
+female_prep = data.frame(trait = unique(female_log$trait_name), stringsAsFactors = F) %>%
+  mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
+  mutate(min = -3) %>%
+  mutate(max = 3) %>%
+  mutate(newdata = map2(.x = min, .y = max, make_new)) %>%
+  select(trait_name, newdata)
+
+prob_dist_data_female = full_join(female_prep, female_log) %>%
+  filter(model == "cov") %>%
+  select(trait_name, final_mod, newdata) %>%
+  mutate(predicted_probs = map2(final_mod, newdata, predict, type = "prob")) %>%
+  mutate(newdata = map2(newdata, predicted_probs, cbind)) %>%
+  select(trait_name, newdata) %>%
+  unnest(cols = c(newdata)) %>%
+  mutate(trait_name = gsub("SPI_135_27_5_", "", trait_name)) %>%
+  mutate(trait_name = gsub("cog", "Cognitive Functioning", trait_name))
+
+b5andcog = c("Cognitive Functioning", "SPI_Agree", "SPI_Extra", "SPI_Consc", "SPI_Neuro", "SPI_Open")
+
+prob_dist_data_female %>%
+  ungroup() %>%
+  filter(trait_name %in% b5andcog) %>%
+  gather(key = "weight", value = "probability", -trait_name, -trait_score, -ses) %>%
+  ggplot(aes(x = trait_score, y = probability, color = weight, fill = weight)) +
+  geom_line() +
+  facet_wrap(~trait_name, scales = "free_x") +
+  theme_bw() + theme(legend.position = "bottom")
+```
+
+
+```{r notebook39, eval = F, echo = F, message = F, fig.height = 15, fig.cap = "Relationship of traits (Narrow 27 traits and weight) to probability of being in each weight category. Models estimated using the sample of adolescent girls."}
+prob_dist_data_female %>%
+  ungroup() %>%
+  filter(!(trait_name %in% b5andcog)) %>%
+  gather(key = "weight", value = "probability", -trait_name, -trait_score, -ses) %>%
+  ggplot(aes(x = trait_score, y = probability, color = weight, fill = weight)) +
+  geom_line() +
+  facet_wrap(~trait_name, scales = "free_x", ncol = 4) +
+  theme_bw() + theme(legend.position = "bottom")
+```
+
+
+```{r notebook40, echo = F, results = 'asis'}
+female_log = female_log %>%
+  filter(str_detect(trait_name, "SPI") | trait_name == "cog") %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "female")
+
+female_log_tab = female_log %>%
+  filter(grepl("trait", term)) %>%
+  filter(model == "cov") %>%
+  mutate(b1_est = printnum(exp(estimate)),
+         b1_est = ifelse(conf.low > 0 | conf.high < 0, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(exp(conf.low)),
+         conf.high = printnum(exp(conf.high)),
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]"),
+         b1_est = paste(b1_est, b2_conf)) %>%
+  dplyr::select(trait_name, y.level, term, b1_est, gender) %>%
+  spread(y.level, b1_est) %>%
+  ungroup() %>%
+  mutate(trait_name = factor(trait_name, levels = c("cog", names(SPI_27_names), names(SPI_5_names)))) %>%
+  arrange(trait_name) %>%
+  mutate(trait_name = c("Cognitive Functioning", SPI_27_names, SPI_5_names)) %>%
+  dplyr::select(-term, -gender)
+
+f_tab_obese_color = ifelse(
+  str_detect(female_log_tab$Obese, "\\*"), "red", "black")
+f_tab_obese_boldf = ifelse(
+  str_detect(female_log_tab$Obese, "\\*"), TRUE, FALSE)
+
+f_tab_overw_color = ifelse(
+  str_detect(female_log_tab$Overweight, "\\*"), "red", "black")
+f_tab_overw_boldf = ifelse(
+  str_detect(female_log_tab$Overweight, "\\*"), TRUE, FALSE)
+
+f_tab_underw_color = ifelse(
+  str_detect(female_log_tab$Underweight, "\\*"), "red", "black")
+f_tab_underw_boldf = ifelse(
+  str_detect(female_log_tab$Underweight, "\\*"), TRUE, FALSE)
+
+female_log_tab %>%
+  kable(.,
+        booktabs = T,
+        col.names = c("Trait", "Obese", "Overweight", "Underweight"),
+        caption = "Odds ratios of BMI categories from individual differences estimated from sample of adolescent girls. Estimates are adjusted for SES. Significant (p < .05) odds ratios are in bold and red.",
+        escape = F) %>%
+  kable_styling() %>%
+  column_spec(2, color = f_tab_obese_color, bold = f_tab_obese_boldf) %>%
+  column_spec(3, color = f_tab_overw_color, bold = f_tab_overw_boldf) %>%
+  column_spec(4, color = f_tab_underw_color, bold = f_tab_underw_boldf) %>%
+  group_rows("SPI: 27 Factors", 2, 28) %>%
+  group_rows("SPI: 5 Factors", 29, 33)
+```
+
+### Boys
+
+Among adolescent boys, a notable finding was the non-linear association of traits with weight status. More specifically, traits like low Sociability and high Easy-Goingness were associated with both increased risk of obesity and being underweight (Table \@ref(tab:notebook43)). We show the probability of inclusion in each weight category across levels of personality (Figure \@ref(fig:notebook42)).
+
+```{r notebook41, echo = F, message = F}
+male_prep = data.frame(trait = unique(male_log$trait_name), stringsAsFactors = F) %>%
+  mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
+  mutate(min = -3) %>%
+  mutate(max = 3) %>%
+  mutate(newdata = map2(.x = min, .y = max, make_new)) %>%
+  select(trait_name, newdata)
+
+prob_dist_data_male = full_join(male_prep, male_log) %>%
+  filter(model == "cov") %>%
+  select(trait_name, final_mod, newdata) %>%
+  mutate(predicted_probs = map2(final_mod, newdata, predict, type = "prob")) %>%
+  mutate(newdata = map2(newdata, predicted_probs, cbind)) %>%
+  select(trait_name, newdata) %>%
+  unnest(cols = c(newdata)) %>%
+  mutate(trait_name = gsub("SPI_135_27_5_", "", trait_name)) %>%
+  mutate(trait_name = gsub("cog", "Cognitive Functioning", trait_name))
+```
+
+
+```{r notebook42, echo = F, message = F, fig.height = 15}
+prob_dist_data_male %>%
+  ungroup() %>%
+  filter(!(trait_name %in% b5andcog)) %>%
+  gather(key = "weight", value = "probability", -trait_name, -trait_score, -ses) %>%
+  ggplot(aes(x = trait_score, y = probability, color = weight, fill = weight)) +
+  geom_line() +
+  facet_wrap(~trait_name, scales = "free_x", ncol = 4) +
+  theme_bw() + theme(legend.position = "bottom")
+```
+
+
+```{r notebook43, eval = T, echo = F, results = 'asis'}
+load(here("data/logistic_output.Rdata"))
+
+male_log = male_log %>%
+  filter(str_detect(trait_name, "SPI") | trait_name == "cog") %>%
+  mutate(coef = map(final_mod, broom::tidy, conf.int = TRUE)) %>%
+  dplyr::select(trait_name, model, coef) %>%
+  unnest(cols = c(coef)) %>%
+  mutate(gender = "male")
+
+male_log_tab = male_log %>%
+  filter(grepl("trait", term)) %>%
+  filter(model == "cov") %>%
+  mutate(b1_est = printnum(exp(estimate)),
+         b1_est = ifelse(conf.low > 0 | conf.high < 0, paste0(b1_est, "*"), b1_est),
+         conf.low = printnum(exp(conf.low)),
+         conf.high = printnum(exp(conf.high)),
+         b2_conf = paste0("[", conf.low, ", ", conf.high, "]"),
+         b1_est = paste(b1_est, b2_conf)) %>%
+  dplyr::select(trait_name, y.level, term, b1_est, gender) %>%
+  spread(y.level, b1_est) %>%
+  ungroup() %>%
+  mutate(trait_name = factor(trait_name, levels = c("cog", names(SPI_27_names), names(SPI_5_names)))) %>%
+  arrange(trait_name) %>%
+  mutate(trait_name = c("Cognitive Functioning", SPI_27_names, SPI_5_names)) %>%
+  dplyr::select(-term, -gender)
+
+m_tab_obese_color = ifelse(
+  str_detect(male_log_tab$Obese, "\\*"), "red", "black")
+m_tab_obese_boldf = ifelse(
+  str_detect(male_log_tab$Obese, "\\*"), TRUE, FALSE)
+
+m_tab_overw_color = ifelse(
+  str_detect(male_log_tab$Overweight, "\\*"), "red", "black")
+m_tab_overw_boldf = ifelse(
+  str_detect(male_log_tab$Overweight, "\\*"), TRUE, FALSE)
+
+m_tab_underw_color = ifelse(
+  str_detect(male_log_tab$Underweight, "\\*"), "red", "black")
+m_tab_underw_boldf = ifelse(
+  str_detect(male_log_tab$Underweight, "\\*"), TRUE, FALSE)
+
+male_log_tab %>%
+  kable(.,
+        booktabs = T,
+        col.names = c("Trait", "Obese", "Overweight", "Underweight"),
+         caption = "Odds ratios of BMI categories from individual differences estimated from sample of adolescent boys Estimates are adjusted for SES. Significant (p < .05) odds ratios are in bold and red.",
+        escape = F) %>%kable_styling() %>%
+  column_spec(2, color = m_tab_obese_color, bold = m_tab_obese_boldf) %>%
+  column_spec(3, color = m_tab_overw_color, bold = m_tab_overw_boldf) %>%
+  column_spec(4, color = m_tab_underw_color, bold = m_tab_underw_boldf) %>%
+  group_rows("SPI: 27 Factors", 2, 28) %>%
+  group_rows("SPI: 5 Factors", 29, 33)
+```
+
+## Interaction of SES with personality
+
+To estimate the joint effect of socioeconomic status and individual differences on BMI category, we graph the estimates of the interaction terms of SES by individual differences by BMI category. Like before, we present the average effect (solid black line) and the 95% confidence intervals for each model.
+
+```{r}
+load(here("data/logistic_output.Rdata"))
+```
+
+
+### Girls
+
+```{r notebook44, echo = F, messages = F, warning = F}
+female_log = female_log %>%
+  mutate(Gender = "Female") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+avg_female = female_log %>%
+  filter(grepl(":", term)) %>%
+  group_by(y.level) %>%
+  summarize(mean = mean(estimate))
+```
+
+We test the interaction of SES and personality among adolescent girls. Few interactions were statistically significant (see Figure \@ref(fig:notebook45))
+
+```{r notebook45, echo = F, messages = F, warning = F, fig.cap="Coefficient estimates for interaction of SES and personality traits, predicting BMI category (adolescent girls)."}
+female_log %>%
+  filter(grepl(":", term)) %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  mutate(estimate = exp(estimate),
+         conf.low = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 1), linetype = "dashed", color = "black") +
+  geom_hline(aes(yintercept = exp(mean)), data = avg_female, color = "black") +
+  scale_color_manual(values = c("gray", "red")) +
+  labs(x = "Specification",
+       y = "Odds Ratio of SES x perosnality term in model") +
+  guides(color = "none")+
+  facet_grid(~y.level)
+```
+
+
+### Boys
+
+We test the interaction of SES and personality among adolescent girls. Few interactions were statistically significant (see Figure \@ref(fig:notebook47))
+
+
+```{r notebook46, echo = F, messages = F, warning = F}
+male_log = male_log %>%
+  mutate(Gender = "Male") %>%
+  select(trait_name, model, coef, Gender) %>%
+  unnest(cols = c(coef))
+
+avg_male = male_log %>%
+  filter(grepl(":", term)) %>%
+  group_by(y.level) %>%
+  summarize(mean = mean(estimate))
+
+```
+
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(avg_male[3, "mean"]*100)-100`% more likely to be Underweight, `r round(avg_male[2, "mean"]*100)-100`% more likely, and `r round(avg_male[1, "mean"]*100)-100`% more likely to be Obese compared to low SES counterparts.
+
+```{r notebook47, echo = F, messages = F, warning = F, fig.cap="Coefficient estimates for interaction of SES and personality traits, predicting BMI category (adolescent boys)."}
+male_log %>%
+  filter(grepl(":", term)) %>%
+  mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
+  mutate(estimate = exp(estimate),
+         conf.low = exp(conf.low),
+         conf.high = exp(conf.high)) %>%
+  arrange(estimate) %>%
+  group_by(y.level) %>%
+  mutate(spec = row_number()) %>%
+  ggplot(aes(x = spec, y = conf.low)) +
+  geom_segment(aes(xend = spec, yend = conf.high, color = psig)) +
+  geom_hline(aes(yintercept = 1), linetype = "dashed") +
+  geom_hline(aes(yintercept = exp(mean)), data = avg_male) +
+  scale_color_manual(values = c("gray", "red")) +
+  labs(x = "Specification",
+       y = "Odds Ratio of SES x perosnality term in model") +
+  guides(color = "none")+
+  facet_grid(~y.level)
+
+```
+
+
+
+\newpage
+
+# Model accuracy{.tabset}
+
+We use the splits generated in the Cleaning data section of the notebook to create our training and test data. (Note that to this point, only the training data have been used in the regression models).
+
+```{r notebook48, message = F, warning = F}
+female_train = sapa_female[train_female, ] %>% select(BMI_p, ses, cog, contains("SPI")) %>% filter(complete.cases(.))
+female_test = sapa_female[-train_female, ] %>% select(BMI_p, ses, cog, contains("SPI")) %>% filter(complete.cases(.))
+female_bmi = female_train$BMI_p
+
+male_train = sapa_male[train_male, ] %>% select(BMI_p, ses, cog, contains("SPI")) %>% filter(complete.cases(.))
+male_test = sapa_male[-train_male, ] %>% select(BMI_p, ses, cog, contains("SPI")) %>% filter(complete.cases(.))
+male_bmi = male_train$BMI_p
+```
+
+We build a function to fit the lasso models.
+
+```{r notebook49, message = F, warning = F}
+fit_model = function(data, outcome){
+  cv_value = model.matrix(BMI_p ~ .,
+                 data = data) %>%
+    cv.glmnet(x = .,
+              y = outcome,
+              alpha = 1)
+  model =  model.matrix(BMI_p ~ ., data = data) %>%
+    glmnet(y = outcome,
+           alpha = 1,
+           lambda = cv_value$lambda.min)
+  return(model)
+}
+```
+
+We also a build a model to get the predictions in the test set from the model best fit in the training data.
+
+```{r notebook50, message = F, warning = F}
+pred_model = function(model, test.data){
+
+  if(length(model$coefficients) == 2){
+    x = test.data
+    }else{
+      x = test.data[, c("BMI_p", rownames(model$beta)[-1])]
+      x <- model.matrix(BMI_p~., x)
+      }
+  predictions = model %>% predict(x) %>% as.vector()
+  # Model performance metrics
+  fit = data.frame(
+    RMSE = RMSE(predictions, test.data$BMI_p),
+    Rsquare = R2(predictions, test.data$BMI_p)
+  )
+  return(fit)
+}
+```
+
+We fit these models separately for adolescent boys and adolescent girls
+
+```{r notebook51, message = F, warning = F }
+set.seed(060821)
+
+mod1_f = lm(BMI_p ~ ses, data = female_train)
+mod2_f = female_train %>%
+  select(BMI_p, ses, cog) %>%
+  fit_model(data = ., outcome = female_bmi)
+mod3_f = female_train %>%
+  select(BMI_p, ses, contains("SPI")) %>%
+  select(1:7) %>%
+  fit_model(data = ., outcome = female_bmi)
+mod4_f = female_train %>%
+  select(BMI_p, ses, contains("SPI")) %>%
+  select(1:2,8:34) %>%
+  fit_model(data = ., outcome = female_bmi)
+mod5_f = female_train %>%
+  select(BMI_p, ses, cog, contains("SPI")) %>%
+  select(1:8) %>%
+  fit_model(data = ., outcome = female_bmi)
+mod6_f = female_train %>%
+  select(BMI_p, ses, cog, contains("SPI")) %>%
+  select(1:3,9:35) %>%
+  fit_model(data = ., outcome = female_bmi)
+
+female_fits = data.frame(
+  vars = c(
+    "SES only",
+    "SES + Cog",
+    "SES + Big Five",
+    "SES + Narrow 27",
+    "SES + Cog + Big Five",
+    "SES + Cog + Narrow 27"))
+female_fits$model = list(mod1_f, mod2_f, mod3_f, mod4_f, mod5_f, mod6_f)
+female_fits = mutate(female_fits, fits = map(model, pred_model, test.data = female_test))
+
+female_fits = female_fits %>%
+  select(-model) %>%
+  unnest(cols = c(fits)) %>%
+  mutate(gender = "Adolescent Girls")
+```
+
+```{r notebook52, message = F, warning = F }
+set.seed(060821)
+
+mod1_m = lm(BMI_p ~ ses, data = male_train)
+mod2_m = male_train %>%
+  select(BMI_p, ses, cog) %>%
+  fit_model(data = ., outcome = male_bmi)
+mod3_m = male_train %>%
+  select(BMI_p, ses, contains("SPI")) %>%
+  select(1:7) %>%
+  fit_model(data = ., outcome = male_bmi)
+mod4_m = male_train %>%
+  select(BMI_p, ses, contains("SPI")) %>%
+  select(1:2,8:34) %>%
+  fit_model(data = ., outcome = male_bmi)
+mod5_m = male_train %>%
+  select(BMI_p, ses, cog, contains("SPI")) %>%
+  select(1:8) %>%
+  fit_model(data = ., outcome = male_bmi)
+mod6_m = male_train %>%
+  select(BMI_p, ses, cog, contains("SPI")) %>%
+  select(1:3,9:35) %>%
+  fit_model(data = ., outcome = male_bmi)
+
+male_fits = data.frame(
+  vars = c(
+    "SES only",
+    "SES + Cog",
+    "SES + Big Five",
+    "SES + Narrow 27",
+    "SES + Cog + Big Five",
+    "SES + Cog + Narrow 27"))
+male_fits$model = list(mod1_m, mod2_m, mod3_m, mod4_m, mod5_m, mod6_m)
+male_fits = mutate(male_fits, fits = map(model, pred_model, test.data = male_test))
+
+male_fits = male_fits %>%
+  select(-model) %>%
+  unnest(cols = c(fits)) %>%
+  mutate(gender = "Adolescent Boys")
+
+```
+
+The results are shown in Table \@ref(tab:notebook53). Across gender, the models with the highest $R^2$ values (i.e., the best out-of-sample prediction) included SES, cognitive functioning, and the narrow 27 traits. For the sample of adolescent boys, this model accounted for more than twice the variance as the model using Big Five traits instead of narrow 27; for adolescent girls, this model accounted for about 30% more variance.
+
+```{r notebook53, results = 'asis', message = F, warning = F}
+female_fits %>%
+  full_join(male_fits) %>%
+  mutate(gender = str_remove(gender, "Adolescent ")) %>%
+  gather(stat, value, starts_with("R")) %>%
+  unite(stat, gender, stat) %>%
+  spread(stat, value) %>%
+  mutate(vars = factor(vars, levels = c("SES only",
+                                        "SES + Cog",
+                                        "SES + Big Five",
+                                        "SES + Narrow 27",
+                                        "SES + Cog + Big Five",
+                                        "SES + Cog + Narrow 27"))) %>%
+  arrange(vars) %>%
+  kable(col.names = c("Model", rep(c("RMSE", "R-squared"), 2)),
+        booktabs = T,
+        caption = "Out of sample model fits from lasso regression models. Models including cognitive functioning and the Narrow 27 traits yielded the best out-of-sample prediction for both genders",
+        digits = c(0,2,3,2,3)) %>%
+  kable_styling() %>%
+  add_header_above(c(" ", "Adolescent Boys" = 2, "Adolescent Girls" = 2))
+```
+
+
+# Sensitivity analysis:  Missing data {.tabset}
+
+Once we filter for adolescents living in the United States, approximately half our sample did not report either their height or weight. Given the sensitivity of body image, especially for the adolescent girls in our sample, we suspect these values are missing not at random (MNAR) and may impact the estimates here. To test for these effects, we imputed missing height and weight values using a principal components analysis approach, using only the other variables in the SAPA dataset that were not included in the analyses above. We repeated the regression models with 10-fold cross validation, repeated 10 times, and report here the differences in significance across models and the differences in effect sizes.
+
+Imputation using a principle components analysis suggested that many of the missing BMI percentiles were between 75 and 100 for both adolescent girls and boys (see Figure \@ref(fig:notebook54)). This would be consistent with a common sense rationale for missing data; in other words, we might expect those adolescents with larger BMI to be the individuals least likely to share their height and weight. However, the proposed distributions from the imputation were heavily skewed. We would not expect to see a distribution like this unless there were some association between BMI and completing the online personality assessment, which is unlikely.
+
+```{r notebook54, echo = F,  message = F, fig.cap = "A comparison of BMI percentile distribution in complete and imputed datasets.", fig.width = 10, fig.height = 7}
+load(here("data/cleaned.Rdata"))
+complete = sapa[,c("BMI_p", "sex")]
+rm(list = c("sapa", "sapa_female", "sapa_male"))
+
+load(here("data/impute_pca/cleaned.Rdata"))
+imputed = sapa[,c("BMI_p", "sex")]
+rm(list = c("sapa", "sapa_female", "sapa_male"))
+
+complete$version = "complete"
+imputed$version = "imputed"
+
+complete %>%
+  full_join(imputed) %>%
+  ggplot(aes(x = BMI_p, fill = version)) +
+  geom_density(alpha = .5) +
+  facet_wrap(~sex) +
+  labs(x = "BMI percentile", fill = "Data") +
+  theme(legend.position = "top")
+
+```
+
+```{r notebook55, echo = F, results ='hide', message = F}
+# load main results
+load(here("data/regression_output.Rdata"))
+female_reg_main = female_reg
+male_reg_main = male_reg
+
+# load imputePCA results
+load(here("data/regression_impute_female.Rdata"))
+load(here("data/regression_impute_male.Rdata"))
+female_reg_pca = female_reg
+male_reg_pca = male_reg
+
+female_reg_main = female_reg_main %>%
+  mutate(gender = "female",
+         version = "main")
+
+female_reg_pca = female_reg_pca %>%
+  mutate(gender = "female",
+         version = "pca")
+
+male_reg_main = male_reg_main %>%
+  mutate(gender = "male",
+         version = "main")
+
+male_reg_pca = male_reg_pca %>%
+  mutate(gender = "male",
+         version = "pca")
+
+```
+
+
+## Girls
+
+We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent girls (Figure \@ref(fimputesig)). Approximately 6 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. The majority of trait associations had the same significance across datasets. In all cases, SES was always a significant predictor. In one case, there was a significant interaction effect when using imputed data, but this seems likely be to sampling error.
+
+```{r notebook56, echo = F, fig.cap = "Statistical significance across models fit on adolescent girls sample.", message = F, fig.width = 10, fig.height = 7}
+full_join(female_reg_main, female_reg_pca) %>%
+  select(trait_name, version, model, term, p.value) %>%
+  mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
+         trait_name = str_remove(trait_name, "SPI_")) %>%
+  spread(version, p.value) %>%
+  mutate(sig = case_when(
+    main < .05 & pca >= .05 ~ "Complete Only",
+    main >= .05 & pca < .05 ~ "Imputed Only",
+    main < .05 & pca < .05 ~ "Both",
+    main >= .05 & pca >= .05 ~ "Neither"
+  )) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(model = ifelse(model == "cov", "Additive Effects", "Joint Effects"),
+         term = case_when(
+           term == "ses" ~ "SES",
+           term == "trait_score" ~ "Trait",
+           TRUE ~ "Interaction"
+         )) %>%
+  ggplot(aes(x = term, fill = sig)) +
+  geom_bar(stat = "count", position = "dodge", alpha = .7, color = "black") +
+  facet_grid(model~., scales = "free_x") +
+  labs(x = "", y = "Count") +
+  theme(legend.position = "top")
+```
+
+We also calculated the difference in estimated effect size across the two samples. Figure \@ref(fig:notebook57) presents the difference in effect sizes, which is the effect estimated in the imputed data minus the effect estimated in the complete dataset. In other words, positive values indicate the estimated effect size is larger when using imputed data, while negative values indicated the estimated effect size is smaller when using imputed data. 
+
+Estimated of the effect of SES (controlling for personality) were lower in the imputed dataset for all models. Half of the trait estimates were larger in the imputed dataset, as were half of the interaction estimates.
+
+```{r notebook57, echo = F, fig.cap = "Difference in effect sizes from the imputed data to the complete data (girls).",  message = F, fig.width = 10, fig.height = 7}
+full_join(female_reg_main, female_reg_pca) %>%
+  select(trait_name, version, model, term, estimate) %>%
+  mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
+         trait_name = str_remove(trait_name, "SPI_")) %>%
+  spread(version, estimate) %>%
+  mutate(difference = pca - main)  %>%
+  filter(term != "(Intercept)") %>%
+  mutate(model = ifelse(model == "cov", "Additive Effects", "Joint Effects"),
+         term = case_when(
+           term == "ses" ~ "SES",
+           term == "trait_score" ~ "Trait",
+           TRUE ~ "Interaction"
+         )) %>%
+  ggplot(aes(x = term, y = difference)) +
+  geom_boxplot() +
+  facet_grid(model~., scales = "free_x") +
+  labs(x = "", y = "Difference in standardized coefficient estimates") +
+  theme(legend.position = "top")
+```
+
+## Boys
+
+We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent boys (Figure \@ref(fig:notebook58)). Approximately 11 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. This discrepancy may reflect a lack of statistical power in the adolescent boys sample or bias in the complete cases. 
+
+For both the complete and imputed datasets, SES was always a significant predictor. None of the interaction terms found in the complete data were present in the imputed data (although we note these significant interactions were assumed to be sampling error and not interpreted in the manuscript); the imputed data yielded no joint effects of personality and SEDS.
+
+```{r notebook58, echo = F, fig.cap = "Statistical significance across models fit on adolescent boys sample.", message = F, fig.width = 10, fig.height = 7}
+full_join(male_reg_main, male_reg_pca) %>%
+  select(trait_name, version, model, term, p.value) %>%
+  mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
+         trait_name = str_remove(trait_name, "SPI_")) %>%
+  spread(version, p.value) %>%
+  mutate(sig = case_when(
+    main < .05 & pca >= .05 ~ "Complete Only",
+    main >= .05 & pca < .05 ~ "Imputed Only",
+    main < .05 & pca < .05 ~ "Both",
+    main >= .05 & pca >= .05 ~ "Neither"
+  )) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(model = ifelse(model == "cov", "Additive Effects", "Joint Effects"),
+         term = case_when(
+           term == "ses" ~ "SES",
+           term == "trait_score" ~ "Trait",
+           TRUE ~ "Interaction"
+         )) %>%
+  ggplot(aes(x = term, fill = sig)) +
+  geom_bar(stat = "count", position = "dodge", alpha = .7, color = "black") +
+  facet_grid(model~., scales = "free_x") +
+  labs(x = "", y = "Count", title = "Statistical significance across models") +
+  theme(legend.position = "top")
+```
+
+Again, we calculated the difference in estimated effect size across the two samples. Figure \@ref(fig:notebook59) presents the difference in effect sizes, which is the effect estimated in the imputed data minus the effect estimated in the complete dataset.
+
+Estimated of the effect of SES (controlling for personality) were lower in the imputed dataset for all models. However, a majority of the estimates of trait effects were larger in the imputed dataset, as were a majority of the interaction estimates.
+
+```{r notebook59, fig.cap = "Difference in effect sizes from the imputed data to the complete data (boys).", echo = F,  message = F, fig.width = 10, fig.height = 7}
+full_join(male_reg_main, male_reg_pca) %>%
+  select(trait_name, version, model, term, estimate) %>%
+  mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
+         trait_name = str_remove(trait_name, "SPI_")) %>%
+  spread(version, estimate) %>%
+ mutate(difference = pca - main)  %>%
+  filter(term != "(Intercept)") %>%
+  mutate(model = ifelse(model == "cov", "Additive Effects", "Joint Effects"),
+         term = case_when(
+           term == "ses" ~ "SES",
+           term == "trait_score" ~ "Trait",
+           TRUE ~ "Interaction"
+         )) %>%
+  ggplot(aes(x = term, y = difference)) +
+  geom_boxplot() +
+  facet_grid(model~., scales = "free_x") +
+  labs(x = "", y = "Difference in standardized coefficient estimates") +
+  theme(legend.position = "top")
+
+```
