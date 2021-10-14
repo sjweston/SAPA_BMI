@@ -396,12 +396,12 @@ load(here("data/cleaned.Rdata"))
 dens_f = density(sapa_female$BMI_p)
 df_f = data.frame(BMI = dens_f$x, 
                   y = dens_f$y,
-                  gender = "Adolescent Girls")
+                  gender = "Adolescent Females")
 
 dens_m = density(sapa_male$BMI_p)
 df_m = data.frame(BMI = dens_m$x, 
                   y = dens_m$y,
-                  gender = "Adolescent Boys")
+                  gender = "Adolescent Males")
 df_f = df_f %>%
   full_join(df_m) %>%
   mutate(quantile = case_when(
@@ -472,7 +472,7 @@ load(here("data/cor_output.Rdata"))
 ```
 
 
-### Girls
+### Females
 
 ```{r notebook16, message=FALSE, fig.width = 10, fig.height = 11, fig.cap="Zero-order correlations among study variables (Female Participants)"}
 corrplot(R_female, method = "square",
@@ -481,7 +481,7 @@ corrplot(R_female, method = "square",
          mar=c(0,0,1,0))
 ```
 
-### Boys
+### Males
 
 ```{r notebook17, message=FALSE, fig.width = 10, fig.height = 11, fig.cap="Zero-order correlations among study variables (Male Participants)"}
 corrplot(R_male, method = "square",
@@ -670,7 +670,7 @@ female_reg = ungroup(female_reg)
 To estimate the effect of socioeconomic status on BMI percentile, we graph the estimates of the SES slope coefficient across all regression models controlling for individual differences. This presents not only the average estimate across all models (solid line), but the range of estimates -- a wide range suggests that the effect of SES on BMI is sensitive to the inclusion of different individual difference measures, while a narrow range suggests that the effect of SES on BMI is persistent through personality and cognition.
 
 
-### Girls
+### Females
 
 ```{r notebook21 }
 avg_female = female_reg %>%
@@ -703,7 +703,7 @@ female_plot_1 = female_reg %>%
   scale_y_continuous(limits = c(-5.5, 0.25), breaks = c(-5:0))+
   labs(x = "Specification",
        y = "SES coefficient, controlling for personality",
-       title = "Adolescent Girls") +
+       title = "Adolescent Females") +
   guides(color = "none") +
   theme_pubr()
 
@@ -727,12 +727,12 @@ female_reg %>%
                     "CI-low",
                     "CI-high"),
       booktabs = T,
-      caption = "Effect of SES controlling for various traits (adolescent girls)") %>% 
+      caption = "Effect of SES controlling for various traits (adolescent females)") %>% 
   kable_classic()
 ```
 
 
-### Boys
+### Males
 
 ```{r notebook23 }
 avg_male = male_reg %>%
@@ -764,7 +764,7 @@ male_plot_1 = male_reg %>%
   #geom_label(aes(x = 25, y = 1.25, label = round(mean,2)), data = avg_male )+
   scale_color_manual(values = c("red", "grey")) +
   scale_y_continuous(limits = c(-5.5, .25), breaks = c(-5:0))+
-  labs(x = "Specification", title = "Adolescent Boys", y = NULL) +
+  labs(x = "Specification", title = "Adolescent Males", y = NULL) +
   guides(color = "none") +
   theme_pubr()
 
@@ -788,7 +788,7 @@ male_reg %>%
                     "CI-low",
                     "CI-high"),
       booktabs = T,
-      caption = "Effect of SES controlling for various traits (adolescent boys)") %>% 
+      caption = "Effect of SES controlling for various traits (adolescent males)") %>% 
   kable_classic()
 ```
 
@@ -796,7 +796,7 @@ male_reg %>%
 
 Next, we examine the coefficients for individual differences from the estimated linear models. These coefficients represent the partial association between each trait and BMI percentile, controlling for SES. To facilitate interpretation, we plot all results in Figure \@ref(fig:notebook25). 
 
-Two patterns stand out quickly: first, more traits are significantly associated with BMI among adolescent girls compared to adolescent boys. This may partially be driven by power (the sample of adolescent girls is more than twice the sample of adolescent boys), but we also note that effect sizes tend to be larger among girls. 
+Two patterns stand out quickly: first, more traits are significantly associated with BMI among adolescent females compared to adolescent males. This may partially be driven by power (the sample of adolescent females is more than twice the sample of adolescent males), but we also note that effect sizes tend to be larger among females. 
 
 Second, traits associated with Neuroticism (Neuroticism itself, but also Irritability, Anxiety, and Well-being) tend to have the largest associations with BMI. 
 
@@ -923,12 +923,12 @@ all_reg_tab %>%
 ## Interaction  of SES with personality
 
 
-To estimate the joint effect of socioeconomic status and individual differences on BMI percentile, we graph the estimates of the interaction terms of SES by individual differences by BMI percentile. Like before, we present the average effect (solid black line) and the 95% confidence intervals for each model. Figure \@ref(fig:notebook27) shows the results for adolescent girls, while Figure \@ref(fig:notebook29) shows the results for adolescent boys.
+To estimate the joint effect of socioeconomic status and individual differences on BMI percentile, we graph the estimates of the interaction terms of SES by individual differences by BMI percentile. Like before, we present the average effect (solid black line) and the 95% confidence intervals for each model. Figure \@ref(fig:notebook27) shows the results for adolescent females, while Figure \@ref(fig:notebook29) shows the results for adolescent males.
 
-### Girls
+### Females
 
 
-```{r notebook27, fig.cap = "Coefficient estimates for interaction of SES and personality traits, predicting BMI percentile (adolescent girls)" }
+```{r notebook27, fig.cap = "Coefficient estimates for interaction of SES and personality traits, predicting BMI percentile (adolescent females)" }
 avg_female = ungroup(female_reg) %>%
   filter(grepl(":", term)) %>% 
   summarise(mean = mean(estimate))
@@ -946,7 +946,7 @@ female_plot_2 = female_reg %>%
   scale_color_manual(values = c("grey", "red")) +
   #scale_y_continuous(limits = c(0.30, 2.20))+
   labs(x = "Specification",
-       y = "SES x perosnality term in model", title = "Adolescent Girls") +
+       y = "SES x perosnality term in model", title = "Adolescent Females") +
   guides(color = "none") +
   theme_pubr()
 
@@ -962,18 +962,18 @@ female_reg %>%
   mutate(p.value = printp(p.value),
          across(where(is.numeric), printnum)) %>% 
   kable(booktabs = T,
-        caption = "Tests of the interaction of SES with traits when predicting BMI percentile (girls).") %>% 
+        caption = "Tests of the interaction of SES with traits when predicting BMI percentile (adolescent females).") %>% 
   kable_styling()
 ```
 
-We present the significant interactions for adolescent girls in Table \@ref(tab:notebook26). All _p_-values were larger than .01. As SES increased, so did the relationship between Well-Being and Conservatism and BMI percentile; as SES increased, the relationship between Order and BMI percentile decreased. These relationships are depicted in Figure \@ref(fig:femaleIntPlot).
+We present the significant interactions for adolescent females in Table \@ref(tab:notebook26). All _p_-values were larger than .01. As SES increased, so did the relationship between Well-Being and Conservatism and BMI percentile; as SES increased, the relationship between Order and BMI percentile decreased. These relationships are depicted in Figure \@ref(fig:femaleIntPlot).
 
 ```{r, echo = F}
 load(here("data/cleaned.Rdata"))
 ```
 
 
-```{r femaleIntPlot, fig.cap = "Significant interactions between SES and personality in adolescent girls sample"}
+```{r femaleIntPlot, fig.cap = "Significant interactions between SES and personality in adolescent females sample"}
 plot_wellbeing = plot_model(lm(BMI_p ~ ses*SPI_WellBeing, data = sapa_female),
                             type = "pred", terms =c("SPI_WellBeing", "ses[meansd]"))
 plot_conservat = plot_model(lm(BMI_p ~ ses*SPI_Conservatism, data = sapa_female),
@@ -988,7 +988,7 @@ ggarrange(plot_wellbeing, plot_conservat, plot_order)
 
 
 
-### Boys
+### Males
 
 ```{r notebook28 }
 male_reg %>%
@@ -998,13 +998,13 @@ male_reg %>%
   mutate(p.value = printp(p.value),
          across(where(is.numeric), printnum)) %>% 
   kable(booktabs = T,
-        caption = "Tests of the interaction of SES with traits when predicting BMI percentile (boys).") %>% 
+        caption = "Tests of the interaction of SES with traits when predicting BMI percentile (males).") %>% 
   kable_styling()
 ```
 
-We present the significant interactions for adolescent boys in Table \@ref(tab:notebook28). Again, all _p_-values were larger than .01. As SES increased, so did the relationship between BMI percentile and the traits of Extraversion, Attention Seeking, Authoritarianism, Emotional Expressiveness, and Conservatism; as SES increased, the relationship between Easy-Goingness and BMI percentile decreased. These relationships are depicted in Figure \@ref(fig:maleIntPlot).
+We present the significant interactions for adolescent males in Table \@ref(tab:notebook28). Again, all _p_-values were larger than .01. As SES increased, so did the relationship between BMI percentile and the traits of Extraversion, Attention Seeking, Authoritarianism, Emotional Expressiveness, and Conservatism; as SES increased, the relationship between Easy-Goingness and BMI percentile decreased. These relationships are depicted in Figure \@ref(fig:maleIntPlot).
 
-```{r notebook29, fig.cap = "Coefficient estimates for interaction of SES and personality traits, predicting BMI percentile (adolescent boys)"}
+```{r notebook29, fig.cap = "Coefficient estimates for interaction of SES and personality traits, predicting BMI percentile (adolescent males)"}
 avg_male = ungroup(male_reg) %>%
   filter(grepl(":", term)) %>% 
   summarise(mean = mean(estimate))
@@ -1022,14 +1022,14 @@ male_plot_2 = male_reg %>%
   scale_color_manual(values = c("grey", "red")) +
   #scale_y_continuous(limits = c(0.30, 2.20))+
   labs(x = "Specification",
-       y = "SES x perosnality term in model", title = "Adolescent Boys") +
+       y = "SES x perosnality term in model", title = "Adolescent Males") +
   guides(color = "none") +
   theme_pubr()
 
 male_plot_2
 ```
 
-```{r maleIntPlot, fig.cap = "Significant interactions between SES and personality in adolescent boys sample"}
+```{r maleIntPlot, fig.cap = "Significant interactions between SES and personality in adolescent males sample"}
 plot_extra = plot_model(lm(BMI_p ~ ses*SPI_Extra, data = sapa_male),
                             type = "pred", 
                         terms =c("SPI_Extra", "ses[meansd]")) +
@@ -1212,7 +1212,7 @@ male_log = male_log %>%
 ```
 
 
-### Girls
+### Females
 
 ```{r notebook33, echo = F, messages = F, warning = F}
 avg_female = female_log %>%
@@ -1222,9 +1222,9 @@ avg_female = female_log %>%
   summarize(mean = mean(estimate))
 ```
 
-Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among girls. Adolescent girls living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. Figure \@ref(fig:notebook 34) depicts the coefficients of SES on BMI category, controlling for personality.
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among females. Adolescent females living in higher SES households were, on average, `r round(100-avg_female[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_female[2, "mean"]*100)`% less likely, and `r 100-round(avg_female[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. Figure \@ref(fig:notebook 34) depicts the coefficients of SES on BMI category, controlling for personality.
 
-```{r notebook34, echo = F, messages = F, warning = F, fig.cap = "Bars represent the 95% confidence interval of the SES odds ratio for each model (one model for each personality trait and cognitive functioning, 33 in total) using the sample of adolescent girls. Bars are red if confidence intervals exclude OR = 1 (i.e., are statitstically significant). The horizontal dashed line is the null hyptothesis, and the horizontal solid line is the average estimate across models."}
+```{r notebook34, echo = F, messages = F, warning = F, fig.cap = "Bars represent the 95% confidence interval of the SES odds ratio for each model (one model for each personality trait and cognitive functioning, 33 in total) using the sample of adolescent females. Bars are red if confidence intervals exclude OR = 1 (i.e., are statitstically significant). The horizontal dashed line is the null hyptothesis, and the horizontal solid line is the average estimate across models."}
 female_log %>%
   filter(term == "ses") %>%
   filter(model == "cov") %>%
@@ -1248,7 +1248,7 @@ female_log %>%
 
 
 
-### Boys
+### Males
 
 ```{r notebook35, echo = F, messages = F, warning = F}
 avg_male = male_log %>%
@@ -1259,9 +1259,9 @@ avg_male = male_log %>%
 
 ```
 
-Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(100-avg_male[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_male[2, "mean"]*100)`% less likely, and `r 100-round(avg_male[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. These results are depicted in Figure \@ref(fig:notebook36).
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among males. Adolescent males living in higher SES households were, on average, `r round(100-avg_male[3, "mean"]*100)`% less likely to be Underweight, `r 100-round(avg_male[2, "mean"]*100)`% less likely, and `r 100-round(avg_male[1, "mean"]*100)`% less likely to be Obese compared to low SES counterparts. These results are depicted in Figure \@ref(fig:notebook36).
 
-```{r notebook36, echo = F, messages = F, warning = F, fig.cap = "Bars represent the 95% confidence interval of the SES odds ratio for each model (one model for each personality trait and cognitive functioning, 33 in total) using the sample of adolescent boys. Bars are red if confidence intervals exclude OR = 1 (i.e., are statitstically significant). The horizontal dashed line is the null hyptothesis, and the horizontal solid line is the average estimate across models."}
+```{r notebook36, echo = F, messages = F, warning = F, fig.cap = "Bars represent the 95% confidence interval of the SES odds ratio for each model (one model for each personality trait and cognitive functioning, 33 in total) using the sample of adolescent males. Bars are red if confidence intervals exclude OR = 1 (i.e., are statitstically significant). The horizontal dashed line is the null hyptothesis, and the horizontal solid line is the average estimate across models."}
 male_log %>%
   filter(term == "ses") %>%
   filter(model == "cov") %>%
@@ -1290,9 +1290,9 @@ male_log %>%
 
 ## Personality (controlling for SES)
 
-### Girls
+### Females
 
-A primary finding is that more traits are associated with the likelihood of adolescent girls being in the underweight category than are associated with the likelihood of being overweight or obese. This is seen most clearly in the table of coefficient estimates (Table \@ref(tab:notebook40)). In addition, we show the probability of inclusion in each weight category across levels of personality (Figure \@ref(fig:notebook38)).
+A primary finding is that more traits are associated with the likelihood of adolescent females being in the underweight category than are associated with the likelihood of being overweight or obese. This is seen most clearly in the table of coefficient estimates (Table \@ref(tab:notebook40)). In addition, we show the probability of inclusion in each weight category across levels of personality (Figure \@ref(fig:notebook38)).
 
 ```{r notebook37, echo = F, message = F, warning = F, results = 'hide'}
 load(here("data/cleaned.Rdata"))
@@ -1308,7 +1308,7 @@ make_new = function(x, y){
 }
 ```
 
-```{r notebook38, echo = F, message = F, fig.cap = "Relationship of traits (cognitive functioning and Big Five) to probability of being in each weight category. Models estimated using the sample of adolescent girls."}
+```{r notebook38, echo = F, message = F, fig.cap = "Relationship of traits (cognitive functioning and Big Five) to probability of being in each weight category. Models estimated using the sample of adolescent females."}
 female_prep = data.frame(trait = unique(female_log$trait_name), stringsAsFactors = F) %>%
   mutate(trait_name = gsub("_135_27_5", "", trait)) %>%
   mutate(min = -3) %>%
@@ -1339,7 +1339,7 @@ prob_dist_data_female %>%
 ```
 
 
-```{r notebook39, eval = F, echo = F, message = F, fig.height = 15, fig.cap = "Relationship of traits (Narrow 27 traits and weight) to probability of being in each weight category. Models estimated using the sample of adolescent girls."}
+```{r notebook39, eval = F, echo = F, message = F, fig.height = 15, fig.cap = "Relationship of traits (Narrow 27 traits and weight) to probability of being in each weight category. Models estimated using the sample of adolescent females."}
 prob_dist_data_female %>%
   ungroup() %>%
   filter(!(trait_name %in% b5andcog)) %>%
@@ -1395,7 +1395,7 @@ female_log_tab %>%
   kable(.,
         booktabs = T,
         col.names = c("Trait", "Obese", "Overweight", "Underweight"),
-        caption = "Odds ratios of BMI categories from individual differences estimated from sample of adolescent girls. Estimates are adjusted for SES. Significant (p < .05) odds ratios are in bold and red.",
+        caption = "Odds ratios of BMI categories from individual differences estimated from sample of adolescent females. Estimates are adjusted for SES. Significant (p < .05) odds ratios are in bold and red.",
         escape = F) %>%
   kable_styling() %>%
   column_spec(2, color = f_tab_obese_color, bold = f_tab_obese_boldf) %>%
@@ -1405,9 +1405,9 @@ female_log_tab %>%
   group_rows("SPI: 5 Factors", 29, 33)
 ```
 
-### Boys
+### Males
 
-Among adolescent boys, a notable finding was the non-linear association of traits with weight status. More specifically, traits like low Sociability and high Easy-Goingness were associated with both increased risk of obesity and being underweight (Table \@ref(tab:notebook43)). We show the probability of inclusion in each weight category across levels of personality (Figure \@ref(fig:notebook42)).
+Among adolescent males, a notable finding was the non-linear association of traits with weight status. More specifically, traits like low Sociability and high Easy-Goingness were associated with both increased risk of obesity and being underweight (Table \@ref(tab:notebook43)). We show the probability of inclusion in each weight category across levels of personality (Figure \@ref(fig:notebook42)).
 
 ```{r notebook41, echo = F, message = F}
 male_prep = data.frame(trait = unique(male_log$trait_name), stringsAsFactors = F) %>%
@@ -1487,7 +1487,7 @@ male_log_tab %>%
   kable(.,
         booktabs = T,
         col.names = c("Trait", "Obese", "Overweight", "Underweight"),
-         caption = "Odds ratios of BMI categories from individual differences estimated from sample of adolescent boys Estimates are adjusted for SES. Significant (p < .05) odds ratios are in bold and red.",
+         caption = "Odds ratios of BMI categories from individual differences estimated from sample of adolescent males Estimates are adjusted for SES. Significant (p < .05) odds ratios are in bold and red.",
         escape = F) %>%kable_styling() %>%
   column_spec(2, color = m_tab_obese_color, bold = m_tab_obese_boldf) %>%
   column_spec(3, color = m_tab_overw_color, bold = m_tab_overw_boldf) %>%
@@ -1505,7 +1505,7 @@ load(here("data/logistic_output.Rdata"))
 ```
 
 
-### Girls
+### Females
 
 ```{r notebook44, echo = F, messages = F, warning = F}
 female_log = female_log %>%
@@ -1519,9 +1519,9 @@ avg_female = female_log %>%
   summarize(mean = mean(estimate))
 ```
 
-We test the interaction of SES and personality among adolescent girls. Few interactions were statistically significant (see Figure \@ref(fig:notebook45))
+We test the interaction of SES and personality among adolescent females. Few interactions were statistically significant (see Figure \@ref(fig:notebook45))
 
-```{r notebook45, echo = F, messages = F, warning = F, fig.cap="Coefficient estimates for interaction of SES and personality traits, predicting BMI category (adolescent girls)."}
+```{r notebook45, echo = F, messages = F, warning = F, fig.cap="Coefficient estimates for interaction of SES and personality traits, predicting BMI category (adolescent females)."}
 female_log %>%
   filter(grepl(":", term)) %>%
   mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
@@ -1543,9 +1543,9 @@ female_log %>%
 ```
 
 
-### Boys
+### Males
 
-We test the interaction of SES and personality among adolescent girls. Few interactions were statistically significant (see Figure \@ref(fig:notebook47))
+We test the interaction of SES and personality among adolescent females. Few interactions were statistically significant (see Figure \@ref(fig:notebook47))
 
 
 ```{r notebook46, echo = F, messages = F, warning = F}
@@ -1561,9 +1561,9 @@ avg_male = male_log %>%
 
 ```
 
-Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among boys. Adolescent boys living in higher SES households were, on average, `r round(avg_male[3, "mean"]*100)-100`% more likely to be Underweight, `r round(avg_male[2, "mean"]*100)-100`% more likely, and `r round(avg_male[1, "mean"]*100)-100`% more likely to be Obese compared to low SES counterparts.
+Parental socioeconomic status positively predicted greater likelihood of all non-normal categories (Underweight, Overweight, and Obese) compared to Normal among males. Adolescent males living in higher SES households were, on average, `r round(avg_male[3, "mean"]*100)-100`% more likely to be Underweight, `r round(avg_male[2, "mean"]*100)-100`% more likely, and `r round(avg_male[1, "mean"]*100)-100`% more likely to be Obese compared to low SES counterparts.
 
-```{r notebook47, echo = F, messages = F, warning = F, fig.cap="Coefficient estimates for interaction of SES and personality traits, predicting BMI category (adolescent boys)."}
+```{r notebook47, echo = F, messages = F, warning = F, fig.cap="Coefficient estimates for interaction of SES and personality traits, predicting BMI category (adolescent males)."}
 male_log %>%
   filter(grepl(":", term)) %>%
   mutate(psig = ifelse(p.value < .05, "yes", "no")) %>%
@@ -1641,7 +1641,7 @@ pred_model = function(model, test.data){
 }
 ```
 
-We fit these models separately for adolescent boys and adolescent girls
+We fit these models separately for adolescent males and adolescent females
 
 ```{r notebook51, message = F, warning = F }
 set.seed(060821)
@@ -1681,7 +1681,7 @@ female_fits = mutate(female_fits, fits = map(model, pred_model, test.data = fema
 female_fits = female_fits %>%
   select(-model) %>%
   unnest(cols = c(fits)) %>%
-  mutate(gender = "Adolescent Girls")
+  mutate(gender = "Adolescent Females")
 ```
 
 ```{r notebook52, message = F, warning = F }
@@ -1722,11 +1722,11 @@ male_fits = mutate(male_fits, fits = map(model, pred_model, test.data = male_tes
 male_fits = male_fits %>%
   select(-model) %>%
   unnest(cols = c(fits)) %>%
-  mutate(gender = "Adolescent Boys")
+  mutate(gender = "Adolescent Males")
 
 ```
 
-The results are shown in Table \@ref(tab:notebook53). Across gender, the models with the highest $R^2$ values (i.e., the best out-of-sample prediction) included SES, cognitive functioning, and the narrow 27 traits. For the sample of adolescent boys, this model accounted for more than twice the variance as the model using Big Five traits instead of narrow 27; for adolescent girls, this model accounted for about 30% more variance.
+The results are shown in Table \@ref(tab:notebook53). Across gender, the models with the highest $R^2$ values (i.e., the best out-of-sample prediction) included SES, cognitive functioning, and the narrow 27 traits. For the sample of adolescent males, this model accounted for more than twice the variance as the model using Big Five traits instead of narrow 27; for adolescent females, this model accounted for about 30% more variance.
 
 ```{r notebook53, results = 'asis', message = F, warning = F}
 female_fits %>%
@@ -1747,15 +1747,15 @@ female_fits %>%
         caption = "Out of sample model fits from lasso regression models. Models including cognitive functioning and the Narrow 27 traits yielded the best out-of-sample prediction for both genders",
         digits = c(0,2,3,2,3)) %>%
   kable_styling() %>%
-  add_header_above(c(" ", "Adolescent Boys" = 2, "Adolescent Girls" = 2))
+  add_header_above(c(" ", "Adolescent Males" = 2, "Adolescent Females" = 2))
 ```
 
 
 # Sensitivity analysis:  Missing data {.tabset}
 
-Once we filter for adolescents living in the United States, approximately half our sample did not report either their height or weight. Given the sensitivity of body image, especially for the adolescent girls in our sample, we suspect these values are missing not at random (MNAR) and may impact the estimates here. To test for these effects, we imputed missing height and weight values using a principal components analysis approach, using only the other variables in the SAPA dataset that were not included in the analyses above. We repeated the regression models with 10-fold cross validation, repeated 10 times, and report here the differences in significance across models and the differences in effect sizes.
+Once we filter for adolescents living in the United States, approximately half our sample did not report either their height or weight. Given the sensitivity of body image, especially for the adolescent females in our sample, we suspect these values are missing not at random (MNAR) and may impact the estimates here. To test for these effects, we imputed missing height and weight values using a principal components analysis approach, using only the other variables in the SAPA dataset that were not included in the analyses above. We repeated the regression models with 10-fold cross validation, repeated 10 times, and report here the differences in significance across models and the differences in effect sizes.
 
-Imputation using a principle components analysis suggested that many of the missing BMI percentiles were between 75 and 100 for both adolescent girls and boys (see Figure \@ref(fig:notebook54)). This would be consistent with a common sense rationale for missing data; in other words, we might expect those adolescents with larger BMI to be the individuals least likely to share their height and weight. However, the proposed distributions from the imputation were heavily skewed. We would not expect to see a distribution like this unless there were some association between BMI and completing the online personality assessment, which is unlikely.
+Imputation using a principle components analysis suggested that many of the missing BMI percentiles were between 75 and 100 for both adolescent females and males (see Figure \@ref(fig:notebook54)). This would be consistent with a common sense rationale for missing data; in other words, we might expect those adolescents with larger BMI to be the individuals least likely to share their height and weight. However, the proposed distributions from the imputation were heavily skewed. We would not expect to see a distribution like this unless there were some association between BMI and completing the online personality assessment, which is unlikely.
 
 ```{r notebook54, echo = F,  message = F, fig.cap = "A comparison of BMI percentile distribution in complete and imputed datasets.", fig.width = 10, fig.height = 7}
 load(here("data/cleaned.Rdata"))
@@ -1810,11 +1810,11 @@ male_reg_pca = male_reg_pca %>%
 ```
 
 
-## Girls
+## Females
 
-We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent girls (Figure \@ref(fimputesig)). Approximately 6 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. The majority of trait associations had the same significance across datasets. In all cases, SES was always a significant predictor. In one case, there was a significant interaction effect when using imputed data, but this seems likely be to sampling error.
+We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent females (Figure \@ref(fimputesig)). Approximately 6 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. The majority of trait associations had the same significance across datasets. In all cases, SES was always a significant predictor. In one case, there was a significant interaction effect when using imputed data, but this seems likely be to sampling error.
 
-```{r notebook56, echo = F, fig.cap = "Statistical significance across models fit on adolescent girls sample.", message = F, fig.width = 10, fig.height = 7}
+```{r notebook56, echo = F, fig.cap = "Statistical significance across models fit on adolescent females sample.", message = F, fig.width = 10, fig.height = 7}
 full_join(female_reg_main, female_reg_pca) %>%
   select(trait_name, version, model, term, p.value) %>%
   mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
@@ -1844,7 +1844,7 @@ We also calculated the difference in estimated effect size across the two sample
 
 Estimated of the effect of SES (controlling for personality) were lower in the imputed dataset for all models. Half of the trait estimates were larger in the imputed dataset, as were half of the interaction estimates.
 
-```{r notebook57, echo = F, fig.cap = "Difference in effect sizes from the imputed data to the complete data (girls).",  message = F, fig.width = 10, fig.height = 7}
+```{r notebook57, echo = F, fig.cap = "Difference in effect sizes from the imputed data to the complete data (females).",  message = F, fig.width = 10, fig.height = 7}
 full_join(female_reg_main, female_reg_pca) %>%
   select(trait_name, version, model, term, estimate) %>%
   mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
@@ -1865,13 +1865,13 @@ full_join(female_reg_main, female_reg_pca) %>%
   theme(legend.position = "top")
 ```
 
-## Boys
+## Males
 
-We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent boys (Figure \@ref(fig:notebook58)). Approximately 11 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. This discrepancy may reflect a lack of statistical power in the adolescent boys sample or bias in the complete cases. 
+We compared the significance of coefficients across models using the complete dataset and the imputed dataset, for adolescent males (Figure \@ref(fig:notebook58)). Approximately 11 traits were significantly associated with BMI using the imputed dataset but not complete; meanwhile, 4 traits were significant using complete data but not imputed. This discrepancy may reflect a lack of statistical power in the adolescent males sample or bias in the complete cases. 
 
 For both the complete and imputed datasets, SES was always a significant predictor. None of the interaction terms found in the complete data were present in the imputed data (although we note these significant interactions were assumed to be sampling error and not interpreted in the manuscript); the imputed data yielded no joint effects of personality and SEDS.
 
-```{r notebook58, echo = F, fig.cap = "Statistical significance across models fit on adolescent boys sample.", message = F, fig.width = 10, fig.height = 7}
+```{r notebook58, echo = F, fig.cap = "Statistical significance across models fit on adolescent males sample.", message = F, fig.width = 10, fig.height = 7}
 full_join(male_reg_main, male_reg_pca) %>%
   select(trait_name, version, model, term, p.value) %>%
   mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),
@@ -1901,7 +1901,7 @@ Again, we calculated the difference in estimated effect size across the two samp
 
 Estimated of the effect of SES (controlling for personality) were lower in the imputed dataset for all models. However, a majority of the estimates of trait effects were larger in the imputed dataset, as were a majority of the interaction estimates.
 
-```{r notebook59, fig.cap = "Difference in effect sizes from the imputed data to the complete data (boys).", echo = F,  message = F, fig.width = 10, fig.height = 7}
+```{r notebook59, fig.cap = "Difference in effect sizes from the imputed data to the complete data (males).", echo = F,  message = F, fig.width = 10, fig.height = 7}
 full_join(male_reg_main, male_reg_pca) %>%
   select(trait_name, version, model, term, estimate) %>%
   mutate(trait_name = str_remove(trait_name, "SPI_135_27_5_"),

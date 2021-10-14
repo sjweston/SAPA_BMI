@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.9.22)  11 OCT 2021 14:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.9.22)  13 OCT 2021 10:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1070,16 +1070,16 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `notebook_allcode.out' has not changed.
-(rerunfilecheck)             Checksum: 44D6D5DB62D20647766B8F276E6447D2;2950.
+(rerunfilecheck)             Checksum: 2F3E93BC031BDF57CE7330191DCF0CB0;2965.
  ) 
 Here is how much of TeX's memory you used:
  12948 strings out of 480559
- 194429 string characters out of 5902367
- 577328 words of memory out of 5000000
+ 194471 string characters out of 5902367
+ 577410 words of memory out of 5000000
  30134 multiletter control sequences out of 15000+600000
  454347 words of font info for 71 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 60i,12n,66p,756b,468s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,12n,66p,758b,468s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/Users/sweston2/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/U
 sers/sweston2/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/Use
 rs/sweston2/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/swe
@@ -1097,7 +1097,7 @@ ist/fonts/type1/public/lm/lmsy10.pfb></Users/sweston2/Library/TinyTeX/texmf-dis
 t/fonts/type1/public/lm/lmtk10.pfb></Users/sweston2/Library/TinyTeX/texmf-dist/
 fonts/type1/public/lm/lmtt10.pfb></Users/sweston2/Library/TinyTeX/texmf-dist/fo
 nts/type1/public/lm/lmtti10.pfb>
-Output written on notebook_allcode.pdf (58 pages, 706971 bytes).
+Output written on notebook_allcode.pdf (58 pages, 707336 bytes).
 PDF statistics:
  733 PDF objects out of 1000 (max. 8388607)
  578 compressed objects within 6 object streams
